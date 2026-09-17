@@ -1,0 +1,23 @@
+{
+  "_comment": [
+    "Declared accuracy targets for the reference-author benchmark, checked by `stylometry accuracy-gate`.",
+    "These are the requested 95% goal expressed as measurable quantities. They are deliberately stricter",
+    "than the benchmark's own predeclared gates in PROTOCOL (80% balanced accuracy), which exist to judge",
+    "whether the pilot is worth continuing rather than whether the method is trustworthy.",
+    "Accuracy is gated together with unknown-author false acceptance, because a rule that accepts every",
+    "candidate scores well on accuracy alone while being useless on a text whose author is not in the set.",
+    "A target is met only when the entire 95% interval clears it; an interval straddling it is inconclusive.",
+    "No target here says anything about scripture: the benchmark measures catalogued modern and ancient",
+    "authors, and a result on it does not transfer to texts whose authorship is the open question."
+  ],
+  "goal": "95% author accuracy on held-out works by known authors",
+  "select": {
+    "language": "grc",
+    "sample_length": 1000
+  },
+  "metrics": {
+    "balanced_accuracy": 0.95,
+    "unknown_false_acceptance": 0.05,
+    "known_acceptance": 0.95
+  }
+}

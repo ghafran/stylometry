@@ -22,6 +22,26 @@ or corpus downloads are required. Tests cover:
 - Held-out feature extraction must preserve its training vocabulary, IDF, projection and scaling.
 - Reference texts must match pinned source and normalized-text checksums; alternate editions must
   not become independent works in training and test partitions.
+- Every manuscript parser turns a fixture in its own source format into the expected verse records,
+  and `build()` records what each source produced so a failing loader cannot silently shrink the
+  corpus (`data/processed/build_report.json`).
+- The reported numbers are pinned, not just executed: assignment margins fall towards a boundary,
+  a planted outlier is flagged while ordinary verses are not, style groups are numbered largest
+  first, lexical features are rates rather than counts, and each group keeps its own colour.
+- A run covering a single work renders a chapter breakdown and suppresses the degenerate cross-work
+  statistics; a pooled-passage run does not claim a chapter breakdown it cannot support.
+- Whatever is present under `data/processed` still loads and still matches the schema the code reads.
+  These checks skip in a fresh clone, where that directory does not exist.
+
+`.github/workflows/tests.yml` runs the offline suite on Python 3.10 and 3.12 and checks that `uv.lock`
+still matches `pyproject.toml`. Nothing in CI needs network access or an API key.
+
+Two habits keep the suite honest. Coverage measures which lines ran, not which mistakes would be
+noticed, so changes to a reported quantity are checked by editing the calculation and confirming a
+test fails. And when editing a source file in a loop, clear `__pycache__` or set
+`PYTHONDONTWRITEBYTECODE=1`: Python invalidates bytecode on size and whole-second mtime, so two
+versions of a file written in the same second can leave a stale `.pyc` in place and produce results
+that belong to neither.
 
 The [real-text benchmark](benchmarks/README.md) downloads 18 Greek works by six catalogued authors,
 16 modern Hebrew works by four authors, and two editions of one additional Greek work. It tests

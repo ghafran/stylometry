@@ -1,0 +1,76 @@
+SOURCE (Hebrew readings, both amulets): https://he.wikipedia.org/wiki/%D7%9C%D7%95%D7%97%D7%99%D7%95%D7%AA_%D7%91%D7%A8%D7%9B%D7%AA_%D7%9B%D7%94%D7%A0%D7%99%D7%9D  (Hebrew Wikipedia 'לוחיות ברכת כהנים', section 'נוסח הלוחיות', citing Shmuel Ahituv, HaKetav VeHaMikhtav, Mosad Bialik 2012, pp. 29-31; CC BY-SA 4.0)
+SOURCE (English rendering of KH1, Hebrew+transliteration of KH2): https://en.wikipedia.org/wiki/Ketef_Hinnom_scrolls  (English Wikipedia 'Ketef Hinnom scrolls', sections KH1 / KH2, following Barkay, Lundberg, Vaughn & Zuckerman, BASOR 334 (2004); CC BY-SA 4.0)
+CONVENTIONS: one physical line of the amulet per row; text in [square brackets] is RECONSTRUCTED (not legible/preserved on the silver); '...' = illegible or lost run of letters; '/' = alternative readings of a damaged letter; leading/trailing ']' or '[' marks a break at the edge. Both amulets are broken at top and bottom, so the first and last lines are incomplete. Original script is Palaeo-Hebrew; transcribed here into square script (the Hebrew Wikipedia page also gives the Palaeo-Hebrew U+10900 block rendering).
+
+=== KH1 (Ketef Hinnom amulet 1, 27 x 97 mm; ~18-19 lines; lines 14-18 = Num 6:24-25a) ===
+[top line(s) broken]
+01  [...]יהו[ה צב    <- PARTLY reconstructed
+02  את האל ה]    <- WHOLLY reconstructed
+03  גד[ל שמר]    <- PARTLY reconstructed
+04  הברית ו    <- legible
+05  [ה]חסד לאהב    <- PARTLY reconstructed
+06  [ו] ושמרי [מצ    <- PARTLY reconstructed
+07  ותו מהעלם    <- WHOLLY reconstructed
+08  וע]ד העלם [...    <- PARTLY reconstructed
+09  ה]ברכה מכל [פ]    <- PARTLY reconstructed
+10  ח ומהרע    <- legible
+11  כי בו גאל    <- legible
+12  ה כי יהוה    <- legible
+13  [י/ה]שיבנו[ך/ ו]    <- PARTLY reconstructed
+14  צור יבר    <- legible
+15  ך יהוה [ו]    <- PARTLY reconstructed
+16  ישמרך [י    <- PARTLY reconstructed
+17  א]ר יהוה    <- PARTLY reconstructed
+18  פנ[ו אלי    <- PARTLY reconstructed
+19  ך...]    <- WHOLLY reconstructed
+[bottom line(s) broken; Num 6:25b-26 may have followed]
+English (en.wikipedia, Barkay et al. 2004 reading):
+    01  ...] YHWH ...
+    02  [...]
+    03  the grea[t ... who keeps]
+    04  the covenant and
+    05  [G]raciousness towards those who love [him] and (alt: [hi]m;)
+    06  those who keep [his commandments ...
+    07  ...].
+    08  the Eternal? [...].
+    09  [the?] blessing more than any
+    10  [sna]re and more than Evil.
+    11  For redemption is in him.
+    12  For YHWH
+    13  is our restorer [and]
+    14  rock. May YHWH bles[s]
+    15  you and
+    16  [may he] keep you.
+    17  [May] YHWH make
+    18  [his face] shine ...
+
+=== KH2 (Ketef Hinnom amulet 2, 11 x 39 mm; 12 lines; lines 5-12 = Num 6:24 + 6:25a + 6:26b) ===
+[top line(s) broken: 'For PN xxxx']
+01  ה/ו ברך ה    <- legible
+02  [א] ליהו[ה]    <- PARTLY reconstructed
+03  העזר ו    <- legible
+04  הגער ב    <- legible
+05  [ר]ע יברך    <- PARTLY reconstructed  (en.wikipedia prints the Hebrew RTL-mangled as 'ר] ע יברך]'; transliteration '[r]ʕ ybrk')
+06  יהוה י    <- legible
+07  שמרך    <- legible
+08  יאר יה    <- legible
+09  [ו]ה פניו    <- PARTLY reconstructed
+10  [אל]יך וי    <- PARTLY reconstructed
+11  שם לך ש    <- legible
+12  [ל]ם    <- PARTLY reconstructed  (he.wikipedia prints this RTL-mangled as 'ל]ם ['; en.wikipedia transliteration '[l]m' confirms the lamed is restored)
+[bottom line(s) broken]
+Same 12 lines as printed on en.wikipedia (Hebrew | transliteration | English):
+    01  ה/ו ברך ה  |  h/w brk h  |  -h/hu. May be blessed h/sh-
+    02  [א] ליהו[ה]  |  [ʔ] l[[Yahweh|yhw[h]]]  |  -[e] by YHW[H,]
+    03  העזר ו  |  hʕzr w  |  the warrior/helper and
+    04  הגער ב  |  hgʕr b  |  the rebuker of
+    05  ר] ע יברך]  |  [r]ʕ ybrk  |  [E]vil: May bless you,
+    06  יהוה י  |  yhwh y  |  YHWH,
+    07  שמרך  |  šmrk  |  keep you.
+    08  יאר יה  |  yʔr yh  |  Make shine, YH-
+    09  [ו]ה פניו  |  [w]h pnyw  |  -[W]H, His face
+    10  [אל]יך וי  |  [ʔl]yk wy  |  [upon] you and g-
+    11  שם לך ש  |  šm lk š  |  -rant you p-
+    12  ] ל]ם  |  [l]m  |  -[ea]ce.
+
+NOTE: Wikipedia's KH1 English rendering has 18 numbered lines; the Hebrew Wikipedia/Ahituv reading has a slightly different line division (the reconstructed 'צבאת האל הגדל' at the top and 'ועד העלם' were split across line breaks differently). Lines 1-2, 5-9 and 13-18 of KH1 contain restored text; only the Priestly-Blessing core (ברכ ... ישמרך ... יאר יהוה פנ[יו]) is largely secure. KH2 is much better preserved: only the first two lines and the final line contain restorations.

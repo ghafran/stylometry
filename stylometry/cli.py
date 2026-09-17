@@ -8,6 +8,8 @@
     stylometry report                           write output/report.md
     stylometry html / witnesses                 HTML site; manuscript-witness comparison
     stylometry compare-models --set NAME=PATH   accuracy, stability and cost of the profiling models
+    stylometry accuracy-gate                    measured benchmark accuracy vs the declared targets
+    stylometry manifest --write|--check          which manuscripts the corpus contains
     stylometry all                              build-corpus -> profile -> cluster -> report
 """
 from __future__ import annotations
@@ -40,7 +42,12 @@ def _select(args, verses):
 
     language = getattr(args, "language", None)
     scope = args.scope or ("christian" if language in (None, "grc") else "all")
-    return select_verses(verses, scope=scope, works=args.works, language=language)
+    selected = select_verses(verses, scope=scope, works=args.works, language=language)
+    chapters = getattr(args, "chapters", None)
+    if chapters:
+        wanted = {str(c) for c in chapters}
+        selected = [v for v in selected if str(v["chapter"]) in wanted]
+    return selected
 
 
 def _lang_out(args) -> Path:
@@ -64,6 +71,7 @@ def _add_scope(p: argparse.ArgumentParser) -> None:
                    help="which part of the corpus to use (default: 'christian' for Greek = everything except the Septuagint; 'all' for other languages)")
     p.add_argument("--language", choices=LANGS, help="grc (Greek), hbo (Hebrew), arb (Arabic); analyses never mix languages")
     p.add_argument("--works", nargs="*", help="restrict to these work codes, e.g. MARK JOHN AJOHN, ISA, Q002")
+    p.add_argument("--chapters", nargs="*", help="restrict to these chapters of the selected work(s), e.g. --works GEN --chapters 1")
 
 
 def cmd_build(args) -> None:
@@ -203,6 +211,63 @@ def cmd_witnesses(args) -> None:
     summary = run(load_corpus(path), lang, out)
     print(json.dumps(summary, indent=1))
     print(f"outputs: {out / 'witness_summary.csv'}, {out / 'site' / 'witnesses.html'}")
+
+
+def cmd_manifest(args) -> None:
+    """Write or verify the checked-in record of which manuscripts the corpus contains."""
+    import json as _json
+
+    from .corpus.build import load_corpus
+    from .manifest import MANIFEST_PATH, build_manifest, compare
+
+    witness_path = CORPUS.with_name("witnesses.jsonl")
+    if not CORPUS.exists() or not witness_path.exists():
+        sys.exit("corpus not built; run `stylometry build-corpus` first")
+    current = build_manifest(load_corpus(CORPUS), load_corpus(witness_path), Path(args.raw))
+    path = Path(args.path) if args.path else ROOT / MANIFEST_PATH
+    if args.write:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(_json.dumps(current, ensure_ascii=False, indent=1), encoding="utf-8")
+        print(f"wrote {path}")
+    missing = [f"{t}: {e['name']}" for t, es in current["coverage"].items() for e in es if not e["present"]]
+    print(f"{current['primary_units']:,} primary units, {current['witness_units']:,} witness units, "
+          f"{current['witnesses']} witnesses, {current['dead_sea_scroll_sigla']} Dead Sea Scroll sigla")
+    for tradition, entries in current["coverage"].items():
+        got = sum(1 for e in entries if e["present"])
+        print(f"  {tradition}: {got}/{len(entries)} required manuscripts present")
+    if missing:
+        print("  missing: " + "; ".join(missing))
+    if args.check:
+        if not path.exists():
+            sys.exit(f"{path} not found; run `stylometry manifest --write` first")
+        problems = compare(current, _json.loads(path.read_text(encoding="utf-8")))
+        if problems:
+            print("\ncorpus no longer matches the manifest:")
+            for problem in problems:
+                print(f"  - {problem}")
+            sys.exit(1)
+        print("\ncorpus matches the manifest")
+
+
+def cmd_accuracy_gate(args) -> None:
+    """Check measured benchmark accuracy against the declared targets."""
+    import json as _json
+
+    from .accuracy_gate import as_dict, evaluate, load_targets, render
+
+    targets_path = Path(args.targets) if args.targets else None
+    targets = load_targets(targets_path)
+    report_path = Path(args.report)
+    if not report_path.exists():
+        sys.exit(f"{report_path} not found; run `stylometry benchmark --download` first")
+    report = _json.loads(report_path.read_text(encoding="utf-8"))
+    outcome = evaluate(report, targets, str(targets_path or ""), str(report_path))
+    print(render(outcome))
+    out = Path(args.out) if args.out else report_path.with_name("accuracy_gate.json")
+    out.write_text(_json.dumps(as_dict(outcome), indent=1), encoding="utf-8")
+    print(f"\nwrote {out}")
+    if not outcome.passed:
+        sys.exit(1)
 
 
 def cmd_compare(args) -> None:
@@ -443,6 +508,21 @@ def main(argv: list[str] | None = None) -> None:
     wt.add_argument("--language", choices=LANGS, default="grc")
     wt.add_argument("--out", default=None)
     wt.set_defaults(func=cmd_witnesses)
+
+    mf = sub.add_parser("manifest", help="record or verify which manuscripts the corpus contains")
+    mf.add_argument("--raw", default=str(RAW))
+    mf.add_argument("--path", default=None, help="manifest file (default benchmarks/corpus_manifest.json)")
+    mf.add_argument("--write", action="store_true", help="regenerate the manifest from the built corpus")
+    mf.add_argument("--check", action="store_true", help="exit non-zero if the corpus no longer matches")
+    mf.set_defaults(func=cmd_manifest)
+
+    ag = sub.add_parser("accuracy-gate",
+                        help="check measured benchmark accuracy against benchmarks/accuracy_targets.json")
+    ag.add_argument("--report", default=str(OUTPUT / "benchmark" / "attribution" / "benchmark.json"),
+                    help="benchmark.json produced by `stylometry benchmark`")
+    ag.add_argument("--targets", default=None, help="targets file (default benchmarks/accuracy_targets.json)")
+    ag.add_argument("--out", default=None, help="where to write the gate result (default beside the report)")
+    ag.set_defaults(func=cmd_accuracy_gate)
 
     cm = sub.add_parser("compare-models", help="compare AI profiling models on the verses they have all profiled")
     cm.add_argument("--set", action="append", required=True, metavar="NAME=PATH",

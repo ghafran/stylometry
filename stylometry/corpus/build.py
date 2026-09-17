@@ -70,18 +70,25 @@ def resolve_witnesses(verses: list[dict]) -> list[dict]:
 def build(raw_dir: str | Path, out_path: str | Path, include_duplicates: bool = False) -> list[dict]:
     raw_dir = Path(raw_dir)
     verses: list[dict] = []
+    # One broken source must not kill the whole build, but it must not vanish either: every source's
+    # outcome is recorded and written to build_report.json beside the corpus.
+    sources: list[dict] = []
     for subdir, loader in LOADERS:
         path = raw_dir / subdir
         if not path.exists():
             print(f"  (no {subdir}; skipped)")
+            sources.append({"source": subdir, "n_units": 0, "status": "absent", "error": None})
             continue
         print(f"parsing {subdir} ...", flush=True)
         try:
             got = loader(path)
-        except Exception as e:  # one broken source must not kill the whole build
+        except Exception as e:
             print(f"  ERROR in {subdir}: {e}")
+            sources.append({"source": subdir, "n_units": 0, "status": "failed", "error": f"{type(e).__name__}: {e}"})
             continue
         print(f"  {len(got)} units")
+        sources.append({"source": subdir, "n_units": len(got),
+                        "status": "ok" if got else "empty", "error": None})
         verses += got
 
     for v in verses:
@@ -92,6 +99,10 @@ def build(raw_dir: str | Path, out_path: str | Path, include_duplicates: bool = 
 
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    failed = [s for s in sources if s["status"] == "failed"]
+    empty = [s for s in sources if s["status"] == "empty"]
+    report = {"sources": sources, "n_units": len(verses), "n_failed": len(failed), "n_empty": len(empty)}
+    (out_path.parent / "build_report.json").write_text(json.dumps(report, ensure_ascii=False, indent=1), encoding="utf-8")
     # Every witness, for textual comparison
     with out_path.with_name("witnesses.jsonl").open("w", encoding="utf-8") as fh:
         for v in verses:
@@ -108,6 +119,12 @@ def build(raw_dir: str | Path, out_path: str | Path, include_duplicates: bool = 
         by_lang[v["language"]][v["work"]] += 1
         tok[v["language"]][v["work"]] += v["n_tokens"]
     print(f"wrote {len(verses)} verse units to {out_path}")
+    for s in failed:
+        print(f"  !! {s['source']} FAILED and contributed nothing: {s['error']}")
+    for s in empty:
+        print(f"  !! {s['source']} parsed without error but produced no units")
+    if failed or empty:
+        print(f"  {len(failed)} failed, {len(empty)} empty; see {out_path.parent / 'build_report.json'}")
     for lang, counts in by_lang.items():
         print(f"[{lang}] {sum(counts.values())} units, {sum(tok[lang].values())} tokens, {len(counts)} works")
         for work, n in counts.items():

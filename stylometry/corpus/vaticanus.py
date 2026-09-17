@@ -43,6 +43,14 @@ NOMINA_SACRA = {
     "στροσ": "σταυροσ", "στρου": "σταυρου", "στρω": "σταυρω", "στρον": "σταυρον",
 }
 NOMINA_SACRA["ιλημ"] = "ιερουσαλημ"
+# Three-letter contractions (first two letters plus the inflected ending) used by P46, Bezae, P72 and
+# others.  The table is consulted only for tokens the transcription marks with "=", so adding a form
+# here cannot touch an ordinary word that happens to look the same (χρω "use" vs Χριστῷ).
+NOMINA_SACRA.update({
+    "ιηυ": "ιησου", "ιην": "ιησουν", "ιησυ": "ιησου",
+    "χρυ": "χριστου", "χρν": "χριστον", "χρω": "χριστω",
+    "ιηλμ": "ιερουσαλημ",
+})
 
 LINE_RE = re.compile(r"^(\d{2})(\d{3})(\d{3}) (.*)$")
 CORR_RE = re.compile(r"(?:x\{[^}]*\}(?: \{[^}]*\})*(?: [a-c]\{[^}]*\})*)|(?:\{[^}]*\}(?: [a-c]\{[^}]*\})*)")
