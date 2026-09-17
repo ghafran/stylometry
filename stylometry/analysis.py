@@ -204,12 +204,20 @@ def _verify(X: np.ndarray, labels: list[str], works: list[str], seed: int) -> di
 BASELINE_PATH = Path(__file__).resolve().parent.parent / "benchmarks" / "change_point_baseline.json"
 
 
-def load_change_point_baseline(path: Path | None = None) -> dict | None:
-    """What the change-point statistic reaches in works of undisputed single authorship."""
+def load_change_point_baseline(language: str = "grc", path: Path | None = None) -> dict | None:
+    """What the statistic reaches in single-author works *of that language*.
+
+    A threshold taken from Greek prose says nothing about Hebrew, so the reference is per language and
+    a language without one gets no verdict rather than a borrowed one. Arabic has no single-author
+    corpus available here at all, and is recorded as unavailable for exactly that reason.
+    """
     path = Path(path or BASELINE_PATH)
     if not path.exists():
         return None
-    return json.loads(path.read_text(encoding="utf-8"))
+    entry = json.loads(path.read_text(encoding="utf-8")).get(language)
+    if not isinstance(entry, dict) or entry.get("available") is False or "max" not in entry:
+        return None
+    return entry
 
 
 def _seams(docs, texts, works, language, permutations, seed) -> list[dict]:
@@ -288,7 +296,7 @@ def render(result: dict) -> str:
     if not seams:
         md.append("No work had enough text for rolling windows.")
     else:
-        baseline = load_change_point_baseline()
+        baseline = load_change_point_baseline(result.get("language", "grc"))
         md.append("The strongest stylistic shift inside each work.\n")
         md.append("**The permutation p-value is reported but is not the finding.** It asks whether the "
                   "windows could be in any order, and for continuous prose they could not: neighbouring "
@@ -297,8 +305,14 @@ def render(result: dict) -> str:
                   "Plato's *Apology* cannot be used to find a seam anywhere.\n")
         if baseline:
             md.append(f"What decides is the last column: whether the shift exceeds what single "
-                      f"authorship itself produces. In those thirteen works the statistic reached a "
-                      f"mean of {baseline['mean']:.2f} and never exceeded **{baseline['max']:.2f}**.\n")
+                      f"authorship itself produces **in this language**. Across {baseline['n_works']} "
+                      f"such works the statistic reached a mean of {baseline['mean']:.2f} and never "
+                      f"exceeded **{baseline['max']:.2f}**.\n")
+            if baseline.get("note_language"):
+                md.append(f"> {baseline['note_language']}\n")
+        else:
+            md.append("**No single-author reference exists for this language**, so no separation value "
+                      "here can be called a seam. The figures are reported as measurements only.\n")
         md.append("| work | windows | token offset | separation | p | above single-author max |"
                   "\n|---|---:|---:|---:|---:|---|")
         for row in seams[:20]:
@@ -308,8 +322,10 @@ def render(result: dict) -> str:
                       f"{row['separation']:.2f} | {row['p_value']:.3f} | {verdict} |")
         beats = [r for r in seams if r.get("exceeds_all_single_author_works")]
         naive = [r for r in seams if r["p_value"] < 0.05]
-        md.append(f"\n{len(naive)} of {len(seams)} works clear p < 0.05, which by itself means little. "
-                  f"**{len(beats)}** exceed what any single-author reference work reached.")
+        md.append(f"\n{len(naive)} of {len(seams)} works clear p < 0.05, which by itself means little.")
+        if baseline:
+            md.append(f"**{len(beats)}** exceed what any single-author reference work in this language "
+                      f"reached.")
     return "\n".join(md) + "\n"
 
 

@@ -7,6 +7,8 @@ chance.
 """
 from __future__ import annotations
 
+import json
+
 import numpy as np
 import pytest
 
@@ -155,3 +157,33 @@ def test_windows_overlap_so_the_series_is_continuous():
 
 def test_a_text_shorter_than_one_window_is_kept_whole_rather_than_dropped():
     assert len(rolling.windows(["a", "b"], size=1000)) == 1
+
+
+# --- the calibration is per language ----------------------------------------------------------------
+
+def test_a_baseline_from_one_language_is_not_applied_to_another(tmp_path):
+    """A threshold taken from Greek prose says nothing about Hebrew, and nothing at all about Arabic."""
+    from stylometry.analysis import load_change_point_baseline
+
+    path = tmp_path / "baseline.json"
+    path.write_text(json.dumps({
+        "grc": {"n_works": 13, "mean": 1.75, "p95": 1.86, "max": 1.88},
+        "hbo": {"n_works": 10, "mean": 1.81, "p95": 1.91, "max": 1.92},
+        "arb": {"available": False, "reason": "no single-author Arabic corpus"},
+    }))
+    assert load_change_point_baseline("grc", path)["max"] == 1.88
+    assert load_change_point_baseline("hbo", path)["max"] == 1.92
+    assert load_change_point_baseline("arb", path) is None, "an unavailable language must not borrow one"
+    assert load_change_point_baseline("lat", path) is None
+
+
+def test_the_checked_in_baseline_covers_every_language_the_corpus_holds():
+    from stylometry.analysis import BASELINE_PATH, load_change_point_baseline
+
+    stored = json.loads(BASELINE_PATH.read_text(encoding="utf-8"))
+    assert {"grc", "hbo", "arb"} <= set(stored)
+    assert stored["arb"]["available"] is False and stored["arb"]["reason"].strip()
+    for language in ("grc", "hbo"):
+        base = load_change_point_baseline(language)
+        assert base and base["n_works"] >= 8 and 0 < base["max"] < 10
+        assert base["note_language"].strip(), "each reference must say what it is drawn from"
