@@ -17,7 +17,7 @@ output*/
 #
 # What stays out is only material no loader reads: the working copies the downloads arrived in,
 # superseded editions, and the Text-Fabric features the Dead Sea Scrolls loader never opens.
-# Trimming those takes data/raw from 770 MB to about 235 MB without changing a single parsed unit.
+# Trimming those takes data/raw from 770 MB to the 234 MB checked in without changing a single parsed unit.
 # ---------------------------------------------------------------------------------------------
 
 # Git working copies of upstream repositories; the files themselves are checked in beside them.

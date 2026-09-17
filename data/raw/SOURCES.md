@@ -43,6 +43,6 @@ Only material no loader reads:
   Text-Fabric loads to satisfy its declared text formats. Parsing the trimmed set yields the same
   7,824 units from 178 witnesses as the full download.
 
-Together these take `data/raw/` from about 770 MB to about 211 MB without changing a single parsed unit.
+Together these take `data/raw/` from about 770 MB to the 234 MB checked in without changing a single parsed unit.
 `scripts/download_sources.sh` refetches anything missing, and `stylometry manifest --check` verifies that
 what is present still matches the checked-in manifest.
