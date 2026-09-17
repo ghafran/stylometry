@@ -1,0 +1,111 @@
+{
+ "n_works": 13,
+ "mean": 1.74924395207398,
+ "max": 1.876705482776637,
+ "p90": 1.848259228780755,
+ "p95": 1.8617352622976207,
+ "note": "a candidate seam must exceed what single-author works reach by internal variation",
+ "_comment": "Change-point separation reached by works of undisputed single authorship. The permutation test alone is not usable: it rejects exchangeability for 11 of these 13 works, because neighbouring windows of any continuous prose share a topic. A candidate seam must instead exceed what single authorship produces here.",
+ "protocol": {
+  "window_tokens": 1000,
+  "step_tokens": 500,
+  "panel": "stylometry.analysis.build_panel",
+  "language": "grc",
+  "permutations": 200,
+  "seed": 0
+ },
+ "works": [
+  {
+   "author": "Plato",
+   "work": "Phaedo",
+   "separation": 1.876705482776637,
+   "permutation_p": 0.009950248756218905,
+   "n_windows": 43
+  },
+  {
+   "author": "Xenophon",
+   "work": "Memorabilia",
+   "separation": 1.8517551153116099,
+   "permutation_p": 0.004975124378109453,
+   "n_windows": 70
+  },
+  {
+   "author": "Xenophon",
+   "work": "Symposium",
+   "separation": 1.8342756826573363,
+   "permutation_p": 0.004975124378109453,
+   "n_windows": 17
+  },
+  {
+   "author": "Xenophon",
+   "work": "Oeconomicus",
+   "separation": 1.8294049901142972,
+   "permutation_p": 0.004975124378109453,
+   "n_windows": 34
+  },
+  {
+   "author": "Lysias",
+   "work": "Against Agoratus",
+   "separation": 1.783250176059251,
+   "permutation_p": 0.06467661691542288,
+   "n_windows": 8
+  },
+  {
+   "author": "Lucian",
+   "work": "Icaromenippus",
+   "separation": 1.7823688503286608,
+   "permutation_p": 0.009950248756218905,
+   "n_windows": 9
+  },
+  {
+   "author": "Plato",
+   "work": "Apology",
+   "separation": 1.7597120081180955,
+   "permutation_p": 0.004975124378109453,
+   "n_windows": 16
+  },
+  {
+   "author": "Lysias",
+   "work": "Against Eratosthenes",
+   "separation": 1.7087207391738304,
+   "permutation_p": 0.06965174129353234,
+   "n_windows": 8
+  },
+  {
+   "author": "Demosthenes",
+   "work": "On the False Embassy",
+   "separation": 1.705094346096935,
+   "permutation_p": 0.004975124378109453,
+   "n_windows": 44
+  },
+  {
+   "author": "Demosthenes",
+   "work": "Against Meidias",
+   "separation": 1.6947079434039005,
+   "permutation_p": 0.009950248756218905,
+   "n_windows": 28
+  },
+  {
+   "author": "Lucian",
+   "work": "Philopseudes",
+   "separation": 1.6734034880150053,
+   "permutation_p": 0.024875621890547265,
+   "n_windows": 11
+  },
+  {
+   "author": "Lucian",
+   "work": "True Histories",
+   "separation": 1.629893286565416,
+   "permutation_p": 0.009950248756218905,
+   "n_windows": 21
+  },
+  {
+   "author": "Demosthenes",
+   "work": "On the Crown",
+   "separation": 1.610879268340767,
+   "permutation_p": 0.004975124378109453,
+   "n_windows": 37
+  }
+ ],
+ "permutation_false_positive_rate": 0.8461538461538461
+}

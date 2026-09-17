@@ -369,6 +369,54 @@ def cmd_wan(args) -> None:
         print(f"  {value[:26]:<26}{hit / total:>8.0%}{total:>6}")
 
 
+def cmd_analyse(args) -> None:
+    """The full battery: every feature family the corpus supports, every method it warrants."""
+    from .analysis import analyse, save
+    from .continuity import annotate_continuity
+    from .passages import build_passages
+
+    verses = _select(args, annotate_continuity(_load_corpus(), bridge_chapters=args.bridge_chapters))
+    if not verses:
+        sys.exit(f"no verses for language={args.language} scope={args.scope} works={args.works}")
+    language = args.language or "grc"
+    passages = build_passages(verses, tokens=args.tokens,
+                              bridge_chapters=args.bridge_chapters)["passages"]
+    if len(passages) < 4:
+        sys.exit(f"only {len(passages)} complete {args.tokens}-token passages; "
+                 f"try --tokens 500 or --bridge-chapters")
+
+    # The passage text carries no punctuation, so the original verse text is rejoined for the blocks
+    # that need it (sentence length, punctuation, rhythm).
+    by_id = {v["id"]: v for v in verses}
+    texts = [" ".join(by_id[i]["text"] for i in p["source_verse_ids"] if i in by_id) for p in passages]
+    docs = [p["text_bare"].split() for p in passages]
+    labels = [str(p.get(args.label) or "?") for p in passages]
+    works = [p["work"] for p in passages]
+
+    keep, unattributable = _attributable(labels, works)
+    if len(keep) < 4:
+        sys.exit("too few units remain once labels carried by a single work are set aside")
+    dropped = len(docs) - len(keep)
+    docs, texts, labels, works = ([x[i] for i in keep] for x in (docs, texts, labels, works))
+    if unattributable:
+        print(f"{len(unattributable)} {args.label} values come from a single work and cannot be "
+              f"attributed once it is held out; {dropped} units set aside")
+
+    result = analyse(docs, texts, labels, works, language=language, seed=args.seed,
+                     permutations=args.permutations)
+    out = Path(args.out) if args.out else OUTPUT / f"{language}-analysis"
+    save(result, out)
+    print(f"{result['n_units']} units, {result['n_features']} features, {result['n_works']} works")
+    print(f"  baselines: majority {result['majority_baseline']:.1%}, chance {result['chance']:.1%}")
+    for name, row in result["attribution"].items():
+        print(f"  {name:<32}{row['accuracy']:>8.1%}")
+    v = result["verification"]
+    if v.get("available"):
+        print(f"  verification: {v['acceptance_of_genuine']:.0%} of genuine pairings accepted, "
+              f"{v['false_acceptance']:.0%} of false ones")
+    print(f"wrote {out / 'analysis.md'} and analysis.json")
+
+
 def cmd_manifest(args) -> None:
     """Write or verify the checked-in record of which manuscripts the corpus contains."""
     import json as _json
@@ -690,6 +738,18 @@ def main(argv: list[str] | None = None) -> None:
                     help='one document per work rather than fixed-length passages. The method needs '
                          'the text: it measures far better on whole works here.')
     wn.set_defaults(func=cmd_wan)
+
+    an = sub.add_parser('analyse', aliases=['analyze'],
+                        help='full battery: every feature family and method the corpus supports')
+    _add_scope(an)
+    an.add_argument('--tokens', type=int, choices=[500, 1000, 2000], default=1000)
+    an.add_argument('--label', default='group', help='which corpus field to score against')
+    an.add_argument('--bridge-chapters', action='store_true')
+    an.add_argument('--permutations', type=int, default=500,
+                    help='permutations for the change-point test')
+    an.add_argument('--seed', type=int, default=0)
+    an.add_argument('--out', default=None)
+    an.set_defaults(func=cmd_analyse)
 
     r = sub.add_parser("report", help="render output/<language>/report.md")
     r.add_argument("--language", choices=LANGS, default="grc")

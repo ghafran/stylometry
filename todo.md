@@ -367,3 +367,68 @@ gain was an artefact of a weakened baseline, and disappeared once the settings m
 - [x] 10.3.3 Test the differences rather than reading the table, using the work as the unit.
 - [ ] 10.3.4 If a combination is ever adopted, fit block weights with nested cross-validation on a
       held-out set. Tuning them on 18 works and reporting those numbers would be overfitting.
+
+## 11. The full strategy panel — built and run
+
+`stylometry analyse` runs every feature family and method the corpus supports, on 1,000-token
+passages held out by whole work. 1,017 features for Greek. Modules: `panel.py` (feature families),
+`measures.py` (Jensen-Shannon, cosine), `supervised.py` (SVM, Random Forest, impostors verification),
+`rolling.py` (windows, change points), `analysis.py` (orchestration and report).
+
+**30 strategies: 23 measured, 4 approximated, 1 partial, 1 unavailable, 1 measured but not authorial.**
+Part-of-speech and syntax are unavailable — nothing in the corpus carries tags and no reliable tagger
+exists for Koine Greek, Biblical Hebrew and Quranic Arabic together. Clause structure, grammar
+preference, morphology and readability are approximated from closed-class words and word endings and
+labelled `approx:`. Punctuation is measured but records the scribe or the modern editor, never the
+author.
+
+**Attribution, whole-work holdout:**
+
+| method | labelled Greek authors | Sinaiticus (8 groupings) | Quran (Meccan/Medinan) |
+|---|---:|---:|---:|
+| baseline (majority) | 31.9% | 23.7% | 50.0% |
+| Delta cosine 2000 MFW | 83.2% | 60.0% | 95.0% |
+| **SVM** | **88.5%** | **70.2%** | **97.5%** |
+| Random Forest | 71.7% | 59.1% | 95.0% |
+| SVM, function words only | 84.8% | 46.0% | 82.5% |
+
+The function-words-only row is the topic-independent control. On the labelled authors it costs almost
+nothing (88.5% → 84.8%), which says the full panel is not winning on topic. On Sinaiticus it costs 24
+points, which says a large part of that 70.2% *is* genre and content rather than authorship.
+
+**Verification — the project's central failure, addressed.** The impostors method reaches **16% false
+acceptance on Sinaiticus and 11.5% on the labelled authors**, against the existing pipeline's 90.5%.
+Unlike attribution it can answer "neither". Caveat recorded: the threshold is fitted on the same data
+and needs its own holdout before the number is quoted as a result.
+
+**Change-point detection, and the correction that made it usable.** As first built it fired on every
+single-author work — Plato's *Apology*, Xenophon's *Memorabilia*, Demosthenes — at p < 0.02. The
+permutation null assumes windows are exchangeable, and no continuous prose satisfies that, because
+neighbouring windows share a topic. Two fixes: the statistic is now scaled like a two-sample mean
+difference, which removed a pull towards the ends of the sequence; and results are read against
+`benchmarks/change_point_baseline.json`, the distribution reached by thirteen works of undisputed
+single authorship (mean 1.75, max 1.88). The permutation p-value is still reported and is still
+rejected for 85% of those single-author works, which is why it is not the finding.
+
+**On that calibrated basis, four books in Codex Sinaiticus exceed what any single-author work reached:**
+
+| book | separation | split falls at | what is there |
+|---|---:|---|---|
+| Isaiah | 2.24 | Isaiah 33:21 | at the "Little Apocalypse" of chs 34–35, long assigned to a later hand |
+| Jeremiah | 2.21 | LXX Jeremiah 27:39 | inside the Oracles Against the Nations, which LXX places centrally |
+| Psalms | 1.92 | Psalm 107:8 | Psalm 107 opens Book V of the Psalter, an ancient marked division |
+| Sirach | 1.91 | Sirach 41:25 | before the hymnic Praise of Creation and Praise of the Fathers |
+
+Luke, Acts, John, Job, Wisdom, Judith and both books of Maccabees did **not** exceed it. Window
+resolution is ±500 tokens, so the correspondence is approximate, but the set of books flagged is the
+set scholarship regards as composite, and the books it declines to flag are the ones regarded as
+unified. Quran sura 2 (al-Baqara) also exceeds the baseline at 1.91; it is the only sura long enough
+to test.
+
+- [x] 11.1 Build the panel, the measures, the classifiers, the rolling analysis and the orchestration.
+- [x] 11.2 Validate the whole battery on labelled authors before quoting any scripture result.
+- [x] 11.3 Calibrate change-point detection against single-author works; record the baseline.
+- [x] 11.4 Run on Codex Sinaiticus and the Quran.
+- [ ] 11.5 Give the verification threshold its own holdout before the false-acceptance figure is quoted.
+- [ ] 11.6 Widen the change-point baseline beyond 13 Greek works, and add Hebrew and Arabic references.
+- [ ] 11.7 Narrow the seam locations with a smaller step once the baseline is re-measured at that step.
