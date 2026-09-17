@@ -326,3 +326,44 @@ which is worth more than either number alone.
 attributed once that work is held out, and was both dragging the score down and stealing predictions
 from labels that could be right. Such labels are now set aside before attribution and the count is
 reported. Delta on Sinaiticus passages reads **58.6%** on this corrected basis, not 45.6%.
+
+### 10.3 Combining repetition, placement and rate — tried; it does not help
+
+`stylometry/repetition.py` adds the vocabulary-richness family (Yule's K, Simpson's D, Sichel's S,
+Honoré's R, Brunet's W, hapax ratio, moving-average TTR, top-word share, repeat rate) — the project
+previously had only raw type-token ratio, which falls with length by construction.
+`stylometry/combined.py` stacks three blocks — rate (Delta's representation), placement (word
+adjacency transitions that actually occur) and repetition — each standardised and scaled to equal
+total variance so no block wins on column count.
+
+**Ablation, identical units and whole-work holdout, rate block at 2,000 MFW throughout:**
+
+| blocks | labelled authors, whole works | labelled authors, 1k passages | Sinaiticus, 1k passages |
+|---|---:|---:|---:|
+| rate only (= Delta) | **100.0%** | **83.2%** | 60.0% |
+| placement only | 83.3% | 59.7% | 49.8% |
+| repetition only | 44.4% | 51.8% | 40.9% |
+| rate + placement | 94.4% | 74.9% | **63.3%** |
+| rate + repetition | 61.1% | 51.3% | 37.2% |
+| all three | 61.1% | 55.0% | 40.9% |
+
+**Repetition is actively harmful.** Adding it to rate costs 22 points on whole works and 32 on
+passages. That reproduces Hoover's finding that vocabulary-richness indices underperform frequent-word
+methods; each compresses a whole text to one number and is sensitive to genre and normalisation.
+
+**Placement neither helps nor hurts reliably.** Rate+placement wins on Sinaiticus (+3.3 points, Paul
+89% → 100%) and loses on the labelled authors (−8.3 points). Tested properly, neither is real:
+
+- Sinaiticus: McNemar exact p = 0.427; bootstrap over whole works +3.7% [−7.7%, +15.1%]
+- Labelled authors: McNemar p = 0.026 per passage, but passages within a work are not independent, and
+  the bootstrap over works gives −8.2% [−16.3%, +1.8%], which includes zero
+
+**A correction worth recording.** The first ablation appeared to show rate+placement beating rate
+alone. It did not: the rate block was defaulting to 500 MFW while Delta's best setting is 2,000. The
+gain was an artefact of a weakened baseline, and disappeared once the settings matched.
+
+- [x] 10.3.1 Implement the repetition family and the combined representation, with tests.
+- [x] 10.3.2 Ablate every combination on labelled authors and on Sinaiticus.
+- [x] 10.3.3 Test the differences rather than reading the table, using the work as the unit.
+- [ ] 10.3.4 If a combination is ever adopted, fit block weights with nested cross-validation on a
+      held-out set. Tuning them on 18 works and reporting those numbers would be overfitting.
