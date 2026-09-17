@@ -227,7 +227,7 @@ def _seams(docs, texts, works, language, permutations, seed) -> list[dict]:
     works known to have one author, because neighbouring windows of continuous prose share a topic.
     What decides is whether the shift exceeds what single authorship itself produces.
     """
-    baseline = load_change_point_baseline()
+    baseline = load_change_point_baseline(language)
     by_work = defaultdict(list)
     for tokens, text, work in zip(docs, texts, works):
         by_work[work].append((tokens, text))

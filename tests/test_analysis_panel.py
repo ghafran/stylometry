@@ -187,3 +187,31 @@ def test_the_checked_in_baseline_covers_every_language_the_corpus_holds():
         base = load_change_point_baseline(language)
         assert base and base["n_works"] >= 8 and 0 < base["max"] < 10
         assert base["note_language"].strip(), "each reference must say what it is drawn from"
+
+
+def test_a_language_without_a_reference_gets_no_verdict_from_another_language(tmp_path):
+    """The loader being language-aware is not enough: the language has to reach it.
+
+    It did not. The Qur'an was scored against the Greek threshold and reported a seam in sura 2 that
+    the Arabic evidence cannot support, because the call site dropped the argument and took the
+    default. Testing the loader alone missed it, so this drives the whole analysis.
+    """
+    from stylometry.analysis import analyse
+
+    rng = np.random.default_rng(0)
+    vocabulary = "في من علي عن مع حتي ان ما لا لم لن قد هو هي".split()
+    docs, texts, labels, works = [], [], [], []
+    for work in range(6):
+        tokens = [vocabulary[i % len(vocabulary)] for i in range(12_000)]
+        for piece in range(6):
+            chunk = tokens[piece * 1000:(piece + 1) * 1000]
+            docs.append(chunk)
+            texts.append(" ".join(chunk))
+            labels.append("meccan" if work % 2 else "medinan")
+            works.append(f"Q{work}")
+    result = analyse(docs, texts, labels, works, language="arb", permutations=20)
+    for row in result["change_points"]:
+        assert "exceeds_all_single_author_works" not in row, (
+            "Arabic has no single-author reference; no row may carry a verdict borrowed from Greek")
+    assert "No single-author reference exists for this language" in __import__(
+        "stylometry.analysis", fromlist=["render"]).render(result)
