@@ -245,3 +245,50 @@ finding, and a defensible paper. See the note in Progress below.
 
 **Check:** I prepare the manuscript, figures, cover letter and anonymised repository. Creating the
 accounts and pressing submit is yours — submission is an act of authorship in your name.
+
+## 10. Other ways of measuring style, and which we are trying
+
+The pipeline in `cluster.py` is one family among several. It combines lexical statistics with blinded
+AI style profiles and clusters them, which finds *whatever structure dominates* — and on this corpus
+that has repeatedly turned out to be genre rather than authorship: Codex Sinaiticus resolved into
+prophets, poetry and narrative, and the Quran into long verses and short ones. The alternatives below
+are the established methods, listed with what each would fix here.
+
+| method | what it is | what it would address |
+|---|---|---|
+| **Burrows's Delta** (2002), **Cosine Delta** (Evert et al. 2017) | most-frequent-word rates, z-scored, compared by mean absolute difference or cosine | the topic/genre confound: Delta uses *only* function words, which an author cannot avoid and does not choose for subject matter |
+| **Zeta** (Burrows 2007) | contrastive — words one author prefers and another avoids | two-author comparisons such as Quran vs hadith |
+| **Impostors / Generalized Impostors** (Koppel & Winter 2014) | is the match to a candidate robust when a crowd of irrelevant documents and random feature subsets are added? | the rejection failure: 90.5% of unseen authors are wrongly accepted. This is the method built for verification |
+| **Unmasking** (Koppel & Schler 2004) | delete the strongest discriminating features iteratively and watch the degradation curve | same-author verification without a reference population |
+| **Rolling stylometry / rolling delta** (Eder) | slide a window along one text and plot attribution as it moves | finding *seams* inside a book, which is what the Documentary Hypothesis actually asks, rather than partitioning verses |
+| **Bayesian function-word models** (Mosteller & Wallace 1964) | posterior odds between two named candidates | honest uncertainty on a specific, declared question |
+| **Authorship embeddings** (e.g. LUAR) | contrastively trained, topic-invariant neural representations | strongest modern accuracy, but needs training data that does not exist for Koine Greek, Biblical Hebrew or Quranic Arabic |
+| **Paleography** (Popović, Dhali & Schomaker 2021, on 1QIsaᵃ) | handwriting: allographs and geometry, not vocabulary | the strongest recent multi-author result in this corpus came from handwriting, and that scroll is already in `data/raw` |
+
+The `stylo` R package (Eder, Rybicki & Kestemont) implements Delta, Zeta and rolling stylometry and is
+what a reviewer will expect to see compared against.
+
+### 10.1 Burrows's Delta — being implemented now
+
+- [x] 10.1.1 Implement Delta in `stylometry/delta.py`: corpus most-frequent-word list, relative
+      frequencies, z-scores, classic and cosine metrics, leave-one-group-out nearest neighbour.
+- [x] 10.1.2 Validated on the labelled reference authors: **100%** on 18 works by 6 catalogued Greek
+      authors, whole-work holdout, cosine Delta at 2,000 MFW. Within the published range, and cosine
+      beating classic reproduces Evert et al. (2017).
+- [x] 10.1.3 Swept 50–2,000 MFW and both metrics; curves recorded below rather than a single point.
+- [x] 10.1.4 Codex Sinaiticus, 259 passages, same holdout: **45.6%** against the AI-profile method's
+      **30.9%**. Paul 94% (against 72%), Septuagint prophets 86% (67%), deuterocanon 53% (8%).
+      Septuagint poetry falls to 23% (from 52%) — Delta drops the genre cues the other method used.
+- [ ] 10.1.5 Report as a baseline beside the current method, not instead of it.
+- [ ] 10.1.6 Download the fresh Greek benchmark (8 further authors) and repeat 10.1.2; 18 works is
+      few enough that 100% could be luck.
+- [ ] 10.1.7 Add Delta to `compare-models` so the baseline appears in the standing comparison.
+
+**Measured so far.** Unit length dominates the choice of method: on the labelled authors Delta scores
+100% on whole works (median 8,745 tokens) but **83.2%** on 1,000-token passages cut from those same
+works — statistically level with the existing pipeline's 85.0% at that size. Delta's advantage appears
+on scripture, not on the benchmark, and it appears exactly where authorship rather than genre is the
+question. That is the predicted behaviour: Delta measures only the words an author cannot avoid.
+
+**Check:** Delta's accuracy on the labelled authors is measured and stated before any scripture result
+is quoted, and the same whole-work holdout is used for both methods so the comparison is fair.

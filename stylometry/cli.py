@@ -238,6 +238,47 @@ def cmd_witnesses(args) -> None:
     print(f"outputs: {out / 'witness_summary.csv'}, {out / 'site' / 'witnesses.html'}")
 
 
+def cmd_delta(args) -> None:
+    """Burrows's Delta as a baseline: most-frequent-word rates, z-scored, nearest neighbour.
+
+    Reported against whatever label the corpus already carries, held out by whole work, so a passage
+    is never attributed by its own neighbours. No model is involved.
+    """
+    from collections import Counter, defaultdict
+
+    from .continuity import annotate_continuity
+    from .delta import attribute
+    from .passages import build_passages
+
+    verses = _select(args, annotate_continuity(_load_corpus(), bridge_chapters=args.bridge_chapters))
+    if not verses:
+        sys.exit(f"no verses for language={args.language} scope={args.scope} works={args.works}")
+    passages = build_passages(verses, tokens=args.tokens, bridge_chapters=args.bridge_chapters)["passages"]
+    if len(passages) < 2:
+        sys.exit(f"only {len(passages)} complete {args.tokens}-token passages; "
+                 f"try --tokens 500 or --bridge-chapters")
+    docs = [p["text_bare"].split() for p in passages]
+    labels = [str(p.get(args.label) or "?") for p in passages]
+    works = [p["work"] for p in passages]
+    predicted = attribute(docs, labels, groups=works, n_words=args.mfw, metric=args.metric)
+
+    correct = sum(p == t for p, t in zip(predicted, labels))
+    majority = max(Counter(labels).values()) / len(labels)
+    print(f"{len(docs)} passages of {args.tokens} tokens, {len(set(labels))} {args.label} values, "
+          f"{len(set(works))} works")
+    print(f"{args.metric} Delta on {args.mfw} most frequent words, held out by work")
+    print(f"  accuracy {correct / len(labels):.1%}   majority baseline {majority:.1%}   "
+          f"chance {1 / len(set(labels)):.1%}")
+    per: dict = defaultdict(lambda: [0, 0])
+    for truth, pred in zip(labels, predicted):
+        per[truth][1] += 1
+        per[truth][0] += truth == pred
+    print(f"\n  {args.label:<26}{'correct':>9}{'n':>6}")
+    for value, (hit, total) in sorted(per.items(), key=lambda kv: -kv[1][1]):
+        print(f"  {value[:26]:<26}{hit / total:>8.0%}{total:>6}")
+    print("\nDelta ranks candidates and never answers 'none of these'; it attributes, it does not verify.")
+
+
 def cmd_manifest(args) -> None:
     """Write or verify the checked-in record of which manuscripts the corpus contains."""
     import json as _json
@@ -531,6 +572,18 @@ def main(argv: list[str] | None = None) -> None:
     cp.add_argument('--seed', type=int, default=42)
     cp.add_argument('--k-criterion', choices=['silhouette', 'bic', 'davies_bouldin', 'calinski'], default='silhouette')
     cp.set_defaults(func=cmd_cluster_passages)
+
+    dl = sub.add_parser('delta', help="Burrows's Delta baseline: most-frequent-word attribution, no AI")
+    _add_scope(dl)
+    dl.add_argument('--tokens', type=int, choices=[500, 1000, 2000], default=1000)
+    dl.add_argument('--mfw', type=int, default=500, help='how many most frequent words to measure on')
+    dl.add_argument('--metric', choices=['cosine', 'classic'], default='cosine',
+                    help="cosine (Evert et al. 2017) measures better than Burrows's original on most corpora")
+    dl.add_argument('--label', default='group',
+                    help='which corpus field to score against, e.g. group, work, collection')
+    dl.add_argument('--bridge-chapters', action='store_true',
+                    help='treat chapter divisions as continuous text (see cluster-passages)')
+    dl.set_defaults(func=cmd_delta)
 
     r = sub.add_parser("report", help="render output/<language>/report.md")
     r.add_argument("--language", choices=LANGS, default="grc")
