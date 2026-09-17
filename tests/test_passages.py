@@ -149,3 +149,86 @@ def test_passage_records_remain_compatible_with_actual_clustering(tmp_path):
     assert summary["n_verses"] == 3
     assert summary["alpha"] == 0
     assert summary["k_used"] == 1
+
+
+# --- bridging chapter divisions ------------------------------------------------------------------
+
+def _chapter_verse(chapter, verse, order, words=("και", "ο", "λογοσ"), **changes):
+    text = " ".join(words)
+    return {"id": f"grc:W.{chapter}.{verse}", "language": "grc", "work": "W", "work_title": "W",
+            "source": "codex", "witness": "S", "collection": "NT", "canon": "NT", "group": "W",
+            "copyist": None, "chapter": str(chapter), "verse": str(verse), "order": order,
+            "ref": f"W {chapter}:{verse}", "text": text, "text_bare": text, "n_tokens": len(words),
+            "has_gap": False, "supplied_frac": 0.0, "duplicate_of": None, **changes}
+
+
+def test_a_chapter_division_breaks_a_run_unless_bridging_is_asked_for():
+    """Chapter numbers are a 13th-century editorial layer, not a feature of any manuscript here."""
+    from stylometry.continuity import consecutive
+
+    end, start = _chapter_verse(1, 30, 30), _chapter_verse(2, 1, 31)
+    assert consecutive(end, start) is False
+    assert consecutive(end, start, bridge_chapters=True) is True
+
+
+@pytest.mark.parametrize("end,start,why", [
+    (_chapter_verse(1, 30, 30), _chapter_verse(3, 1, 31), "a skipped chapter is not adjacency"),
+    (_chapter_verse(1, 30, 30), _chapter_verse(2, 4, 31), "the next chapter must start at its first verse"),
+    (_chapter_verse(1, 30, 30), _chapter_verse(2, 1, 40), "source order must advance by exactly one"),
+    (_chapter_verse(1, 30, 30, has_gap=True), _chapter_verse(2, 1, 31), "a gap is never bridged"),
+    (_chapter_verse(1, 30, 30), _chapter_verse(2, 1, 31, work="OTHER"), "a different work is not bridged"),
+])
+def test_bridging_never_invents_adjacency_the_corpus_does_not_record(end, start, why):
+    from stylometry.continuity import consecutive
+
+    assert consecutive(end, start, bridge_chapters=True) is False, why
+
+
+def test_bridging_recovers_text_that_chapter_length_would_otherwise_discard():
+    """Chapters shorter than a passage are dropped whole; that cost 93% of Codex Sinaiticus."""
+    verses = []
+    order = 0
+    for chapter in range(1, 5):
+        for verse in range(1, 51):
+            order += 1
+            verses.append(_chapter_verse(chapter, verse, order, words=("και", "ο", "λογοσ", "εν")))
+    # 800 tokens in all, in four 200-token chapters: no single chapter can fill a 500-token passage.
+    without = build_passages(verses, tokens=500)
+    with_bridge = build_passages(verses, tokens=500, bridge_chapters=True)
+    assert without["passages"] == []
+    assert len(with_bridge["passages"]) == 1
+    assert with_bridge["settings"]["bridge_chapters"] is True
+    assert "chapter divisions bridged" in with_bridge["settings"]["boundaries"]
+
+
+# --- pooling verse profiles into a passage ---------------------------------------------------------
+
+def test_pooled_profile_averages_the_scales_and_takes_the_commonest_category():
+    from stylometry.ai_profile import CATEGORICAL_DIMS, NUMERIC_DIMS
+    from stylometry.passages import pool_profiles
+
+    def profile(ident, value, category, tag):
+        return {"id": ident, **{d: value for d in NUMERIC_DIMS},
+                **{d: vs[0] for d, vs in CATEGORICAL_DIMS.items()},
+                "discourse_mode": category, "style_tags": [tag],
+                "distinctive_phrases": [], "signature": "s"}
+
+    passage = {"id": "p1", "source_verse_ids": ["a", "b", "c", "d"]}
+    profiles = {"a": profile("a", 0.2, "narrative", "x"), "b": profile("b", 0.4, "narrative", "x"),
+                "c": profile("c", 0.6, "poetry", "y"), "d": profile("d", 0.8, "narrative", "x")}
+    pooled = pool_profiles([passage], profiles)["p1"]
+    assert pooled["register"] == pytest.approx(0.5)
+    assert pooled["discourse_mode"] == "narrative", "three of four verses narrate"
+    assert pooled["style_tags"][0] == "x"
+
+
+def test_a_passage_mostly_lacking_profiles_is_omitted_rather_than_averaged_from_a_fragment():
+    from stylometry.ai_profile import CATEGORICAL_DIMS, NUMERIC_DIMS
+    from stylometry.passages import pool_profiles
+
+    one = {"id": "a", **{d: 0.5 for d in NUMERIC_DIMS},
+           **{d: vs[0] for d, vs in CATEGORICAL_DIMS.items()},
+           "style_tags": ["x"], "distinctive_phrases": [], "signature": "s"}
+    passage = {"id": "p1", "source_verse_ids": ["a", "b", "c", "d", "e"]}
+    assert pool_profiles([passage], {"a": one}) == {}
+    assert pool_profiles([passage], {"a": one}, min_coverage=0.2) != {}

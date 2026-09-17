@@ -160,25 +160,47 @@ def cmd_cluster(args) -> None:
 
 def cmd_cluster_passages(args) -> None:
     from .continuity import annotate_continuity
-    from .passages import build_passages
+    from .passages import build_passages, pool_profiles
     from .cluster import run
     from .report import render
     from .corpus.build import load_corpus
 
+    # A profiles file alone must not quietly turn the control into an AI run; the opt-in is the
+    # only way in, and this is checked before anything is loaded.
+    if getattr(args, 'profiles', None) and not args.with_ai:
+        raise SystemExit(2)
     args.language = args.language or 'grc'
     source = load_corpus(args.corpus) if getattr(args, 'corpus', None) else _load_corpus()
-    verses = _select(args, annotate_continuity(source))
-    result = build_passages(verses, tokens=args.tokens)
+    bridge = getattr(args, 'bridge_chapters', False)
+    verses = _select(args, annotate_continuity(source, bridge_chapters=bridge))
+    result = build_passages(verses, tokens=args.tokens, bridge_chapters=bridge)
     out = Path(args.out) if args.out else OUTPUT / 'passages' / args.language
     out.mkdir(parents=True, exist_ok=True)
     (out / 'passages.json').write_text(json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False) + '\n')
     if len(result['passages']) < 3:
         raise SystemExit(f"fewer than three complete passages; exclusions and source mapping saved to {out / 'passages.json'}")
-    summary = run(result['passages'], None, out, k=args.k, kmin=1, kmax=args.kmax,
-                  window=0, alpha=0, weights={'lex': 1.0}, seed=args.seed,
+    # Passage mode is the AI-free control by default: no model touches it, so its result is
+    # independent of any profiling. Pooling existing verse profiles in is available, but only when
+    # asked for explicitly, and the summary records which of the two was run.
+    pooled = None
+    if args.with_ai:
+        from .ai_profile import load_profiles
+
+        verse_profiles = load_profiles(_profiles_path(args))
+        if not verse_profiles:
+            raise SystemExit(f"--with-ai needs verse profiles; none found in {_profiles_path(args)}")
+        pooled = pool_profiles(result['passages'], verse_profiles)
+        if len(pooled) < 3:
+            raise SystemExit(f"only {len(pooled)} of {len(result['passages'])} passages are covered by "
+                             f"{_profiles_path(args)}; profile the verses first or drop --with-ai")
+    weights = ({'lex': 1.0} if pooled is None
+               else {'lex': args.w_lex, 'ai': args.w_ai, 'tags': args.w_tags})
+    summary = run(result['passages'], pooled, out, k=args.k, kmin=1, kmax=args.kmax,
+                  window=0, alpha=0, weights=weights, seed=args.seed,
                   criterion=args.k_criterion)
     summary.update(input_unit='pooled_token_passage', passage_tokens=args.tokens,
-                   source_mapping_file='passages.json', input_verses=len(verses))
+                   source_mapping_file='passages.json', input_verses=len(verses),
+                   ai_profiles_pooled=(0 if pooled is None else len(pooled)))
     (out / 'summary.json').write_text(json.dumps(summary, ensure_ascii=False, indent=2, allow_nan=False) + '\n')
     render(out)
     print(f"Analyzed {len(result['passages'])} complete {args.tokens}-token passages. Style groups remain exploratory.")
@@ -489,7 +511,20 @@ def main(argv: list[str] | None = None) -> None:
     cp = sub.add_parser('cluster-passages', help='pool raw tokens before exploratory lexical style analysis')
     _add_scope(cp)
     cp.add_argument('--tokens', type=int, choices=[500, 1000, 2000], default=1000)
+    cp.add_argument('--bridge-chapters', action='store_true',
+                    help='treat a chapter division as continuous text where the corpus records the two '
+                         'verses as adjacent. Chapter and verse numbers are medieval and early-modern '
+                         'editorial additions, not manuscript features; breaking on them costs most of '
+                         'a complete codex. Leave off for fragmentary sources.')
     cp.add_argument('--corpus', help='source verse JSONL (defaults to the built project corpus)')
+    _add_profiles(cp)
+    cp.add_argument('--with-ai', action='store_true',
+                    help='pool the existing verse AI profiles into each passage and cluster on them '
+                         'too. Off by default: passage mode is the AI-free control, and leaving it '
+                         'off keeps that result independent of any model.')
+    cp.add_argument('--w-lex', type=float, default=1.0)
+    cp.add_argument('--w-ai', type=float, default=1.0)
+    cp.add_argument('--w-tags', type=float, default=0.7)
     cp.add_argument('--out', default=None)
     cp.add_argument('--k', type=int)
     cp.add_argument('--kmax', type=int, default=20)

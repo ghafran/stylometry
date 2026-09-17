@@ -116,7 +116,22 @@ def test_selection_cannot_close_a_gap_between_repeated_work_occurrences(monkeypa
     ["--alpha", "0.7"], ["--window", "5"], ["--profiles", "profiles.jsonl"], ["--tokens", "250"],
 ])
 def test_passage_command_rejects_verse_ai_smoothing_and_undeclared_lengths(monkeypatch, extra):
+    """Verse smoothing and undeclared lengths stay out, and a profiles file alone is not a way in.
+
+    Passage mode is the AI-free control. Pooling verse profiles into passages is available, but only
+    through the explicit --with-ai opt-in, so naming a profiles file on its own must still fail, and
+    must fail before any corpus is read.
+    """
     monkeypatch.setattr(cli, "_load_corpus", lambda: pytest.fail("invalid settings must fail before corpus loading"))
     with pytest.raises(SystemExit) as error:
         cli.main(["cluster-passages", *extra])
     assert error.value.code == 2
+
+
+def test_passage_mode_stays_ai_free_unless_the_opt_in_is_given(monkeypatch, tmp_path):
+    """The default run must not read profiles at all - that independence is the point of the control."""
+    monkeypatch.setattr(cli, "_load_corpus", lambda: [source(i, 500) for i in range(1, 8)])
+    monkeypatch.setattr(ai_profile, "load_profiles", prohibit_profiles)
+    cli.main(["cluster-passages", "--tokens", "500", "--scope", "all", "--out", str(tmp_path)])
+    summary = json.loads((tmp_path / "summary.json").read_text())
+    assert summary["ai_profiles_pooled"] == 0 and summary["used_ai_profiles"] is False

@@ -25,8 +25,18 @@ def _integer(value: object) -> int | None:
     return None
 
 
-def consecutive(previous: dict, following: dict) -> bool:
+def consecutive(previous: dict, following: dict, *, bridge_chapters: bool = False) -> bool:
     """Whether adjacent input records are demonstrably consecutive.
+
+    ``bridge_chapters`` relaxes one break, and only for callers that ask. Chapter and verse divisions
+    are 13th- and 16th-century editorial additions; they are not features of any manuscript here, and
+    in a continuously written codex the last verse of a chapter is followed on the page by the first
+    verse of the next. Breaking there is the right default for fragmentary sources, where the tail of
+    a chapter may simply not survive, but on a complete codex it discards most of the text: Codex
+    Sinaiticus yielded 23 passages of 1,000 tokens from 350,746 tokens, keeping 6.6%. When bridging is
+    asked for, the corpus must still record the two as adjacent - ``order`` advancing by exactly one,
+    neither side gapped - and the later record must be the first verse of its chapter, so a bridge is
+    never inferred across missing text.
 
     Both sides must share their language, work, witness and source.  Gapped
     records stand alone.  Chapter/document boundaries are conservative breaks:
@@ -43,8 +53,16 @@ def consecutive(previous: dict, following: dict) -> bool:
         return False
     if previous.get("has_gap") or following.get("has_gap"):
         return False
-    if previous.get("chapter") != following.get("chapter"):
-        return False
+    bridged = previous.get("chapter") != following.get("chapter")
+    if bridged:
+        if not bridge_chapters:
+            return False
+        # Only across a chapter's own boundary: the next record must open the next chapter.
+        before, after = _integer(previous.get("chapter")), _integer(following.get("chapter"))
+        if before is None or after != before + 1:
+            return False
+        if _integer(following.get("verse")) != 1:
+            return False
 
     annotated = any(key in record for record in (previous, following) for key in (_INDEX, _SEGMENT))
     if annotated:
@@ -56,8 +74,9 @@ def consecutive(previous: dict, following: dict) -> bool:
         if previous[_SEGMENT] != following[_SEGMENT]:
             return False
 
+    # Across a bridge the verse number restarts by definition, so only source order can witness it.
     has_position = False
-    for key in ("order", "verse"):
+    for key in (("order",) if bridged else ("order", "verse")):
         before, after = _integer(previous.get(key)), _integer(following.get(key))
         if before is None and after is None:
             continue
@@ -67,7 +86,7 @@ def consecutive(previous: dict, following: dict) -> bool:
     return has_position
 
 
-def annotate_continuity(verses: list[dict]) -> list[dict]:
+def annotate_continuity(verses: list[dict], *, bridge_chapters: bool = False) -> list[dict]:
     """Copy records and attach stable passage/index metadata before filtering.
 
     Existing annotations are retained: applying this helper to an already
@@ -76,7 +95,7 @@ def annotate_continuity(verses: list[dict]) -> list[dict]:
     out: list[dict] = []
     segment = -1
     for i, verse in enumerate(verses):
-        if not i or not consecutive(verses[i - 1], verse):
+        if not i or not consecutive(verses[i - 1], verse, bridge_chapters=bridge_chapters):
             segment += 1
         rec = dict(verse)
         rec.setdefault(_INDEX, i)

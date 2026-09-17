@@ -21,7 +21,7 @@ PASSAGE_LENGTHS = (500, 1000, 2000)
 _LABEL_BOUNDARIES = ("author", "group", "copyist", "duplicate_of")
 
 
-def build_passages(verses: list[dict], tokens: int = 1000) -> dict:
+def build_passages(verses: list[dict], tokens: int = 1000, *, bridge_chapters: bool = False) -> dict:
     """Return exact token passages, explicit exclusions, and source mappings.
 
     No text is normalized a second time and no source record is reordered. The
@@ -50,7 +50,7 @@ def build_passages(verses: list[dict], tokens: int = 1000) -> dict:
                 or not math.isfinite(supplied) or not 0 <= supplied <= 1):
             raise ValueError("supplied_frac must be a finite number between zero and one")
 
-    annotated = annotate_continuity(verses)
+    annotated = annotate_continuity(verses, bridge_chapters=bridge_chapters)
     passages, exclusions, run = [], [], []
     run_number = 0
 
@@ -119,7 +119,7 @@ def build_passages(verses: list[dict], tokens: int = 1000) -> dict:
             continue
         if run:
             previous = run[-1][0]
-            if (not consecutive(previous, verse)
+            if (not consecutive(previous, verse, bridge_chapters=bridge_chapters)
                     or any(previous.get(key) != verse.get(key) for key in _LABEL_BOUNDARIES)):
                 flush()
         run.append((verse, words))
@@ -140,9 +140,13 @@ def build_passages(verses: list[dict], tokens: int = 1000) -> dict:
         "passages": passages, "exclusions": exclusions,
         "settings": {
             "version": "raw-token-passages-v1", "tokens": tokens, "overlap_tokens": 0,
+            "bridge_chapters": bridge_chapters,
             "text_field": "text_bare", "display_text": "normalized tokens; use source mappings for original display text",
             "source_offsets": "zero-based, half-open token offsets into source text_bare.split()",
-            "boundaries": "original continuity plus author, group, copyist, and duplicate identity; damaged, supplied, and empty verses excluded",
+            "boundaries": ("original continuity plus author, group, copyist, and duplicate identity; damaged, "
+                           "supplied, and empty verses excluded"
+                           + ("; chapter divisions bridged where the corpus records the two as adjacent"
+                              if bridge_chapters else "; chapter divisions break a passage")),
             "input_verses": len(verses), "input_tokens": input_tokens,
             "retained_tokens": len(passages) * tokens, "excluded_tokens": sum(r["n_tokens"] for r in exclusions),
             "passages_by_language": {language: counts[language] for language in languages},
@@ -150,3 +154,39 @@ def build_passages(verses: list[dict], tokens: int = 1000) -> dict:
             "interpretation": "Experimental passage representation, not validated author identification.",
         },
     }
+
+
+def pool_profiles(passages: list[dict], profiles: dict[str, dict], *, min_coverage: float = 0.8) -> dict:
+    """Average the verse profiles inside each passage into one profile for the passage.
+
+    Passage clustering was built on lexical features alone, which left the AI profiles - the strongest
+    signal measured on this corpus, separating translated from composed Greek at d = +2.51 - out of the
+    analysis entirely. A passage is a span of verses, each already profiled, so its profile is the mean
+    of theirs: the six scales average, each categorical takes the value most of its verses carry, and
+    the style tags are the commonest across the span.
+
+    A passage whose verses are mostly unprofiled is omitted rather than averaged from a fragment of
+    itself; ``min_coverage`` is that floor. Averaging discards the within-passage distribution of the
+    categorical fields, which is real information a later feature map could use.
+    """
+    from .ai_profile import CATEGORICAL_DIMS, NUMERIC_DIMS
+
+    if not 0 < min_coverage <= 1:
+        raise ValueError("min_coverage must be in (0, 1]")
+    pooled: dict[str, dict] = {}
+    for passage in passages:
+        ids = passage.get("source_verse_ids") or []
+        got = [profiles[i] for i in ids if i in profiles]
+        if not ids or len(got) / len(ids) < min_coverage:
+            continue
+        record: dict = {"id": passage["id"]}
+        for dim in NUMERIC_DIMS:
+            record[dim] = sum(g[dim] for g in got) / len(got)
+        for dim in CATEGORICAL_DIMS:
+            record[dim] = Counter(g[dim] for g in got).most_common(1)[0][0]
+        tags = Counter(t for g in got for t in g.get("style_tags", []))
+        record["style_tags"] = [t for t, _ in tags.most_common(8)]
+        record["distinctive_phrases"] = []
+        record["signature"] = f"Pooled from {len(got)} profiled verses."
+        pooled[passage["id"]] = record
+    return pooled
