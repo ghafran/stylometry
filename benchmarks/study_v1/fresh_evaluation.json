@@ -1,0 +1,4732 @@
+{
+  "status": "failed",
+  "scripture_attribution_validated": false,
+  "evaluation_lock_sha256": "8bd676972f0972c40fb9aa5f26d556a3c2423c0f50b4e65786cf52a5fddadd27",
+  "evaluated_utc": "2026-09-17T01:18:57.555263+00:00",
+  "runs": [
+    {
+      "language": "grc",
+      "selected": {
+        "model": "function_centroid",
+        "length": 500,
+        "development_operating_targets_met": false,
+        "selection_accuracy": 0.7255731922398587,
+        "selection_basis": "Prefer development unknown acceptance <=5%, known wrong acceptance <=5% and known correct acceptance >=80%; then maximize mean matched-genre closed-set accuracy (overall accuracy if no genre control); ties use declared model order then shorter passages"
+      },
+      "status": "failed",
+      "adequate_coverage": false,
+      "metrics": {
+        "accuracy": {
+          "value": 0.8854166666666666,
+          "ci95": null,
+          "independent_works": 6,
+          "ci_method": "Conditional work bootstrap with full refits and unfamiliar-author block resampling; known candidate authors fixed. Unavailable with singleton author/role strata.",
+          "independent_authors": 4,
+          "resampling_range95": [
+            0.7291666666666666,
+            0.9375
+          ],
+          "singleton_strata": [
+            {
+              "role": "train",
+              "author": "Aeschines"
+            },
+            {
+              "role": "train",
+              "author": "Dionysius of Halicarnassus"
+            },
+            {
+              "role": "known_calibration",
+              "author": "Aeschines"
+            },
+            {
+              "role": "known_calibration",
+              "author": "Dionysius of Halicarnassus"
+            },
+            {
+              "role": "known_test",
+              "author": "Aeschines"
+            },
+            {
+              "role": "known_test",
+              "author": "Dionysius of Halicarnassus"
+            },
+            {
+              "role": "unknown_test",
+              "author": "Galen"
+            }
+          ],
+          "refit_replicates": 40,
+          "usable_replicates": 40
+        },
+        "unknown_false_acceptance": {
+          "value": 0.0,
+          "ci95": null,
+          "independent_works": 3,
+          "ci_method": "Conditional work bootstrap with full refits and unfamiliar-author block resampling; known candidate authors fixed. Unavailable with singleton author/role strata.",
+          "independent_authors": 2,
+          "resampling_range95": [
+            0.0,
+            0.841886116991581
+          ],
+          "singleton_strata": [
+            {
+              "role": "train",
+              "author": "Aeschines"
+            },
+            {
+              "role": "train",
+              "author": "Dionysius of Halicarnassus"
+            },
+            {
+              "role": "known_calibration",
+              "author": "Aeschines"
+            },
+            {
+              "role": "known_calibration",
+              "author": "Dionysius of Halicarnassus"
+            },
+            {
+              "role": "known_test",
+              "author": "Aeschines"
+            },
+            {
+              "role": "known_test",
+              "author": "Dionysius of Halicarnassus"
+            },
+            {
+              "role": "unknown_test",
+              "author": "Galen"
+            }
+          ],
+          "refit_replicates": 40,
+          "usable_replicates": 40
+        },
+        "known_acceptance": {
+          "value": 0.0,
+          "ci95": null,
+          "independent_works": 6,
+          "ci_method": "Conditional work bootstrap with full refits and unfamiliar-author block resampling; known candidate authors fixed. Unavailable with singleton author/role strata.",
+          "independent_authors": 4,
+          "resampling_range95": [
+            0.0,
+            0.45925812643990044
+          ],
+          "singleton_strata": [
+            {
+              "role": "train",
+              "author": "Aeschines"
+            },
+            {
+              "role": "train",
+              "author": "Dionysius of Halicarnassus"
+            },
+            {
+              "role": "known_calibration",
+              "author": "Aeschines"
+            },
+            {
+              "role": "known_calibration",
+              "author": "Dionysius of Halicarnassus"
+            },
+            {
+              "role": "known_test",
+              "author": "Aeschines"
+            },
+            {
+              "role": "known_test",
+              "author": "Dionysius of Halicarnassus"
+            },
+            {
+              "role": "unknown_test",
+              "author": "Galen"
+            }
+          ],
+          "refit_replicates": 40,
+          "usable_replicates": 40
+        },
+        "known_correct_acceptance": {
+          "value": 0.0,
+          "ci95": null,
+          "independent_works": 6,
+          "ci_method": "Conditional work bootstrap with full refits and unfamiliar-author block resampling; known candidate authors fixed. Unavailable with singleton author/role strata.",
+          "independent_authors": 4,
+          "resampling_range95": [
+            0.0,
+            0.45925812643990044
+          ],
+          "singleton_strata": [
+            {
+              "role": "train",
+              "author": "Aeschines"
+            },
+            {
+              "role": "train",
+              "author": "Dionysius of Halicarnassus"
+            },
+            {
+              "role": "known_calibration",
+              "author": "Aeschines"
+            },
+            {
+              "role": "known_calibration",
+              "author": "Dionysius of Halicarnassus"
+            },
+            {
+              "role": "known_test",
+              "author": "Aeschines"
+            },
+            {
+              "role": "known_test",
+              "author": "Dionysius of Halicarnassus"
+            },
+            {
+              "role": "unknown_test",
+              "author": "Galen"
+            }
+          ],
+          "refit_replicates": 40,
+          "usable_replicates": 40
+        },
+        "known_wrong_acceptance": {
+          "value": 0.0,
+          "ci95": null,
+          "independent_works": 6,
+          "ci_method": "Conditional work bootstrap with full refits and unfamiliar-author block resampling; known candidate authors fixed. Unavailable with singleton author/role strata.",
+          "independent_authors": 4,
+          "resampling_range95": [
+            0.0,
+            0.45925812643990044
+          ],
+          "singleton_strata": [
+            {
+              "role": "train",
+              "author": "Aeschines"
+            },
+            {
+              "role": "train",
+              "author": "Dionysius of Halicarnassus"
+            },
+            {
+              "role": "known_calibration",
+              "author": "Aeschines"
+            },
+            {
+              "role": "known_calibration",
+              "author": "Dionysius of Halicarnassus"
+            },
+            {
+              "role": "known_test",
+              "author": "Aeschines"
+            },
+            {
+              "role": "known_test",
+              "author": "Dionysius of Halicarnassus"
+            },
+            {
+              "role": "unknown_test",
+              "author": "Galen"
+            }
+          ],
+          "refit_replicates": 40,
+          "usable_replicates": 40
+        },
+        "accuracy_among_accepted": {
+          "value": null,
+          "ci95": null,
+          "independent_works": 0,
+          "independent_authors": 0,
+          "resampling_range95": null,
+          "ci_method": "Conditional work bootstrap with full refits and unfamiliar-author block resampling; known candidate authors fixed. Unavailable with singleton author/role strata.",
+          "singleton_strata": [
+            {
+              "role": "train",
+              "author": "Aeschines"
+            },
+            {
+              "role": "train",
+              "author": "Dionysius of Halicarnassus"
+            },
+            {
+              "role": "known_calibration",
+              "author": "Aeschines"
+            },
+            {
+              "role": "known_calibration",
+              "author": "Dionysius of Halicarnassus"
+            },
+            {
+              "role": "known_test",
+              "author": "Aeschines"
+            },
+            {
+              "role": "known_test",
+              "author": "Dionysius of Halicarnassus"
+            },
+            {
+              "role": "unknown_test",
+              "author": "Galen"
+            }
+          ],
+          "refit_replicates": 40,
+          "usable_replicates": 0
+        }
+      },
+      "gates": {
+        "accuracy": "inconclusive",
+        "unknown_false_acceptance": "inconclusive",
+        "known_acceptance": "inconclusive",
+        "known_correct_acceptance": "inconclusive",
+        "known_wrong_acceptance": "inconclusive",
+        "matched_genre_accuracy": "inconclusive"
+      },
+      "observed_targets_met": {
+        "accuracy": true,
+        "unknown_false_acceptance": true,
+        "known_acceptance": false,
+        "known_correct_acceptance": false,
+        "known_wrong_acceptance": true,
+        "matched_genre_accuracy": true
+      },
+      "calibration": {
+        "status": "no_feasible_threshold",
+        "feasible": false,
+        "threshold": 0.17240623655365173,
+        "known_acceptance": 0.30312500000000014,
+        "known_correct_acceptance": 0.2822916666666668,
+        "known_wrong_acceptance": 0.020833333333333336,
+        "unknown_false_acceptance": 0.041666666666666664,
+        "candidate_authors": [
+          "Aeschines",
+          "Dionysius of Halicarnassus",
+          "Isaeus",
+          "Plutarch"
+        ],
+        "calibration_counts": {
+          "known": {
+            "authors": 4,
+            "works": 6,
+            "samples": 61
+          },
+          "impostor": {
+            "authors": 2,
+            "works": 5,
+            "samples": 32
+          }
+        },
+        "targets": {
+          "max_false_acceptance": 0.05,
+          "min_known_acceptance": 0.8
+        },
+        "weighting": "equal authors, then equal works per author, then equal samples per work",
+        "scope": "development only; empirical calibration rates do not certify unseen-author risk",
+        "reason": "No threshold meets both calibration targets; all application decisions abstain."
+      },
+      "model_metadata": {
+        "kind": "function_centroid",
+        "seed": 42,
+        "language": "grc",
+        "candidate_authors": [
+          "Aeschines",
+          "Dionysius of Halicarnassus",
+          "Isaeus",
+          "Plutarch"
+        ],
+        "training_works": [
+          "grc:tlg0007.tlg070",
+          "grc:tlg0007.tlg090",
+          "grc:tlg0017.tlg006",
+          "grc:tlg0017.tlg007",
+          "grc:tlg0026.tlg001",
+          "grc:tlg0081.tlg010"
+        ],
+        "training_samples": 57,
+        "weighting": "equal authors, then equal canonical works, then equal chunks; total weight equals training work count",
+        "scope": "fixed development candidate; no hyperparameter search or validation claim",
+        "score_type": "cosine similarity, not probability",
+        "parameters": {
+          "svd_dims": 0,
+          "standardization": "training-only weighted mean and variance",
+          "excluded_features": [
+            "misc:log_tokens"
+          ],
+          "function_word_bigram_limit": 0
+        },
+        "feature_note": "Predefined function/common words include content verbs; not topic-free. Suffixes are crude word endings; adjacent common-word bigrams are a word-order proxy, not validated morphology, syntax, or POS tags.",
+        "feature_count": 321
+      },
+      "partitions": {
+        "train": [
+          "grc:tlg0007.tlg070",
+          "grc:tlg0007.tlg090",
+          "grc:tlg0017.tlg006",
+          "grc:tlg0017.tlg007",
+          "grc:tlg0026.tlg001",
+          "grc:tlg0081.tlg010"
+        ],
+        "known_calibration": [
+          "grc:tlg0007.tlg091",
+          "grc:tlg0007.tlg092",
+          "grc:tlg0017.tlg001",
+          "grc:tlg0017.tlg003",
+          "grc:tlg0026.tlg003",
+          "grc:tlg0081.tlg012"
+        ],
+        "impostors": [
+          "grc:tlg0028.tlg005",
+          "grc:tlg0028.tlg006",
+          "grc:tlg0284.tlg001",
+          "grc:tlg0284.tlg002",
+          "grc:tlg0284.tlg003"
+        ],
+        "known_test": [
+          "grc:tlg0007.tlg071",
+          "grc:tlg0007.tlg080",
+          "grc:tlg0017.tlg002",
+          "grc:tlg0017.tlg005",
+          "grc:tlg0026.tlg002",
+          "grc:tlg0081.tlg015"
+        ],
+        "unknown_test": [
+          "grc:tlg0027.tlg001",
+          "grc:tlg0027.tlg002",
+          "grc:tlg0057.tlg010"
+        ]
+      },
+      "counts": {
+        "train": {
+          "authors": 4,
+          "works": 6,
+          "passages": 57
+        },
+        "known_calibration": {
+          "authors": 4,
+          "works": 6,
+          "passages": 61
+        },
+        "impostors": {
+          "authors": 2,
+          "works": 5,
+          "passages": 32
+        },
+        "known_test": {
+          "authors": 4,
+          "works": 6,
+          "passages": 46
+        },
+        "unknown_test": {
+          "authors": 2,
+          "works": 3,
+          "passages": 27
+        }
+      },
+      "controls": [
+        {
+          "label": "genre",
+          "value": "forensic_oratory",
+          "candidate_authors": [
+            "Aeschines",
+            "Isaeus"
+          ],
+          "accuracy": {
+            "value": 0.9583333333333334,
+            "ci95": null,
+            "independent_works": 3,
+            "ci_method": "Conditional work bootstrap with full refits and unfamiliar-author block resampling; known candidate authors fixed. Unavailable with singleton author/role strata.",
+            "independent_authors": 2,
+            "resampling_range95": [
+              0.58125,
+              1.0
+            ],
+            "singleton_strata": [
+              {
+                "role": "train",
+                "author": "Aeschines"
+              },
+              {
+                "role": "known_calibration",
+                "author": "Aeschines"
+              },
+              {
+                "role": "known_test",
+                "author": "Aeschines"
+              },
+              {
+                "role": "unknown_test",
+                "author": "Galen"
+              }
+            ],
+            "refit_replicates": 40,
+            "usable_replicates": 40
+          },
+          "metrics": {
+            "accuracy": {
+              "value": 0.9583333333333334,
+              "ci95": null,
+              "independent_works": 3,
+              "ci_method": "Conditional work bootstrap with full refits and unfamiliar-author block resampling; known candidate authors fixed. Unavailable with singleton author/role strata.",
+              "independent_authors": 2,
+              "resampling_range95": [
+                0.58125,
+                1.0
+              ],
+              "singleton_strata": [
+                {
+                  "role": "train",
+                  "author": "Aeschines"
+                },
+                {
+                  "role": "known_calibration",
+                  "author": "Aeschines"
+                },
+                {
+                  "role": "known_test",
+                  "author": "Aeschines"
+                },
+                {
+                  "role": "unknown_test",
+                  "author": "Galen"
+                }
+              ],
+              "refit_replicates": 40,
+              "usable_replicates": 40
+            },
+            "unknown_false_acceptance": {
+              "value": 0.0,
+              "ci95": null,
+              "independent_works": 3,
+              "ci_method": "Conditional work bootstrap with full refits and unfamiliar-author block resampling; known candidate authors fixed. Unavailable with singleton author/role strata.",
+              "independent_authors": 2,
+              "resampling_range95": [
+                0.0,
+                0.841886116991581
+              ],
+              "singleton_strata": [
+                {
+                  "role": "train",
+                  "author": "Aeschines"
+                },
+                {
+                  "role": "known_calibration",
+                  "author": "Aeschines"
+                },
+                {
+                  "role": "known_test",
+                  "author": "Aeschines"
+                },
+                {
+                  "role": "unknown_test",
+                  "author": "Galen"
+                }
+              ],
+              "refit_replicates": 40,
+              "usable_replicates": 40
+            },
+            "known_acceptance": {
+              "value": 0.0,
+              "ci95": null,
+              "independent_works": 3,
+              "ci_method": "Conditional work bootstrap with full refits and unfamiliar-author block resampling; known candidate authors fixed. Unavailable with singleton author/role strata.",
+              "independent_authors": 2,
+              "resampling_range95": [
+                0.0,
+                0.7075982261787134
+              ],
+              "singleton_strata": [
+                {
+                  "role": "train",
+                  "author": "Aeschines"
+                },
+                {
+                  "role": "known_calibration",
+                  "author": "Aeschines"
+                },
+                {
+                  "role": "known_test",
+                  "author": "Aeschines"
+                },
+                {
+                  "role": "unknown_test",
+                  "author": "Galen"
+                }
+              ],
+              "refit_replicates": 40,
+              "usable_replicates": 40
+            },
+            "known_correct_acceptance": {
+              "value": 0.0,
+              "ci95": null,
+              "independent_works": 3,
+              "ci_method": "Conditional work bootstrap with full refits and unfamiliar-author block resampling; known candidate authors fixed. Unavailable with singleton author/role strata.",
+              "independent_authors": 2,
+              "resampling_range95": [
+                0.0,
+                0.7075982261787134
+              ],
+              "singleton_strata": [
+                {
+                  "role": "train",
+                  "author": "Aeschines"
+                },
+                {
+                  "role": "known_calibration",
+                  "author": "Aeschines"
+                },
+                {
+                  "role": "known_test",
+                  "author": "Aeschines"
+                },
+                {
+                  "role": "unknown_test",
+                  "author": "Galen"
+                }
+              ],
+              "refit_replicates": 40,
+              "usable_replicates": 40
+            },
+            "known_wrong_acceptance": {
+              "value": 0.0,
+              "ci95": null,
+              "independent_works": 3,
+              "ci_method": "Conditional work bootstrap with full refits and unfamiliar-author block resampling; known candidate authors fixed. Unavailable with singleton author/role strata.",
+              "independent_authors": 2,
+              "resampling_range95": [
+                0.0,
+                0.7075982261787134
+              ],
+              "singleton_strata": [
+                {
+                  "role": "train",
+                  "author": "Aeschines"
+                },
+                {
+                  "role": "known_calibration",
+                  "author": "Aeschines"
+                },
+                {
+                  "role": "known_test",
+                  "author": "Aeschines"
+                },
+                {
+                  "role": "unknown_test",
+                  "author": "Galen"
+                }
+              ],
+              "refit_replicates": 40,
+              "usable_replicates": 40
+            },
+            "accuracy_among_accepted": {
+              "value": null,
+              "ci95": null,
+              "independent_works": 0,
+              "independent_authors": 0,
+              "resampling_range95": null,
+              "ci_method": "Conditional work bootstrap with full refits and unfamiliar-author block resampling; known candidate authors fixed. Unavailable with singleton author/role strata.",
+              "singleton_strata": [
+                {
+                  "role": "train",
+                  "author": "Aeschines"
+                },
+                {
+                  "role": "known_calibration",
+                  "author": "Aeschines"
+                },
+                {
+                  "role": "known_test",
+                  "author": "Aeschines"
+                },
+                {
+                  "role": "unknown_test",
+                  "author": "Galen"
+                }
+              ],
+              "refit_replicates": 40,
+              "usable_replicates": 0
+            }
+          },
+          "interpretation": "Same frozen model design refitted exclusively on genre/topic-matched reference works; independent diagnostic, no reselection"
+        }
+      ],
+      "exclusions": [],
+      "predictions": [
+        {
+          "id": "benchmark:1e566d1784d9bee4:0",
+          "author": "Aeschines",
+          "work_id": "grc:tlg0026.tlg002",
+          "genre": "forensic_oratory",
+          "topic": "athenian_public_affairs",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Aeschines",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": 0.1294086686794625,
+            "Dionysius of Halicarnassus": -0.029118466192410545,
+            "Isaeus": -0.05849530037362054,
+            "Plutarch": -0.021920507199120823
+          }
+        },
+        {
+          "id": "benchmark:1e566d1784d9bee4:1000",
+          "author": "Aeschines",
+          "work_id": "grc:tlg0026.tlg002",
+          "genre": "forensic_oratory",
+          "topic": "athenian_public_affairs",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Aeschines",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": 0.08407005661984704,
+            "Dionysius of Halicarnassus": -0.04554343434992971,
+            "Isaeus": 0.008478397714764134,
+            "Plutarch": -0.03591467229424816
+          }
+        },
+        {
+          "id": "benchmark:1e566d1784d9bee4:2000",
+          "author": "Aeschines",
+          "work_id": "grc:tlg0026.tlg002",
+          "genre": "forensic_oratory",
+          "topic": "athenian_public_affairs",
+          "known": true,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Isaeus",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": 0.028626980335459424,
+            "Dionysius of Halicarnassus": -0.0905473734764713,
+            "Isaeus": 0.051592928051196404,
+            "Plutarch": 0.009176321372339367
+          }
+        },
+        {
+          "id": "benchmark:1e566d1784d9bee4:3000",
+          "author": "Aeschines",
+          "work_id": "grc:tlg0026.tlg002",
+          "genre": "forensic_oratory",
+          "topic": "athenian_public_affairs",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Aeschines",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": 0.10566908206388866,
+            "Dionysius of Halicarnassus": -0.06711269749264678,
+            "Isaeus": -0.01584076055070156,
+            "Plutarch": -0.00934223844558934
+          }
+        },
+        {
+          "id": "benchmark:1e566d1784d9bee4:4000",
+          "author": "Aeschines",
+          "work_id": "grc:tlg0026.tlg002",
+          "genre": "forensic_oratory",
+          "topic": "athenian_public_affairs",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Aeschines",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": 0.12814151200006282,
+            "Dionysius of Halicarnassus": 0.020034394671902104,
+            "Isaeus": -0.011944800243578645,
+            "Plutarch": -0.11353540470090374
+          }
+        },
+        {
+          "id": "benchmark:1e566d1784d9bee4:5000",
+          "author": "Aeschines",
+          "work_id": "grc:tlg0026.tlg002",
+          "genre": "forensic_oratory",
+          "topic": "athenian_public_affairs",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Aeschines",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": 0.20208194179928812,
+            "Dionysius of Halicarnassus": -0.03245133784555609,
+            "Isaeus": -0.0413335050126431,
+            "Plutarch": -0.09655196510913547
+          }
+        },
+        {
+          "id": "benchmark:1e566d1784d9bee4:6000",
+          "author": "Aeschines",
+          "work_id": "grc:tlg0026.tlg002",
+          "genre": "forensic_oratory",
+          "topic": "athenian_public_affairs",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Aeschines",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": 0.11151672186626536,
+            "Dionysius of Halicarnassus": -0.05642233827052109,
+            "Isaeus": -0.05201140059333548,
+            "Plutarch": 0.012040810981437756
+          }
+        },
+        {
+          "id": "benchmark:1e566d1784d9bee4:7000",
+          "author": "Aeschines",
+          "work_id": "grc:tlg0026.tlg002",
+          "genre": "forensic_oratory",
+          "topic": "athenian_public_affairs",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Aeschines",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": 0.041043417240842636,
+            "Dionysius of Halicarnassus": 0.0012938068290863545,
+            "Isaeus": -0.06906324208884772,
+            "Plutarch": 0.033829360610570895
+          }
+        },
+        {
+          "id": "benchmark:1e566d1784d9bee4:8000",
+          "author": "Aeschines",
+          "work_id": "grc:tlg0026.tlg002",
+          "genre": "forensic_oratory",
+          "topic": "athenian_public_affairs",
+          "known": true,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Isaeus",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": 0.020888923864579707,
+            "Dionysius of Halicarnassus": -0.03638772605570426,
+            "Isaeus": 0.021234284051713993,
+            "Plutarch": -0.0046333074750036
+          }
+        },
+        {
+          "id": "benchmark:1e566d1784d9bee4:9000",
+          "author": "Aeschines",
+          "work_id": "grc:tlg0026.tlg002",
+          "genre": "forensic_oratory",
+          "topic": "athenian_public_affairs",
+          "known": true,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Isaeus",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": 0.06511775908193948,
+            "Dionysius of Halicarnassus": -0.005641609634988841,
+            "Isaeus": 0.06639245833605477,
+            "Plutarch": -0.1155288963783859
+          }
+        },
+        {
+          "id": "benchmark:1e566d1784d9bee4:10000",
+          "author": "Aeschines",
+          "work_id": "grc:tlg0026.tlg002",
+          "genre": "forensic_oratory",
+          "topic": "athenian_public_affairs",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Aeschines",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": 0.17645873489363523,
+            "Dionysius of Halicarnassus": -0.054194902532780156,
+            "Isaeus": -0.021127335089982893,
+            "Plutarch": -0.07511002134768807
+          }
+        },
+        {
+          "id": "benchmark:1e566d1784d9bee4:11500",
+          "author": "Aeschines",
+          "work_id": "grc:tlg0026.tlg002",
+          "genre": "forensic_oratory",
+          "topic": "athenian_public_affairs",
+          "known": true,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Plutarch",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": -0.00019970436668410236,
+            "Dionysius of Halicarnassus": -0.0605193073193423,
+            "Isaeus": 0.007436948018564725,
+            "Plutarch": 0.04935382918852122
+          }
+        },
+        {
+          "id": "benchmark:cc9987487969161a:0",
+          "author": "Dionysius of Halicarnassus",
+          "work_id": "grc:tlg0081.tlg015",
+          "genre": "rhetorical_criticism",
+          "topic": "literary_style",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Dionysius of Halicarnassus",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": -0.016679558814778974,
+            "Dionysius of Halicarnassus": 0.05446559493717381,
+            "Isaeus": -0.055443409169667356,
+            "Plutarch": 0.018500560842613516
+          }
+        },
+        {
+          "id": "benchmark:cc9987487969161a:500",
+          "author": "Dionysius of Halicarnassus",
+          "work_id": "grc:tlg0081.tlg015",
+          "genre": "rhetorical_criticism",
+          "topic": "literary_style",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Dionysius of Halicarnassus",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": -0.11320078656878231,
+            "Dionysius of Halicarnassus": 0.11737170396475419,
+            "Isaeus": -0.07014038710387402,
+            "Plutarch": 0.05477220647082694
+          }
+        },
+        {
+          "id": "benchmark:cc9987487969161a:1000",
+          "author": "Dionysius of Halicarnassus",
+          "work_id": "grc:tlg0081.tlg015",
+          "genre": "rhetorical_criticism",
+          "topic": "literary_style",
+          "known": true,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Plutarch",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": -0.12638336597767608,
+            "Dionysius of Halicarnassus": 0.08616346673125183,
+            "Isaeus": -0.0693918535683997,
+            "Plutarch": 0.09421388076397877
+          }
+        },
+        {
+          "id": "benchmark:cc9987487969161a:1500",
+          "author": "Dionysius of Halicarnassus",
+          "work_id": "grc:tlg0081.tlg015",
+          "genre": "rhetorical_criticism",
+          "topic": "literary_style",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Dionysius of Halicarnassus",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": -0.07608194351379696,
+            "Dionysius of Halicarnassus": 0.09648770083986735,
+            "Isaeus": -0.06445050916203489,
+            "Plutarch": 0.037689618630463
+          }
+        },
+        {
+          "id": "benchmark:cc9987487969161a:2000",
+          "author": "Dionysius of Halicarnassus",
+          "work_id": "grc:tlg0081.tlg015",
+          "genre": "rhetorical_criticism",
+          "topic": "literary_style",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Dionysius of Halicarnassus",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": -0.06881152566919596,
+            "Dionysius of Halicarnassus": 0.09678486239826178,
+            "Isaeus": -0.09462408971035033,
+            "Plutarch": 0.06160283738857814
+          }
+        },
+        {
+          "id": "benchmark:cc9987487969161a:2500",
+          "author": "Dionysius of Halicarnassus",
+          "work_id": "grc:tlg0081.tlg015",
+          "genre": "rhetorical_criticism",
+          "topic": "literary_style",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Dionysius of Halicarnassus",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": -0.10976298712630647,
+            "Dionysius of Halicarnassus": 0.14778302917277517,
+            "Isaeus": -0.025506975763831173,
+            "Plutarch": -0.021299633954270016
+          }
+        },
+        {
+          "id": "benchmark:cc9987487969161a:3000",
+          "author": "Dionysius of Halicarnassus",
+          "work_id": "grc:tlg0081.tlg015",
+          "genre": "rhetorical_criticism",
+          "topic": "literary_style",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Dionysius of Halicarnassus",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": -0.11857116132535783,
+            "Dionysius of Halicarnassus": 0.20477266970798458,
+            "Isaeus": -0.20208318640715833,
+            "Plutarch": 0.10971447045363864
+          }
+        },
+        {
+          "id": "benchmark:cc9987487969161a:3500",
+          "author": "Dionysius of Halicarnassus",
+          "work_id": "grc:tlg0081.tlg015",
+          "genre": "rhetorical_criticism",
+          "topic": "literary_style",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Dionysius of Halicarnassus",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": -0.14885193065561597,
+            "Dionysius of Halicarnassus": 0.12350610041297172,
+            "Isaeus": -0.02984379616911693,
+            "Plutarch": 0.03833612223559662
+          }
+        },
+        {
+          "id": "benchmark:12e494d8441084d2:0",
+          "author": "Isaeus",
+          "work_id": "grc:tlg0017.tlg005",
+          "genre": "forensic_oratory",
+          "topic": "athenian_inheritance",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Isaeus",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": 0.04002417610656455,
+            "Dionysius of Halicarnassus": -0.11010671389918511,
+            "Isaeus": 0.12317169750483957,
+            "Plutarch": -0.0537691740537871
+          }
+        },
+        {
+          "id": "benchmark:12e494d8441084d2:500",
+          "author": "Isaeus",
+          "work_id": "grc:tlg0017.tlg005",
+          "genre": "forensic_oratory",
+          "topic": "athenian_inheritance",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Isaeus",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": -0.047472450293550746,
+            "Dionysius of Halicarnassus": -0.04676532266432745,
+            "Isaeus": 0.21555176647000152,
+            "Plutarch": -0.13276676408031962
+          }
+        },
+        {
+          "id": "benchmark:12e494d8441084d2:1000",
+          "author": "Isaeus",
+          "work_id": "grc:tlg0017.tlg005",
+          "genre": "forensic_oratory",
+          "topic": "athenian_inheritance",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Isaeus",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": -0.032134961491279306,
+            "Dionysius of Halicarnassus": -0.05162920763898998,
+            "Isaeus": 0.11396747558707648,
+            "Plutarch": -0.03915584713870623
+          }
+        },
+        {
+          "id": "benchmark:12e494d8441084d2:1500",
+          "author": "Isaeus",
+          "work_id": "grc:tlg0017.tlg005",
+          "genre": "forensic_oratory",
+          "topic": "athenian_inheritance",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Isaeus",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": -0.012296866946049445,
+            "Dionysius of Halicarnassus": -0.04001049460601906,
+            "Isaeus": 0.035283688317200336,
+            "Plutarch": 0.012321237142659763
+          }
+        },
+        {
+          "id": "benchmark:12e494d8441084d2:2000",
+          "author": "Isaeus",
+          "work_id": "grc:tlg0017.tlg005",
+          "genre": "forensic_oratory",
+          "topic": "athenian_inheritance",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Isaeus",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": 0.09147604205730664,
+            "Dionysius of Halicarnassus": -0.0754315490841448,
+            "Isaeus": 0.11055669329947405,
+            "Plutarch": -0.11644313041584901
+          }
+        },
+        {
+          "id": "benchmark:12e494d8441084d2:2500",
+          "author": "Isaeus",
+          "work_id": "grc:tlg0017.tlg005",
+          "genre": "forensic_oratory",
+          "topic": "athenian_inheritance",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Isaeus",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": -0.005354415811330022,
+            "Dionysius of Halicarnassus": -0.0023355189160925,
+            "Isaeus": 0.03777828492699682,
+            "Plutarch": -0.03122530613910064
+          }
+        },
+        {
+          "id": "benchmark:02901c6a0cd63922:0",
+          "author": "Isaeus",
+          "work_id": "grc:tlg0017.tlg002",
+          "genre": "forensic_oratory",
+          "topic": "athenian_inheritance",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Isaeus",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": 0.055933929300158926,
+            "Dionysius of Halicarnassus": -0.1293883575501729,
+            "Isaeus": 0.13059751959746885,
+            "Plutarch": -0.056421811883062174
+          }
+        },
+        {
+          "id": "benchmark:02901c6a0cd63922:500",
+          "author": "Isaeus",
+          "work_id": "grc:tlg0017.tlg002",
+          "genre": "forensic_oratory",
+          "topic": "athenian_inheritance",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Isaeus",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": 0.11438899230505359,
+            "Dionysius of Halicarnassus": -0.18778445619616457,
+            "Isaeus": 0.22814087434164593,
+            "Plutarch": -0.14825271141309657
+          }
+        },
+        {
+          "id": "benchmark:02901c6a0cd63922:1000",
+          "author": "Isaeus",
+          "work_id": "grc:tlg0017.tlg002",
+          "genre": "forensic_oratory",
+          "topic": "athenian_inheritance",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Isaeus",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": 0.07002548247309404,
+            "Dionysius of Halicarnassus": -0.1656881041627528,
+            "Isaeus": 0.20521678286981648,
+            "Plutarch": -0.10899200193778998
+          }
+        },
+        {
+          "id": "benchmark:02901c6a0cd63922:1500",
+          "author": "Isaeus",
+          "work_id": "grc:tlg0017.tlg002",
+          "genre": "forensic_oratory",
+          "topic": "athenian_inheritance",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Isaeus",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": 0.056718377779269476,
+            "Dionysius of Halicarnassus": -0.07948847075978173,
+            "Isaeus": 0.09255382746396291,
+            "Plutarch": -0.06564076199882654
+          }
+        },
+        {
+          "id": "benchmark:02901c6a0cd63922:2000",
+          "author": "Isaeus",
+          "work_id": "grc:tlg0017.tlg002",
+          "genre": "forensic_oratory",
+          "topic": "athenian_inheritance",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Isaeus",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": 0.0856899100944598,
+            "Dionysius of Halicarnassus": -0.10614157998501395,
+            "Isaeus": 0.1251771129690337,
+            "Plutarch": -0.09753634034869985
+          }
+        },
+        {
+          "id": "benchmark:62f37277e626347d:0",
+          "author": "Plutarch",
+          "work_id": "grc:tlg0007.tlg071",
+          "genre": "philosophical_essay",
+          "topic": "ethical_conduct",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Plutarch",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": -0.1128107588624637,
+            "Dionysius of Halicarnassus": 0.038914290266896655,
+            "Isaeus": -0.11275310757164399,
+            "Plutarch": 0.17059786176518038
+          }
+        },
+        {
+          "id": "benchmark:62f37277e626347d:500",
+          "author": "Plutarch",
+          "work_id": "grc:tlg0007.tlg071",
+          "genre": "philosophical_essay",
+          "topic": "ethical_conduct",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Plutarch",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": -0.14285555359235366,
+            "Dionysius of Halicarnassus": 0.037906261866347844,
+            "Isaeus": -0.23881451888702207,
+            "Plutarch": 0.32294729238201375
+          }
+        },
+        {
+          "id": "benchmark:62f37277e626347d:1000",
+          "author": "Plutarch",
+          "work_id": "grc:tlg0007.tlg071",
+          "genre": "philosophical_essay",
+          "topic": "ethical_conduct",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Plutarch",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": -0.06252188018017339,
+            "Dionysius of Halicarnassus": -0.005213288761211666,
+            "Isaeus": -0.1443116259022084,
+            "Plutarch": 0.20163858756248462
+          }
+        },
+        {
+          "id": "benchmark:62f37277e626347d:1500",
+          "author": "Plutarch",
+          "work_id": "grc:tlg0007.tlg071",
+          "genre": "philosophical_essay",
+          "topic": "ethical_conduct",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Plutarch",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": -0.061400112579996016,
+            "Dionysius of Halicarnassus": -0.007498272580582138,
+            "Isaeus": -0.1810539870915074,
+            "Plutarch": 0.23967627990593168
+          }
+        },
+        {
+          "id": "benchmark:62f37277e626347d:2000",
+          "author": "Plutarch",
+          "work_id": "grc:tlg0007.tlg071",
+          "genre": "philosophical_essay",
+          "topic": "ethical_conduct",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Plutarch",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": -0.10178809244494084,
+            "Dionysius of Halicarnassus": -0.015106626272854836,
+            "Isaeus": -0.21606883479452257,
+            "Plutarch": 0.31554768005213985
+          }
+        },
+        {
+          "id": "benchmark:62f37277e626347d:2500",
+          "author": "Plutarch",
+          "work_id": "grc:tlg0007.tlg071",
+          "genre": "philosophical_essay",
+          "topic": "ethical_conduct",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Plutarch",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": -0.14274397095035546,
+            "Dionysius of Halicarnassus": -0.05936120683468447,
+            "Isaeus": -0.10129701939335559,
+            "Plutarch": 0.27603224288634787
+          }
+        },
+        {
+          "id": "benchmark:62f37277e626347d:3000",
+          "author": "Plutarch",
+          "work_id": "grc:tlg0007.tlg071",
+          "genre": "philosophical_essay",
+          "topic": "ethical_conduct",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Plutarch",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": -0.022896149182650222,
+            "Dionysius of Halicarnassus": -0.06965999139413287,
+            "Isaeus": -0.12085511122413514,
+            "Plutarch": 0.20542901884712436
+          }
+        },
+        {
+          "id": "benchmark:62f37277e626347d:3500",
+          "author": "Plutarch",
+          "work_id": "grc:tlg0007.tlg071",
+          "genre": "philosophical_essay",
+          "topic": "ethical_conduct",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Plutarch",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": -0.1372660505110474,
+            "Dionysius of Halicarnassus": 0.052559475445952526,
+            "Isaeus": -0.11354054843300496,
+            "Plutarch": 0.1789905463019562
+          }
+        },
+        {
+          "id": "benchmark:62f37277e626347d:4000",
+          "author": "Plutarch",
+          "work_id": "grc:tlg0007.tlg071",
+          "genre": "philosophical_essay",
+          "topic": "ethical_conduct",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Plutarch",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": 0.0007124347973439354,
+            "Dionysius of Halicarnassus": -0.0847535161518925,
+            "Isaeus": -0.09417779300023639,
+            "Plutarch": 0.1731430612504716
+          }
+        },
+        {
+          "id": "benchmark:8dae25927a7f856e:0",
+          "author": "Plutarch",
+          "work_id": "grc:tlg0007.tlg080",
+          "genre": "philosophical_essay",
+          "topic": "religion_and_divination",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Plutarch",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": -0.0571871454610243,
+            "Dionysius of Halicarnassus": -0.1144080044190426,
+            "Isaeus": -0.1419433855017186,
+            "Plutarch": 0.2970203984758751
+          }
+        },
+        {
+          "id": "benchmark:8dae25927a7f856e:500",
+          "author": "Plutarch",
+          "work_id": "grc:tlg0007.tlg080",
+          "genre": "philosophical_essay",
+          "topic": "religion_and_divination",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Plutarch",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": -0.04752591784456214,
+            "Dionysius of Halicarnassus": -0.020614566231668813,
+            "Isaeus": -0.1868619723950258,
+            "Plutarch": 0.24621584714691552
+          }
+        },
+        {
+          "id": "benchmark:8dae25927a7f856e:1000",
+          "author": "Plutarch",
+          "work_id": "grc:tlg0007.tlg080",
+          "genre": "philosophical_essay",
+          "topic": "religion_and_divination",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Plutarch",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": -0.14376214072013227,
+            "Dionysius of Halicarnassus": 0.028355397375506308,
+            "Isaeus": -0.17274772042008132,
+            "Plutarch": 0.26641070080465845
+          }
+        },
+        {
+          "id": "benchmark:8dae25927a7f856e:1500",
+          "author": "Plutarch",
+          "work_id": "grc:tlg0007.tlg080",
+          "genre": "philosophical_essay",
+          "topic": "religion_and_divination",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Plutarch",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": -0.07719776171602315,
+            "Dionysius of Halicarnassus": -0.0298384342921158,
+            "Isaeus": -0.06087602038655961,
+            "Plutarch": 0.15327042665910923
+          }
+        },
+        {
+          "id": "benchmark:8dae25927a7f856e:2000",
+          "author": "Plutarch",
+          "work_id": "grc:tlg0007.tlg080",
+          "genre": "philosophical_essay",
+          "topic": "religion_and_divination",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Plutarch",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": -0.018570856563941113,
+            "Dionysius of Halicarnassus": 0.012577324186262395,
+            "Isaeus": -0.12367005298848156,
+            "Plutarch": 0.12767764203095086
+          }
+        },
+        {
+          "id": "benchmark:8dae25927a7f856e:2500",
+          "author": "Plutarch",
+          "work_id": "grc:tlg0007.tlg080",
+          "genre": "philosophical_essay",
+          "topic": "religion_and_divination",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Plutarch",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": -0.07833424278907573,
+            "Dionysius of Halicarnassus": -0.07186016087927924,
+            "Isaeus": -0.0604560494957464,
+            "Plutarch": 0.19312633270640664
+          }
+        },
+        {
+          "id": "benchmark:ab9379093719e802:0",
+          "author": "Andocides",
+          "work_id": "grc:tlg0027.tlg002",
+          "genre": "deliberative_oratory",
+          "topic": "athenian_public_affairs",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Dionysius of Halicarnassus",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": 0.03300625159618536,
+            "Dionysius of Halicarnassus": 0.06540728434859787,
+            "Isaeus": 0.03527542618112597,
+            "Plutarch": -0.12407940879622849
+          }
+        },
+        {
+          "id": "benchmark:ab9379093719e802:500",
+          "author": "Andocides",
+          "work_id": "grc:tlg0027.tlg002",
+          "genre": "deliberative_oratory",
+          "topic": "athenian_public_affairs",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Aeschines",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": 0.10644710952541249,
+            "Dionysius of Halicarnassus": 0.007073549806802207,
+            "Isaeus": 0.038056015032604966,
+            "Plutarch": -0.13345555513363788
+          }
+        },
+        {
+          "id": "benchmark:ab9379093719e802:1000",
+          "author": "Andocides",
+          "work_id": "grc:tlg0027.tlg002",
+          "genre": "deliberative_oratory",
+          "topic": "athenian_public_affairs",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Aeschines",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": 0.13989383329274438,
+            "Dionysius of Halicarnassus": -0.026351833776179633,
+            "Isaeus": 0.06828300909271903,
+            "Plutarch": -0.16033881469225056
+          }
+        },
+        {
+          "id": "benchmark:f1fbdc7b82cbf123:0",
+          "author": "Andocides",
+          "work_id": "grc:tlg0027.tlg001",
+          "genre": "forensic_oratory",
+          "topic": "athenian_public_affairs",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Isaeus",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": 0.06450953614831995,
+            "Dionysius of Halicarnassus": -0.0013072651502156083,
+            "Isaeus": 0.07424420619262385,
+            "Plutarch": -0.1269501391403955
+          }
+        },
+        {
+          "id": "benchmark:f1fbdc7b82cbf123:500",
+          "author": "Andocides",
+          "work_id": "grc:tlg0027.tlg001",
+          "genre": "forensic_oratory",
+          "topic": "athenian_public_affairs",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Aeschines",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": 0.13123291490946817,
+            "Dionysius of Halicarnassus": -0.05055642139172003,
+            "Isaeus": 0.06533909147323419,
+            "Plutarch": -0.12751769627215953
+          }
+        },
+        {
+          "id": "benchmark:f1fbdc7b82cbf123:1500",
+          "author": "Andocides",
+          "work_id": "grc:tlg0027.tlg001",
+          "genre": "forensic_oratory",
+          "topic": "athenian_public_affairs",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Dionysius of Halicarnassus",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": 0.052512963440429196,
+            "Dionysius of Halicarnassus": 0.05840878993702172,
+            "Isaeus": -0.020482719411857753,
+            "Plutarch": -0.07788413677618466
+          }
+        },
+        {
+          "id": "benchmark:f1fbdc7b82cbf123:2000",
+          "author": "Andocides",
+          "work_id": "grc:tlg0027.tlg001",
+          "genre": "forensic_oratory",
+          "topic": "athenian_public_affairs",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Isaeus",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": 0.050463484790592004,
+            "Dionysius of Halicarnassus": 0.031241186416162144,
+            "Isaeus": 0.1151580688515756,
+            "Plutarch": -0.1867270756041269
+          }
+        },
+        {
+          "id": "benchmark:f1fbdc7b82cbf123:3000",
+          "author": "Andocides",
+          "work_id": "grc:tlg0027.tlg001",
+          "genre": "forensic_oratory",
+          "topic": "athenian_public_affairs",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Plutarch",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": -0.01803819746015262,
+            "Dionysius of Halicarnassus": -0.028341855792820576,
+            "Isaeus": -0.06541975004586727,
+            "Plutarch": 0.10713702479173809
+          }
+        },
+        {
+          "id": "benchmark:f1fbdc7b82cbf123:3500",
+          "author": "Andocides",
+          "work_id": "grc:tlg0027.tlg001",
+          "genre": "forensic_oratory",
+          "topic": "athenian_public_affairs",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Aeschines",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": 0.05746138166531722,
+            "Dionysius of Halicarnassus": -0.024077704715474373,
+            "Isaeus": 0.04178162160974942,
+            "Plutarch": -0.06722292185400482
+          }
+        },
+        {
+          "id": "benchmark:f1fbdc7b82cbf123:4500",
+          "author": "Andocides",
+          "work_id": "grc:tlg0027.tlg001",
+          "genre": "forensic_oratory",
+          "topic": "athenian_public_affairs",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Dionysius of Halicarnassus",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": 0.03328484236525223,
+            "Dionysius of Halicarnassus": 0.10460416593849188,
+            "Isaeus": 0.06713428263323755,
+            "Plutarch": -0.19293570977385008
+          }
+        },
+        {
+          "id": "benchmark:f1fbdc7b82cbf123:5000",
+          "author": "Andocides",
+          "work_id": "grc:tlg0027.tlg001",
+          "genre": "forensic_oratory",
+          "topic": "athenian_public_affairs",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Aeschines",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": 0.06631976218120428,
+            "Dionysius of Halicarnassus": 0.02422764635144985,
+            "Isaeus": 0.055342429358676115,
+            "Plutarch": -0.13340886726802978
+          }
+        },
+        {
+          "id": "benchmark:f1fbdc7b82cbf123:6000",
+          "author": "Andocides",
+          "work_id": "grc:tlg0027.tlg001",
+          "genre": "forensic_oratory",
+          "topic": "athenian_public_affairs",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Dionysius of Halicarnassus",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": -0.04411329589954982,
+            "Dionysius of Halicarnassus": 0.12601663573905206,
+            "Isaeus": 0.004298707939066204,
+            "Plutarch": -0.08550204085716111
+          }
+        },
+        {
+          "id": "benchmark:f1fbdc7b82cbf123:6500",
+          "author": "Andocides",
+          "work_id": "grc:tlg0027.tlg001",
+          "genre": "forensic_oratory",
+          "topic": "athenian_public_affairs",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Aeschines",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": 0.07921540256002292,
+            "Dionysius of Halicarnassus": -0.024815108291115946,
+            "Isaeus": -0.00062801743535648,
+            "Plutarch": -0.04214164853706427
+          }
+        },
+        {
+          "id": "benchmark:f1fbdc7b82cbf123:7500",
+          "author": "Andocides",
+          "work_id": "grc:tlg0027.tlg001",
+          "genre": "forensic_oratory",
+          "topic": "athenian_public_affairs",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Aeschines",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": 0.09960787983746873,
+            "Dionysius of Halicarnassus": -0.0787253235791141,
+            "Isaeus": 0.07242987531688157,
+            "Plutarch": -0.08191366320705053
+          }
+        },
+        {
+          "id": "benchmark:f1fbdc7b82cbf123:8500",
+          "author": "Andocides",
+          "work_id": "grc:tlg0027.tlg001",
+          "genre": "forensic_oratory",
+          "topic": "athenian_public_affairs",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Isaeus",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": -0.01422906606935762,
+            "Dionysius of Halicarnassus": 0.015538570775061409,
+            "Isaeus": 0.05574761587752425,
+            "Plutarch": -0.05857473351604271
+          }
+        },
+        {
+          "id": "benchmark:6b0e6aea7d187a8e:0",
+          "author": "Galen",
+          "work_id": "grc:tlg0057.tlg010",
+          "genre": "medical_treatise",
+          "topic": "physiology",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Dionysius of Halicarnassus",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": -0.033965894622414235,
+            "Dionysius of Halicarnassus": 0.12718532186820114,
+            "Isaeus": -0.11861712683445383,
+            "Plutarch": 0.028171276423241402
+          }
+        },
+        {
+          "id": "benchmark:6b0e6aea7d187a8e:2500",
+          "author": "Galen",
+          "work_id": "grc:tlg0057.tlg010",
+          "genre": "medical_treatise",
+          "topic": "physiology",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Plutarch",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": 0.018329258770429617,
+            "Dionysius of Halicarnassus": 0.0033427350510341724,
+            "Isaeus": -0.05040235774572329,
+            "Plutarch": 0.032128306458294474
+          }
+        },
+        {
+          "id": "benchmark:6b0e6aea7d187a8e:5500",
+          "author": "Galen",
+          "work_id": "grc:tlg0057.tlg010",
+          "genre": "medical_treatise",
+          "topic": "physiology",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Plutarch",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": -0.09176489359585935,
+            "Dionysius of Halicarnassus": 0.013094215907016496,
+            "Isaeus": 0.002516823110503074,
+            "Plutarch": 0.06167367847913117
+          }
+        },
+        {
+          "id": "benchmark:6b0e6aea7d187a8e:8000",
+          "author": "Galen",
+          "work_id": "grc:tlg0057.tlg010",
+          "genre": "medical_treatise",
+          "topic": "physiology",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Plutarch",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": -0.07106518378640954,
+            "Dionysius of Halicarnassus": 0.022244944614180973,
+            "Isaeus": -0.11988974477179407,
+            "Plutarch": 0.1585742684595664
+          }
+        },
+        {
+          "id": "benchmark:6b0e6aea7d187a8e:11000",
+          "author": "Galen",
+          "work_id": "grc:tlg0057.tlg010",
+          "genre": "medical_treatise",
+          "topic": "physiology",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Plutarch",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": -0.052960758639684344,
+            "Dionysius of Halicarnassus": -0.046111752268061176,
+            "Isaeus": -0.09092404378901524,
+            "Plutarch": 0.17843145681523206
+          }
+        },
+        {
+          "id": "benchmark:6b0e6aea7d187a8e:14000",
+          "author": "Galen",
+          "work_id": "grc:tlg0057.tlg010",
+          "genre": "medical_treatise",
+          "topic": "physiology",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Dionysius of Halicarnassus",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": 0.003737490897344544,
+            "Dionysius of Halicarnassus": 0.044501033236275564,
+            "Isaeus": -0.0851313572537563,
+            "Plutarch": 0.04057848277568362
+          }
+        },
+        {
+          "id": "benchmark:6b0e6aea7d187a8e:16500",
+          "author": "Galen",
+          "work_id": "grc:tlg0057.tlg010",
+          "genre": "medical_treatise",
+          "topic": "physiology",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Plutarch",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": -0.047244611270311924,
+            "Dionysius of Halicarnassus": -0.005321419574353491,
+            "Isaeus": -0.029993458097507367,
+            "Plutarch": 0.07440955051664241
+          }
+        },
+        {
+          "id": "benchmark:6b0e6aea7d187a8e:19500",
+          "author": "Galen",
+          "work_id": "grc:tlg0057.tlg010",
+          "genre": "medical_treatise",
+          "topic": "physiology",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Dionysius of Halicarnassus",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": -0.09271538115395678,
+            "Dionysius of Halicarnassus": 0.16250306454892463,
+            "Isaeus": -0.1716562376796182,
+            "Plutarch": 0.09723274903043676
+          }
+        },
+        {
+          "id": "benchmark:6b0e6aea7d187a8e:22500",
+          "author": "Galen",
+          "work_id": "grc:tlg0057.tlg010",
+          "genre": "medical_treatise",
+          "topic": "physiology",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Dionysius of Halicarnassus",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": -0.04930893558923799,
+            "Dionysius of Halicarnassus": 0.0843843949564601,
+            "Isaeus": -0.11944109514334104,
+            "Plutarch": 0.08183946422096261
+          }
+        },
+        {
+          "id": "benchmark:6b0e6aea7d187a8e:25000",
+          "author": "Galen",
+          "work_id": "grc:tlg0057.tlg010",
+          "genre": "medical_treatise",
+          "topic": "physiology",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Plutarch",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": -0.0572798279302685,
+            "Dionysius of Halicarnassus": 0.0645034815291724,
+            "Isaeus": -0.1361082708366311,
+            "Plutarch": 0.12379633115812175
+          }
+        },
+        {
+          "id": "benchmark:6b0e6aea7d187a8e:28000",
+          "author": "Galen",
+          "work_id": "grc:tlg0057.tlg010",
+          "genre": "medical_treatise",
+          "topic": "physiology",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Plutarch",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": -0.09956879702205579,
+            "Dionysius of Halicarnassus": 0.00608339016659152,
+            "Isaeus": -0.06178848027936817,
+            "Plutarch": 0.13920224237166492
+          }
+        },
+        {
+          "id": "benchmark:6b0e6aea7d187a8e:31000",
+          "author": "Galen",
+          "work_id": "grc:tlg0057.tlg010",
+          "genre": "medical_treatise",
+          "topic": "physiology",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Dionysius of Halicarnassus",
+          "decision": null,
+          "candidate_scores": {
+            "Aeschines": -0.11256297920669796,
+            "Dionysius of Halicarnassus": 0.19462645510038237,
+            "Isaeus": -0.10346219568651738,
+            "Plutarch": 0.015339127783071876
+          }
+        }
+      ]
+    },
+    {
+      "language": "hbo",
+      "selected": {
+        "model": "char_linear",
+        "length": 500,
+        "development_operating_targets_met": false,
+        "selection_accuracy": 0.7532242063492063,
+        "selection_basis": "Prefer development unknown acceptance <=5%, known wrong acceptance <=5% and known correct acceptance >=80%; then maximize mean matched-genre closed-set accuracy (overall accuracy if no genre control); ties use declared model order then shorter passages"
+      },
+      "status": "failed",
+      "adequate_coverage": false,
+      "metrics": {
+        "accuracy": {
+          "value": 0.90625,
+          "ci95": [
+            0.5118303571428571,
+            0.9825892857142857
+          ],
+          "independent_works": 8,
+          "ci_method": "Conditional work bootstrap with full refits and unfamiliar-author block resampling; known candidate authors fixed. Unavailable with singleton author/role strata.",
+          "independent_authors": 4,
+          "resampling_range95": [
+            0.5118303571428571,
+            0.9825892857142857
+          ],
+          "singleton_strata": [],
+          "refit_replicates": 40,
+          "usable_replicates": 40
+        },
+        "unknown_false_acceptance": {
+          "value": 0.0,
+          "ci95": [
+            0.0,
+            0.841886116991581
+          ],
+          "independent_works": 4,
+          "ci_method": "Conditional work bootstrap with full refits and unfamiliar-author block resampling; known candidate authors fixed. Unavailable with singleton author/role strata.",
+          "independent_authors": 2,
+          "resampling_range95": [
+            0.0,
+            0.841886116991581
+          ],
+          "singleton_strata": [],
+          "refit_replicates": 40,
+          "usable_replicates": 40
+        },
+        "known_acceptance": {
+          "value": 0.0,
+          "ci95": [
+            0.0,
+            0.3694166475528192
+          ],
+          "independent_works": 8,
+          "ci_method": "Conditional work bootstrap with full refits and unfamiliar-author block resampling; known candidate authors fixed. Unavailable with singleton author/role strata.",
+          "independent_authors": 4,
+          "resampling_range95": [
+            0.0,
+            0.3694166475528192
+          ],
+          "singleton_strata": [],
+          "refit_replicates": 40,
+          "usable_replicates": 40
+        },
+        "known_correct_acceptance": {
+          "value": 0.0,
+          "ci95": [
+            0.0,
+            0.3694166475528192
+          ],
+          "independent_works": 8,
+          "ci_method": "Conditional work bootstrap with full refits and unfamiliar-author block resampling; known candidate authors fixed. Unavailable with singleton author/role strata.",
+          "independent_authors": 4,
+          "resampling_range95": [
+            0.0,
+            0.3694166475528192
+          ],
+          "singleton_strata": [],
+          "refit_replicates": 40,
+          "usable_replicates": 40
+        },
+        "known_wrong_acceptance": {
+          "value": 0.0,
+          "ci95": [
+            0.0,
+            0.3694166475528192
+          ],
+          "independent_works": 8,
+          "ci_method": "Conditional work bootstrap with full refits and unfamiliar-author block resampling; known candidate authors fixed. Unavailable with singleton author/role strata.",
+          "independent_authors": 4,
+          "resampling_range95": [
+            0.0,
+            0.3694166475528192
+          ],
+          "singleton_strata": [],
+          "refit_replicates": 40,
+          "usable_replicates": 40
+        },
+        "accuracy_among_accepted": {
+          "value": null,
+          "ci95": null,
+          "independent_works": 0,
+          "independent_authors": 0,
+          "resampling_range95": null,
+          "ci_method": "Conditional work bootstrap with full refits and unfamiliar-author block resampling; known candidate authors fixed. Unavailable with singleton author/role strata.",
+          "singleton_strata": [],
+          "refit_replicates": 40,
+          "usable_replicates": 0
+        }
+      },
+      "gates": {
+        "accuracy": "inconclusive",
+        "unknown_false_acceptance": "inconclusive",
+        "known_acceptance": "failed",
+        "known_correct_acceptance": "failed",
+        "known_wrong_acceptance": "inconclusive",
+        "matched_genre_accuracy": "inconclusive"
+      },
+      "observed_targets_met": {
+        "accuracy": true,
+        "unknown_false_acceptance": true,
+        "known_acceptance": false,
+        "known_correct_acceptance": false,
+        "known_wrong_acceptance": true,
+        "matched_genre_accuracy": true
+      },
+      "calibration": {
+        "status": "no_feasible_threshold",
+        "feasible": false,
+        "threshold": 0.04804020684302561,
+        "known_acceptance": 0.42708333333333315,
+        "known_correct_acceptance": 0.42708333333333315,
+        "known_wrong_acceptance": 0.0,
+        "unknown_false_acceptance": 0.041666666666666664,
+        "candidate_authors": [
+          "Asher Barash",
+          "Moshe Smilansky",
+          "Nechama Pukhachevsky",
+          "Yehuda Steinberg"
+        ],
+        "calibration_counts": {
+          "known": {
+            "authors": 4,
+            "works": 8,
+            "samples": 67
+          },
+          "impostor": {
+            "authors": 2,
+            "works": 4,
+            "samples": 34
+          }
+        },
+        "targets": {
+          "max_false_acceptance": 0.05,
+          "min_known_acceptance": 0.8
+        },
+        "weighting": "equal authors, then equal works per author, then equal samples per work",
+        "scope": "development only; empirical calibration rates do not certify unseen-author risk",
+        "reason": "No threshold meets both calibration targets; all application decisions abstain."
+      },
+      "model_metadata": {
+        "kind": "char_linear",
+        "seed": 42,
+        "language": "hbo",
+        "candidate_authors": [
+          "Asher Barash",
+          "Moshe Smilansky",
+          "Nechama Pukhachevsky",
+          "Yehuda Steinberg"
+        ],
+        "training_works": [
+          "hbo:benyehuda.m1550",
+          "hbo:benyehuda.m21331",
+          "hbo:benyehuda.m21332",
+          "hbo:benyehuda.m2169",
+          "hbo:benyehuda.m2872",
+          "hbo:benyehuda.m34679",
+          "hbo:benyehuda.m34681",
+          "hbo:benyehuda.m6658"
+        ],
+        "training_samples": 64,
+        "weighting": "equal authors, then equal canonical works, then equal chunks; total weight equals training work count",
+        "scope": "fixed development candidate; no hyperparameter search or validation claim",
+        "score_type": "logistic regression decision score, not probability",
+        "parameters": {
+          "analyzer": "char_wb",
+          "ngram_range": [
+            3,
+            5
+          ],
+          "max_features": 30000,
+          "min_df": 1,
+          "sublinear_tf": true,
+          "lowercase": false,
+          "idf_document_unit": "canonical training work",
+          "classifier": "LogisticRegression",
+          "solver": "lbfgs",
+          "C": 1.0,
+          "max_iter": 2000
+        },
+        "feature_count": 30000
+      },
+      "partitions": {
+        "train": [
+          "hbo:benyehuda.m1550",
+          "hbo:benyehuda.m21331",
+          "hbo:benyehuda.m21332",
+          "hbo:benyehuda.m2169",
+          "hbo:benyehuda.m2872",
+          "hbo:benyehuda.m34679",
+          "hbo:benyehuda.m34681",
+          "hbo:benyehuda.m6658"
+        ],
+        "known_calibration": [
+          "hbo:benyehuda.m21330",
+          "hbo:benyehuda.m23058",
+          "hbo:benyehuda.m34665",
+          "hbo:benyehuda.m34668",
+          "hbo:benyehuda.m458",
+          "hbo:benyehuda.m5686",
+          "hbo:benyehuda.m6335",
+          "hbo:benyehuda.m953"
+        ],
+        "impostors": [
+          "hbo:benyehuda.m2062",
+          "hbo:benyehuda.m229",
+          "hbo:benyehuda.m2376",
+          "hbo:benyehuda.m647"
+        ],
+        "known_test": [
+          "hbo:benyehuda.m21329",
+          "hbo:benyehuda.m2232",
+          "hbo:benyehuda.m23056",
+          "hbo:benyehuda.m2418",
+          "hbo:benyehuda.m2550",
+          "hbo:benyehuda.m305",
+          "hbo:benyehuda.m34678",
+          "hbo:benyehuda.m34683"
+        ],
+        "unknown_test": [
+          "hbo:benyehuda.m13354",
+          "hbo:benyehuda.m34",
+          "hbo:benyehuda.m7953",
+          "hbo:benyehuda.m8036"
+        ]
+      },
+      "counts": {
+        "train": {
+          "authors": 4,
+          "works": 8,
+          "passages": 64
+        },
+        "known_calibration": {
+          "authors": 4,
+          "works": 8,
+          "passages": 67
+        },
+        "impostors": {
+          "authors": 2,
+          "works": 4,
+          "passages": 34
+        },
+        "known_test": {
+          "authors": 4,
+          "works": 8,
+          "passages": 59
+        },
+        "unknown_test": {
+          "authors": 2,
+          "works": 4,
+          "passages": 45
+        }
+      },
+      "controls": [
+        {
+          "label": "genre",
+          "value": "literary_prose",
+          "candidate_authors": [
+            "Asher Barash",
+            "Moshe Smilansky",
+            "Nechama Pukhachevsky",
+            "Yehuda Steinberg"
+          ],
+          "accuracy": {
+            "value": 0.90625,
+            "ci95": [
+              0.5118303571428571,
+              0.9825892857142857
+            ],
+            "independent_works": 8,
+            "ci_method": "Conditional work bootstrap with full refits and unfamiliar-author block resampling; known candidate authors fixed. Unavailable with singleton author/role strata.",
+            "independent_authors": 4,
+            "resampling_range95": [
+              0.5118303571428571,
+              0.9825892857142857
+            ],
+            "singleton_strata": [],
+            "refit_replicates": 40,
+            "usable_replicates": 40
+          },
+          "metrics": {
+            "accuracy": {
+              "value": 0.90625,
+              "ci95": [
+                0.5118303571428571,
+                0.9825892857142857
+              ],
+              "independent_works": 8,
+              "ci_method": "Conditional work bootstrap with full refits and unfamiliar-author block resampling; known candidate authors fixed. Unavailable with singleton author/role strata.",
+              "independent_authors": 4,
+              "resampling_range95": [
+                0.5118303571428571,
+                0.9825892857142857
+              ],
+              "singleton_strata": [],
+              "refit_replicates": 40,
+              "usable_replicates": 40
+            },
+            "unknown_false_acceptance": {
+              "value": 0.0,
+              "ci95": [
+                0.0,
+                0.841886116991581
+              ],
+              "independent_works": 4,
+              "ci_method": "Conditional work bootstrap with full refits and unfamiliar-author block resampling; known candidate authors fixed. Unavailable with singleton author/role strata.",
+              "independent_authors": 2,
+              "resampling_range95": [
+                0.0,
+                0.841886116991581
+              ],
+              "singleton_strata": [],
+              "refit_replicates": 40,
+              "usable_replicates": 40
+            },
+            "known_acceptance": {
+              "value": 0.0,
+              "ci95": [
+                0.0,
+                0.3694166475528192
+              ],
+              "independent_works": 8,
+              "ci_method": "Conditional work bootstrap with full refits and unfamiliar-author block resampling; known candidate authors fixed. Unavailable with singleton author/role strata.",
+              "independent_authors": 4,
+              "resampling_range95": [
+                0.0,
+                0.3694166475528192
+              ],
+              "singleton_strata": [],
+              "refit_replicates": 40,
+              "usable_replicates": 40
+            },
+            "known_correct_acceptance": {
+              "value": 0.0,
+              "ci95": [
+                0.0,
+                0.3694166475528192
+              ],
+              "independent_works": 8,
+              "ci_method": "Conditional work bootstrap with full refits and unfamiliar-author block resampling; known candidate authors fixed. Unavailable with singleton author/role strata.",
+              "independent_authors": 4,
+              "resampling_range95": [
+                0.0,
+                0.3694166475528192
+              ],
+              "singleton_strata": [],
+              "refit_replicates": 40,
+              "usable_replicates": 40
+            },
+            "known_wrong_acceptance": {
+              "value": 0.0,
+              "ci95": [
+                0.0,
+                0.3694166475528192
+              ],
+              "independent_works": 8,
+              "ci_method": "Conditional work bootstrap with full refits and unfamiliar-author block resampling; known candidate authors fixed. Unavailable with singleton author/role strata.",
+              "independent_authors": 4,
+              "resampling_range95": [
+                0.0,
+                0.3694166475528192
+              ],
+              "singleton_strata": [],
+              "refit_replicates": 40,
+              "usable_replicates": 40
+            },
+            "accuracy_among_accepted": {
+              "value": null,
+              "ci95": null,
+              "independent_works": 0,
+              "independent_authors": 0,
+              "resampling_range95": null,
+              "ci_method": "Conditional work bootstrap with full refits and unfamiliar-author block resampling; known candidate authors fixed. Unavailable with singleton author/role strata.",
+              "singleton_strata": [],
+              "refit_replicates": 40,
+              "usable_replicates": 0
+            }
+          },
+          "interpretation": "Same frozen model design refitted exclusively on genre/topic-matched reference works; independent diagnostic, no reselection"
+        },
+        {
+          "label": "topic",
+          "value": "modern_social_and_psychological_fiction",
+          "candidate_authors": [
+            "Asher Barash",
+            "Moshe Smilansky",
+            "Nechama Pukhachevsky",
+            "Yehuda Steinberg"
+          ],
+          "accuracy": {
+            "value": 0.90625,
+            "ci95": [
+              0.5118303571428571,
+              0.9825892857142857
+            ],
+            "independent_works": 8,
+            "ci_method": "Conditional work bootstrap with full refits and unfamiliar-author block resampling; known candidate authors fixed. Unavailable with singleton author/role strata.",
+            "independent_authors": 4,
+            "resampling_range95": [
+              0.5118303571428571,
+              0.9825892857142857
+            ],
+            "singleton_strata": [],
+            "refit_replicates": 40,
+            "usable_replicates": 40
+          },
+          "metrics": {
+            "accuracy": {
+              "value": 0.90625,
+              "ci95": [
+                0.5118303571428571,
+                0.9825892857142857
+              ],
+              "independent_works": 8,
+              "ci_method": "Conditional work bootstrap with full refits and unfamiliar-author block resampling; known candidate authors fixed. Unavailable with singleton author/role strata.",
+              "independent_authors": 4,
+              "resampling_range95": [
+                0.5118303571428571,
+                0.9825892857142857
+              ],
+              "singleton_strata": [],
+              "refit_replicates": 40,
+              "usable_replicates": 40
+            },
+            "unknown_false_acceptance": {
+              "value": 0.0,
+              "ci95": [
+                0.0,
+                0.841886116991581
+              ],
+              "independent_works": 4,
+              "ci_method": "Conditional work bootstrap with full refits and unfamiliar-author block resampling; known candidate authors fixed. Unavailable with singleton author/role strata.",
+              "independent_authors": 2,
+              "resampling_range95": [
+                0.0,
+                0.841886116991581
+              ],
+              "singleton_strata": [],
+              "refit_replicates": 40,
+              "usable_replicates": 40
+            },
+            "known_acceptance": {
+              "value": 0.0,
+              "ci95": [
+                0.0,
+                0.3694166475528192
+              ],
+              "independent_works": 8,
+              "ci_method": "Conditional work bootstrap with full refits and unfamiliar-author block resampling; known candidate authors fixed. Unavailable with singleton author/role strata.",
+              "independent_authors": 4,
+              "resampling_range95": [
+                0.0,
+                0.3694166475528192
+              ],
+              "singleton_strata": [],
+              "refit_replicates": 40,
+              "usable_replicates": 40
+            },
+            "known_correct_acceptance": {
+              "value": 0.0,
+              "ci95": [
+                0.0,
+                0.3694166475528192
+              ],
+              "independent_works": 8,
+              "ci_method": "Conditional work bootstrap with full refits and unfamiliar-author block resampling; known candidate authors fixed. Unavailable with singleton author/role strata.",
+              "independent_authors": 4,
+              "resampling_range95": [
+                0.0,
+                0.3694166475528192
+              ],
+              "singleton_strata": [],
+              "refit_replicates": 40,
+              "usable_replicates": 40
+            },
+            "known_wrong_acceptance": {
+              "value": 0.0,
+              "ci95": [
+                0.0,
+                0.3694166475528192
+              ],
+              "independent_works": 8,
+              "ci_method": "Conditional work bootstrap with full refits and unfamiliar-author block resampling; known candidate authors fixed. Unavailable with singleton author/role strata.",
+              "independent_authors": 4,
+              "resampling_range95": [
+                0.0,
+                0.3694166475528192
+              ],
+              "singleton_strata": [],
+              "refit_replicates": 40,
+              "usable_replicates": 40
+            },
+            "accuracy_among_accepted": {
+              "value": null,
+              "ci95": null,
+              "independent_works": 0,
+              "independent_authors": 0,
+              "resampling_range95": null,
+              "ci_method": "Conditional work bootstrap with full refits and unfamiliar-author block resampling; known candidate authors fixed. Unavailable with singleton author/role strata.",
+              "singleton_strata": [],
+              "refit_replicates": 40,
+              "usable_replicates": 0
+            }
+          },
+          "interpretation": "Same frozen model design refitted exclusively on genre/topic-matched reference works; independent diagnostic, no reselection"
+        }
+      ],
+      "exclusions": [],
+      "predictions": [
+        {
+          "id": "benchmark:774e0c8b9f3a007e:0",
+          "author": "Asher Barash",
+          "work_id": "hbo:benyehuda.m34683",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Asher Barash",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": 0.013713807859447414,
+            "Moshe Smilansky": -0.01831820815670181,
+            "Nechama Pukhachevsky": -0.007586562755697012,
+            "Yehuda Steinberg": 0.012190963052953599
+          }
+        },
+        {
+          "id": "benchmark:774e0c8b9f3a007e:500",
+          "author": "Asher Barash",
+          "work_id": "hbo:benyehuda.m34683",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Asher Barash",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": 0.047495307449450484,
+            "Moshe Smilansky": -0.01562409562303228,
+            "Nechama Pukhachevsky": -0.017506479283681757,
+            "Yehuda Steinberg": -0.014364732542734257
+          }
+        },
+        {
+          "id": "benchmark:774e0c8b9f3a007e:1000",
+          "author": "Asher Barash",
+          "work_id": "hbo:benyehuda.m34683",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Yehuda Steinberg",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": 0.0072778651339881996,
+            "Moshe Smilansky": -0.015303604829705768,
+            "Nechama Pukhachevsky": -0.003483963917351948,
+            "Yehuda Steinberg": 0.011509703613071721
+          }
+        },
+        {
+          "id": "benchmark:774e0c8b9f3a007e:1500",
+          "author": "Asher Barash",
+          "work_id": "hbo:benyehuda.m34683",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Asher Barash",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": 0.049422248497549115,
+            "Moshe Smilansky": -0.02436005718909065,
+            "Nechama Pukhachevsky": -0.001611586289968926,
+            "Yehuda Steinberg": -0.023450605018487378
+          }
+        },
+        {
+          "id": "benchmark:774e0c8b9f3a007e:2000",
+          "author": "Asher Barash",
+          "work_id": "hbo:benyehuda.m34683",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Asher Barash",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": 0.03587017771971435,
+            "Moshe Smilansky": -0.022049955123537985,
+            "Nechama Pukhachevsky": -0.002318112920413685,
+            "Yehuda Steinberg": -0.011502109675760501
+          }
+        },
+        {
+          "id": "benchmark:774e0c8b9f3a007e:2500",
+          "author": "Asher Barash",
+          "work_id": "hbo:benyehuda.m34683",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Asher Barash",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": 0.02648411293143194,
+            "Moshe Smilansky": -0.006370379448253046,
+            "Nechama Pukhachevsky": -0.01244081533187598,
+            "Yehuda Steinberg": -0.007672918151300774
+          }
+        },
+        {
+          "id": "benchmark:774e0c8b9f3a007e:3000",
+          "author": "Asher Barash",
+          "work_id": "hbo:benyehuda.m34683",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Asher Barash",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": 0.01479443467357864,
+            "Moshe Smilansky": 0.0021970262856023473,
+            "Nechama Pukhachevsky": -0.007862599789781087,
+            "Yehuda Steinberg": -0.009128861169397713
+          }
+        },
+        {
+          "id": "benchmark:774e0c8b9f3a007e:3500",
+          "author": "Asher Barash",
+          "work_id": "hbo:benyehuda.m34683",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": 0.012995445987042484,
+            "Moshe Smilansky": 0.014615096329147821,
+            "Nechama Pukhachevsky": -0.01122911643872348,
+            "Yehuda Steinberg": -0.016381425877464568
+          }
+        },
+        {
+          "id": "benchmark:f92b08f5a4d89f9f:0",
+          "author": "Asher Barash",
+          "work_id": "hbo:benyehuda.m34678",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Asher Barash",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": 0.02728874062456398,
+            "Moshe Smilansky": -0.035578539220480536,
+            "Nechama Pukhachevsky": -0.0015839431668564464,
+            "Yehuda Steinberg": 0.009873741762775303
+          }
+        },
+        {
+          "id": "benchmark:f92b08f5a4d89f9f:500",
+          "author": "Asher Barash",
+          "work_id": "hbo:benyehuda.m34678",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Nechama Pukhachevsky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": 0.009315680937292941,
+            "Moshe Smilansky": -0.03267973557580079,
+            "Nechama Pukhachevsky": 0.02303281071541205,
+            "Yehuda Steinberg": 0.0003312439230980296
+          }
+        },
+        {
+          "id": "benchmark:f92b08f5a4d89f9f:1000",
+          "author": "Asher Barash",
+          "work_id": "hbo:benyehuda.m34678",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Nechama Pukhachevsky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": 0.010798233219318169,
+            "Moshe Smilansky": -0.03449968690315731,
+            "Nechama Pukhachevsky": 0.02824741609220256,
+            "Yehuda Steinberg": -0.004545962408361151
+          }
+        },
+        {
+          "id": "benchmark:f92b08f5a4d89f9f:1500",
+          "author": "Asher Barash",
+          "work_id": "hbo:benyehuda.m34678",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Nechama Pukhachevsky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": 0.012633786990066353,
+            "Moshe Smilansky": -0.03063520014601422,
+            "Nechama Pukhachevsky": 0.03177287964361976,
+            "Yehuda Steinberg": -0.013771466487669758
+          }
+        },
+        {
+          "id": "benchmark:f92b08f5a4d89f9f:2000",
+          "author": "Asher Barash",
+          "work_id": "hbo:benyehuda.m34678",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Asher Barash",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": 0.04242393234615421,
+            "Moshe Smilansky": -0.021337446924975953,
+            "Nechama Pukhachevsky": 0.001075575267922508,
+            "Yehuda Steinberg": -0.0221620606890985
+          }
+        },
+        {
+          "id": "benchmark:f92b08f5a4d89f9f:2500",
+          "author": "Asher Barash",
+          "work_id": "hbo:benyehuda.m34678",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Asher Barash",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": 0.03102552419982119,
+            "Moshe Smilansky": -0.024318166748117674,
+            "Nechama Pukhachevsky": 0.011307092747727955,
+            "Yehuda Steinberg": -0.01801445019942903
+          }
+        },
+        {
+          "id": "benchmark:7443f810b6f6c34f:0",
+          "author": "Moshe Smilansky",
+          "work_id": "hbo:benyehuda.m21329",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.028073723341433113,
+            "Moshe Smilansky": 0.06664096954234777,
+            "Nechama Pukhachevsky": -0.005257192570600445,
+            "Yehuda Steinberg": -0.033310053630312184
+          }
+        },
+        {
+          "id": "benchmark:7443f810b6f6c34f:500",
+          "author": "Moshe Smilansky",
+          "work_id": "hbo:benyehuda.m21329",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.02680691491124746,
+            "Moshe Smilansky": 0.04606692843919496,
+            "Nechama Pukhachevsky": -0.0032641183348028897,
+            "Yehuda Steinberg": -0.015995895193142196
+          }
+        },
+        {
+          "id": "benchmark:7443f810b6f6c34f:1000",
+          "author": "Moshe Smilansky",
+          "work_id": "hbo:benyehuda.m21329",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.013033425937198376,
+            "Moshe Smilansky": 0.03187845942426624,
+            "Nechama Pukhachevsky": 0.010937890093076738,
+            "Yehuda Steinberg": -0.029782923580142284
+          }
+        },
+        {
+          "id": "benchmark:7443f810b6f6c34f:2000",
+          "author": "Moshe Smilansky",
+          "work_id": "hbo:benyehuda.m21329",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.03859327464291306,
+            "Moshe Smilansky": 0.06821265403522452,
+            "Nechama Pukhachevsky": -0.007801567810379806,
+            "Yehuda Steinberg": -0.02181781158192947
+          }
+        },
+        {
+          "id": "benchmark:7443f810b6f6c34f:2500",
+          "author": "Moshe Smilansky",
+          "work_id": "hbo:benyehuda.m21329",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.039191666500086965,
+            "Moshe Smilansky": 0.03954373654690259,
+            "Nechama Pukhachevsky": 0.0027076813405619536,
+            "Yehuda Steinberg": -0.0030597513873753673
+          }
+        },
+        {
+          "id": "benchmark:7443f810b6f6c34f:3500",
+          "author": "Moshe Smilansky",
+          "work_id": "hbo:benyehuda.m21329",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.04016159019636081,
+            "Moshe Smilansky": 0.06597503477211619,
+            "Nechama Pukhachevsky": -0.006031991523071467,
+            "Yehuda Steinberg": -0.019781453052681832
+          }
+        },
+        {
+          "id": "benchmark:7443f810b6f6c34f:4000",
+          "author": "Moshe Smilansky",
+          "work_id": "hbo:benyehuda.m21329",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.030181776516183027,
+            "Moshe Smilansky": 0.04187766713513075,
+            "Nechama Pukhachevsky": 0.0029375484834286824,
+            "Yehuda Steinberg": -0.014633439102374092
+          }
+        },
+        {
+          "id": "benchmark:7443f810b6f6c34f:5000",
+          "author": "Moshe Smilansky",
+          "work_id": "hbo:benyehuda.m21329",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.03960248870029537,
+            "Moshe Smilansky": 0.03821517540955441,
+            "Nechama Pukhachevsky": 0.009319032740345094,
+            "Yehuda Steinberg": -0.007931719449601986
+          }
+        },
+        {
+          "id": "benchmark:7443f810b6f6c34f:5500",
+          "author": "Moshe Smilansky",
+          "work_id": "hbo:benyehuda.m21329",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.02398858761287403,
+            "Moshe Smilansky": 0.0452150787835063,
+            "Nechama Pukhachevsky": -0.009625641083641005,
+            "Yehuda Steinberg": -0.011600850086988997
+          }
+        },
+        {
+          "id": "benchmark:7443f810b6f6c34f:6500",
+          "author": "Moshe Smilansky",
+          "work_id": "hbo:benyehuda.m21329",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.0432947844499183,
+            "Moshe Smilansky": 0.0648451494326798,
+            "Nechama Pukhachevsky": -0.016060733700467626,
+            "Yehuda Steinberg": -0.0054896312822914255
+          }
+        },
+        {
+          "id": "benchmark:7443f810b6f6c34f:7000",
+          "author": "Moshe Smilansky",
+          "work_id": "hbo:benyehuda.m21329",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.03409999556323243,
+            "Moshe Smilansky": 0.05691467374633745,
+            "Nechama Pukhachevsky": -0.004508956672406275,
+            "Yehuda Steinberg": -0.01830572151069655
+          }
+        },
+        {
+          "id": "benchmark:7443f810b6f6c34f:8000",
+          "author": "Moshe Smilansky",
+          "work_id": "hbo:benyehuda.m21329",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.02213213129712714,
+            "Moshe Smilansky": 0.05149404143190094,
+            "Nechama Pukhachevsky": -0.005316918767869405,
+            "Yehuda Steinberg": -0.02404499136690236
+          }
+        },
+        {
+          "id": "benchmark:7d4d8d8b7dba4f48:0",
+          "author": "Moshe Smilansky",
+          "work_id": "hbo:benyehuda.m23056",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": 0.004287762647259936,
+            "Moshe Smilansky": 0.0444784884742343,
+            "Nechama Pukhachevsky": -0.01032507373993304,
+            "Yehuda Steinberg": -0.03844117738155896
+          }
+        },
+        {
+          "id": "benchmark:7d4d8d8b7dba4f48:500",
+          "author": "Moshe Smilansky",
+          "work_id": "hbo:benyehuda.m23056",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.00353642591171803,
+            "Moshe Smilansky": 0.06885834068309295,
+            "Nechama Pukhachevsky": -0.009069680877775418,
+            "Yehuda Steinberg": -0.05625223389359735
+          }
+        },
+        {
+          "id": "benchmark:7d4d8d8b7dba4f48:1000",
+          "author": "Moshe Smilansky",
+          "work_id": "hbo:benyehuda.m23056",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.001122826578101816,
+            "Moshe Smilansky": 0.04313463929417558,
+            "Nechama Pukhachevsky": -0.008234580480730008,
+            "Yehuda Steinberg": -0.033777232235341556
+          }
+        },
+        {
+          "id": "benchmark:7d4d8d8b7dba4f48:1500",
+          "author": "Moshe Smilansky",
+          "work_id": "hbo:benyehuda.m23056",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.029869069610092593,
+            "Moshe Smilansky": 0.06378348488264211,
+            "Nechama Pukhachevsky": -0.014733993403505782,
+            "Yehuda Steinberg": -0.019180421869041522
+          }
+        },
+        {
+          "id": "benchmark:7d4d8d8b7dba4f48:2000",
+          "author": "Moshe Smilansky",
+          "work_id": "hbo:benyehuda.m23056",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.03863020336353287,
+            "Moshe Smilansky": 0.08234026946744094,
+            "Nechama Pukhachevsky": -0.021920006516213026,
+            "Yehuda Steinberg": -0.021790059587692992
+          }
+        },
+        {
+          "id": "benchmark:7d4d8d8b7dba4f48:2500",
+          "author": "Moshe Smilansky",
+          "work_id": "hbo:benyehuda.m23056",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.03738760737110861,
+            "Moshe Smilansky": 0.08108344310414271,
+            "Nechama Pukhachevsky": -0.0075815233629239875,
+            "Yehuda Steinberg": -0.03611431237010796
+          }
+        },
+        {
+          "id": "benchmark:30d325a151915e05:0",
+          "author": "Nechama Pukhachevsky",
+          "work_id": "hbo:benyehuda.m2550",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Nechama Pukhachevsky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.022174227896450478,
+            "Moshe Smilansky": 0.0029360606397269345,
+            "Nechama Pukhachevsky": 0.03426737306102151,
+            "Yehuda Steinberg": -0.015029205804295847
+          }
+        },
+        {
+          "id": "benchmark:30d325a151915e05:500",
+          "author": "Nechama Pukhachevsky",
+          "work_id": "hbo:benyehuda.m2550",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Nechama Pukhachevsky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.00495343756183168,
+            "Moshe Smilansky": -0.01269485693631545,
+            "Nechama Pukhachevsky": 0.033833194170587735,
+            "Yehuda Steinberg": -0.01618489967243836
+          }
+        },
+        {
+          "id": "benchmark:30d325a151915e05:1000",
+          "author": "Nechama Pukhachevsky",
+          "work_id": "hbo:benyehuda.m2550",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Nechama Pukhachevsky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.022013223081826995,
+            "Moshe Smilansky": 0.004217096610507348,
+            "Nechama Pukhachevsky": 0.03512383010021976,
+            "Yehuda Steinberg": -0.017327703628897934
+          }
+        },
+        {
+          "id": "benchmark:30d325a151915e05:1500",
+          "author": "Nechama Pukhachevsky",
+          "work_id": "hbo:benyehuda.m2550",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Nechama Pukhachevsky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.009850533977026463,
+            "Moshe Smilansky": 0.007108571215629961,
+            "Nechama Pukhachevsky": 0.024047185727748385,
+            "Yehuda Steinberg": -0.021305222966349683
+          }
+        },
+        {
+          "id": "benchmark:6eb1718f81569327:0",
+          "author": "Nechama Pukhachevsky",
+          "work_id": "hbo:benyehuda.m305",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Nechama Pukhachevsky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.011428409683858734,
+            "Moshe Smilansky": -0.0249995712434923,
+            "Nechama Pukhachevsky": 0.04759487673519743,
+            "Yehuda Steinberg": -0.01116689580784426
+          }
+        },
+        {
+          "id": "benchmark:6eb1718f81569327:500",
+          "author": "Nechama Pukhachevsky",
+          "work_id": "hbo:benyehuda.m305",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Nechama Pukhachevsky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": 0.00043435139449853576,
+            "Moshe Smilansky": -0.005164348396720752,
+            "Nechama Pukhachevsky": 0.034464948392358426,
+            "Yehuda Steinberg": -0.029734951390134073
+          }
+        },
+        {
+          "id": "benchmark:6eb1718f81569327:1000",
+          "author": "Nechama Pukhachevsky",
+          "work_id": "hbo:benyehuda.m305",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Nechama Pukhachevsky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.016987183721450312,
+            "Moshe Smilansky": 0.0031216871126798916,
+            "Nechama Pukhachevsky": 0.03974521965536583,
+            "Yehuda Steinberg": -0.02587972304659325
+          }
+        },
+        {
+          "id": "benchmark:6eb1718f81569327:1500",
+          "author": "Nechama Pukhachevsky",
+          "work_id": "hbo:benyehuda.m305",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Nechama Pukhachevsky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.011545591820873863,
+            "Moshe Smilansky": -0.015772756742337482,
+            "Nechama Pukhachevsky": 0.04143744335253694,
+            "Yehuda Steinberg": -0.01411909478932345
+          }
+        },
+        {
+          "id": "benchmark:6eb1718f81569327:2000",
+          "author": "Nechama Pukhachevsky",
+          "work_id": "hbo:benyehuda.m305",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Nechama Pukhachevsky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.013898647677598611,
+            "Moshe Smilansky": -0.00283667237215482,
+            "Nechama Pukhachevsky": 0.046000026218411656,
+            "Yehuda Steinberg": -0.029264706168656174
+          }
+        },
+        {
+          "id": "benchmark:6eb1718f81569327:2500",
+          "author": "Nechama Pukhachevsky",
+          "work_id": "hbo:benyehuda.m305",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Nechama Pukhachevsky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.010365366248829012,
+            "Moshe Smilansky": -0.026131074570388987,
+            "Nechama Pukhachevsky": 0.04241943403385943,
+            "Yehuda Steinberg": -0.005922993214639258
+          }
+        },
+        {
+          "id": "benchmark:6eb1718f81569327:3000",
+          "author": "Nechama Pukhachevsky",
+          "work_id": "hbo:benyehuda.m305",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Nechama Pukhachevsky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.015790508962663933,
+            "Moshe Smilansky": -0.007327008872404382,
+            "Nechama Pukhachevsky": 0.03443290011195995,
+            "Yehuda Steinberg": -0.0113153822768894
+          }
+        },
+        {
+          "id": "benchmark:6eb1718f81569327:3500",
+          "author": "Nechama Pukhachevsky",
+          "work_id": "hbo:benyehuda.m305",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Nechama Pukhachevsky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.01735343938125238,
+            "Moshe Smilansky": -0.014647005228904646,
+            "Nechama Pukhachevsky": 0.02486068841038833,
+            "Yehuda Steinberg": 0.007139756199770914
+          }
+        },
+        {
+          "id": "benchmark:6eb1718f81569327:4000",
+          "author": "Nechama Pukhachevsky",
+          "work_id": "hbo:benyehuda.m305",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Nechama Pukhachevsky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": 0.004765117163851592,
+            "Moshe Smilansky": 0.002647231012328565,
+            "Nechama Pukhachevsky": 0.0179223669051369,
+            "Yehuda Steinberg": -0.025334715081314803
+          }
+        },
+        {
+          "id": "benchmark:6eb1718f81569327:4500",
+          "author": "Nechama Pukhachevsky",
+          "work_id": "hbo:benyehuda.m305",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Nechama Pukhachevsky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.011553036769323687,
+            "Moshe Smilansky": -0.009312853170597359,
+            "Nechama Pukhachevsky": 0.04137899057514917,
+            "Yehuda Steinberg": -0.020513100635225875
+          }
+        },
+        {
+          "id": "benchmark:6eb1718f81569327:5000",
+          "author": "Nechama Pukhachevsky",
+          "work_id": "hbo:benyehuda.m305",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Nechama Pukhachevsky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.009073261378236885,
+            "Moshe Smilansky": -0.008897298427435564,
+            "Nechama Pukhachevsky": 0.04185400882036678,
+            "Yehuda Steinberg": -0.02388344901469218
+          }
+        },
+        {
+          "id": "benchmark:6eb1718f81569327:5500",
+          "author": "Nechama Pukhachevsky",
+          "work_id": "hbo:benyehuda.m305",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Nechama Pukhachevsky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.014848351298608661,
+            "Moshe Smilansky": -0.01203418139448437,
+            "Nechama Pukhachevsky": 0.048158654457950416,
+            "Yehuda Steinberg": -0.021276121764855063
+          }
+        },
+        {
+          "id": "benchmark:36db4a98d6c13c43:0",
+          "author": "Yehuda Steinberg",
+          "work_id": "hbo:benyehuda.m2232",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Yehuda Steinberg",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.03471045527682778,
+            "Moshe Smilansky": -0.02087614412284767,
+            "Nechama Pukhachevsky": 0.0021448999949936617,
+            "Yehuda Steinberg": 0.05344169940468396
+          }
+        },
+        {
+          "id": "benchmark:36db4a98d6c13c43:500",
+          "author": "Yehuda Steinberg",
+          "work_id": "hbo:benyehuda.m2232",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Yehuda Steinberg",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.0264474888927215,
+            "Moshe Smilansky": -0.021483134660463272,
+            "Nechama Pukhachevsky": 0.00712703232458929,
+            "Yehuda Steinberg": 0.04080359122859776
+          }
+        },
+        {
+          "id": "benchmark:36db4a98d6c13c43:1000",
+          "author": "Yehuda Steinberg",
+          "work_id": "hbo:benyehuda.m2232",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Yehuda Steinberg",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.016487993356262127,
+            "Moshe Smilansky": -0.03718913570091138,
+            "Nechama Pukhachevsky": 0.002612286000990043,
+            "Yehuda Steinberg": 0.05106484305618572
+          }
+        },
+        {
+          "id": "benchmark:36db4a98d6c13c43:1500",
+          "author": "Yehuda Steinberg",
+          "work_id": "hbo:benyehuda.m2232",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Yehuda Steinberg",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.025512484593873102,
+            "Moshe Smilansky": -0.031117591057915606,
+            "Nechama Pukhachevsky": 0.0036891052385329194,
+            "Yehuda Steinberg": 0.052940970413258
+          }
+        },
+        {
+          "id": "benchmark:a5c7f730b33ca3e4:0",
+          "author": "Yehuda Steinberg",
+          "work_id": "hbo:benyehuda.m2418",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Yehuda Steinberg",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.03870207691243652,
+            "Moshe Smilansky": -0.011833319862997946,
+            "Nechama Pukhachevsky": -0.009141220857746043,
+            "Yehuda Steinberg": 0.059676617633182806
+          }
+        },
+        {
+          "id": "benchmark:a5c7f730b33ca3e4:500",
+          "author": "Yehuda Steinberg",
+          "work_id": "hbo:benyehuda.m2418",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Yehuda Steinberg",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.03719836051291403,
+            "Moshe Smilansky": -0.005887121589638737,
+            "Nechama Pukhachevsky": -0.003982813829397831,
+            "Yehuda Steinberg": 0.04706829593195287
+          }
+        },
+        {
+          "id": "benchmark:a5c7f730b33ca3e4:1000",
+          "author": "Yehuda Steinberg",
+          "work_id": "hbo:benyehuda.m2418",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Yehuda Steinberg",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.036595248187758264,
+            "Moshe Smilansky": -0.002816437513928815,
+            "Nechama Pukhachevsky": -0.006918885725520288,
+            "Yehuda Steinberg": 0.04633057142720973
+          }
+        },
+        {
+          "id": "benchmark:a5c7f730b33ca3e4:1500",
+          "author": "Yehuda Steinberg",
+          "work_id": "hbo:benyehuda.m2418",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Yehuda Steinberg",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.030912220392629957,
+            "Moshe Smilansky": -0.010266336148563038,
+            "Nechama Pukhachevsky": -0.00019479376257587234,
+            "Yehuda Steinberg": 0.041373350303771206
+          }
+        },
+        {
+          "id": "benchmark:a5c7f730b33ca3e4:2000",
+          "author": "Yehuda Steinberg",
+          "work_id": "hbo:benyehuda.m2418",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Yehuda Steinberg",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.043002108622113,
+            "Moshe Smilansky": -0.002355926463153142,
+            "Nechama Pukhachevsky": 0.005906456635517993,
+            "Yehuda Steinberg": 0.03945157844975053
+          }
+        },
+        {
+          "id": "benchmark:a5c7f730b33ca3e4:2500",
+          "author": "Yehuda Steinberg",
+          "work_id": "hbo:benyehuda.m2418",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Yehuda Steinberg",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.03649289376777173,
+            "Moshe Smilansky": -0.010503878833832643,
+            "Nechama Pukhachevsky": 0.004029457047265888,
+            "Yehuda Steinberg": 0.04296731555434054
+          }
+        },
+        {
+          "id": "benchmark:a5c7f730b33ca3e4:3000",
+          "author": "Yehuda Steinberg",
+          "work_id": "hbo:benyehuda.m2418",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": true,
+          "correct": true,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Yehuda Steinberg",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.03031287934613709,
+            "Moshe Smilansky": 0.0037873236188663484,
+            "Nechama Pukhachevsky": -0.0035984407500771884,
+            "Yehuda Steinberg": 0.030123996477350222
+          }
+        },
+        {
+          "id": "benchmark:8119fbab3744846d:0",
+          "author": "Aharon Abraham Kabak",
+          "work_id": "hbo:benyehuda.m34",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Nechama Pukhachevsky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": 0.004757768384770635,
+            "Moshe Smilansky": 0.0039509102950257315,
+            "Nechama Pukhachevsky": 0.010413338257926494,
+            "Yehuda Steinberg": -0.019122016937720608
+          }
+        },
+        {
+          "id": "benchmark:8119fbab3744846d:1000",
+          "author": "Aharon Abraham Kabak",
+          "work_id": "hbo:benyehuda.m34",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Nechama Pukhachevsky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.0003405786664370629,
+            "Moshe Smilansky": 0.000673697601826579,
+            "Nechama Pukhachevsky": 0.01882427692289029,
+            "Yehuda Steinberg": -0.01915739585827762
+          }
+        },
+        {
+          "id": "benchmark:8119fbab3744846d:2000",
+          "author": "Aharon Abraham Kabak",
+          "work_id": "hbo:benyehuda.m34",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Nechama Pukhachevsky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.003351182340051987,
+            "Moshe Smilansky": 0.00537374551360926,
+            "Nechama Pukhachevsky": 0.020319124904488693,
+            "Yehuda Steinberg": -0.022341688078043792
+          }
+        },
+        {
+          "id": "benchmark:8119fbab3744846d:3000",
+          "author": "Aharon Abraham Kabak",
+          "work_id": "hbo:benyehuda.m34",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Nechama Pukhachevsky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": 0.00659625584413917,
+            "Moshe Smilansky": 0.0010741598449455153,
+            "Nechama Pukhachevsky": 0.02909142663483159,
+            "Yehuda Steinberg": -0.036761842323913975
+          }
+        },
+        {
+          "id": "benchmark:8119fbab3744846d:4000",
+          "author": "Aharon Abraham Kabak",
+          "work_id": "hbo:benyehuda.m34",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Nechama Pukhachevsky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": 0.002840462308216686,
+            "Moshe Smilansky": 0.0053142032718444705,
+            "Nechama Pukhachevsky": 0.024898757198456883,
+            "Yehuda Steinberg": -0.033053422778515966
+          }
+        },
+        {
+          "id": "benchmark:8119fbab3744846d:5000",
+          "author": "Aharon Abraham Kabak",
+          "work_id": "hbo:benyehuda.m34",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Nechama Pukhachevsky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": 0.010308879881729512,
+            "Moshe Smilansky": -0.0032968150818544094,
+            "Nechama Pukhachevsky": 0.01636312668493046,
+            "Yehuda Steinberg": -0.023375191484803295
+          }
+        },
+        {
+          "id": "benchmark:8119fbab3744846d:6000",
+          "author": "Aharon Abraham Kabak",
+          "work_id": "hbo:benyehuda.m34",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Nechama Pukhachevsky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.022017449170808594,
+            "Moshe Smilansky": -0.002203666715190329,
+            "Nechama Pukhachevsky": 0.03179228712843321,
+            "Yehuda Steinberg": -0.007571171242432011
+          }
+        },
+        {
+          "id": "benchmark:8119fbab3744846d:7000",
+          "author": "Aharon Abraham Kabak",
+          "work_id": "hbo:benyehuda.m34",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Nechama Pukhachevsky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.014148100559732472,
+            "Moshe Smilansky": -0.0006738137690472474,
+            "Nechama Pukhachevsky": 0.020494091869535488,
+            "Yehuda Steinberg": -0.005672177540753558
+          }
+        },
+        {
+          "id": "benchmark:8119fbab3744846d:8000",
+          "author": "Aharon Abraham Kabak",
+          "work_id": "hbo:benyehuda.m34",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": 0.0010166643686420592,
+            "Moshe Smilansky": 0.01881817664298632,
+            "Nechama Pukhachevsky": 0.00385178642619702,
+            "Yehuda Steinberg": -0.023686627437823158
+          }
+        },
+        {
+          "id": "benchmark:8119fbab3744846d:9000",
+          "author": "Aharon Abraham Kabak",
+          "work_id": "hbo:benyehuda.m34",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.006656382027444759,
+            "Moshe Smilansky": 0.017324176382576176,
+            "Nechama Pukhachevsky": 0.013713642664119114,
+            "Yehuda Steinberg": -0.024381437019248293
+          }
+        },
+        {
+          "id": "benchmark:8119fbab3744846d:10000",
+          "author": "Aharon Abraham Kabak",
+          "work_id": "hbo:benyehuda.m34",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Nechama Pukhachevsky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.003047225104025368,
+            "Moshe Smilansky": 0.014077862052456952,
+            "Nechama Pukhachevsky": 0.01915257788256433,
+            "Yehuda Steinberg": -0.03018321483099374
+          }
+        },
+        {
+          "id": "benchmark:8119fbab3744846d:11000",
+          "author": "Aharon Abraham Kabak",
+          "work_id": "hbo:benyehuda.m34",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.02632806656483354,
+            "Moshe Smilansky": 0.028340923816394883,
+            "Nechama Pukhachevsky": 0.01989653087369181,
+            "Yehuda Steinberg": -0.02190938812525092
+          }
+        },
+        {
+          "id": "benchmark:54beadbeff230cbc:0",
+          "author": "Aharon Abraham Kabak",
+          "work_id": "hbo:benyehuda.m13354",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Yehuda Steinberg",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.02412057940248417,
+            "Moshe Smilansky": 0.0008211929192473034,
+            "Nechama Pukhachevsky": 0.004292726297849368,
+            "Yehuda Steinberg": 0.01900666018538973
+          }
+        },
+        {
+          "id": "benchmark:54beadbeff230cbc:1000",
+          "author": "Aharon Abraham Kabak",
+          "work_id": "hbo:benyehuda.m13354",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Nechama Pukhachevsky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": 0.0026621554612616697,
+            "Moshe Smilansky": -0.0015909368672027283,
+            "Nechama Pukhachevsky": 0.010225856792768327,
+            "Yehuda Steinberg": -0.011297075386825065
+          }
+        },
+        {
+          "id": "benchmark:54beadbeff230cbc:2000",
+          "author": "Aharon Abraham Kabak",
+          "work_id": "hbo:benyehuda.m13354",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": 0.004625283714668193,
+            "Moshe Smilansky": 0.008571988465337656,
+            "Nechama Pukhachevsky": 0.0030399141489452506,
+            "Yehuda Steinberg": -0.016237186328948876
+          }
+        },
+        {
+          "id": "benchmark:54beadbeff230cbc:3000",
+          "author": "Aharon Abraham Kabak",
+          "work_id": "hbo:benyehuda.m13354",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Asher Barash",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": 0.008908683102948553,
+            "Moshe Smilansky": 0.0061872289153869515,
+            "Nechama Pukhachevsky": 0.001214123039012282,
+            "Yehuda Steinberg": -0.016310035057345507
+          }
+        },
+        {
+          "id": "benchmark:54beadbeff230cbc:4000",
+          "author": "Aharon Abraham Kabak",
+          "work_id": "hbo:benyehuda.m13354",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": 0.00115800716554314,
+            "Moshe Smilansky": 0.00854438460802235,
+            "Nechama Pukhachevsky": 0.008130175991600729,
+            "Yehuda Steinberg": -0.017832567765164054
+          }
+        },
+        {
+          "id": "benchmark:54beadbeff230cbc:5000",
+          "author": "Aharon Abraham Kabak",
+          "work_id": "hbo:benyehuda.m13354",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Nechama Pukhachevsky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": 0.0012748860161255196,
+            "Moshe Smilansky": 0.005222204417256038,
+            "Nechama Pukhachevsky": 0.012086441069427037,
+            "Yehuda Steinberg": -0.01858353150280638
+          }
+        },
+        {
+          "id": "benchmark:54beadbeff230cbc:6500",
+          "author": "Aharon Abraham Kabak",
+          "work_id": "hbo:benyehuda.m13354",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.0013666533505570363,
+            "Moshe Smilansky": 0.011332054507960418,
+            "Nechama Pukhachevsky": 0.01123216224955025,
+            "Yehuda Steinberg": -0.021197563406951496
+          }
+        },
+        {
+          "id": "benchmark:54beadbeff230cbc:7500",
+          "author": "Aharon Abraham Kabak",
+          "work_id": "hbo:benyehuda.m13354",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Nechama Pukhachevsky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.008950313357655,
+            "Moshe Smilansky": 0.010844108740510542,
+            "Nechama Pukhachevsky": 0.014251854317239066,
+            "Yehuda Steinberg": -0.01614564970009237
+          }
+        },
+        {
+          "id": "benchmark:54beadbeff230cbc:8500",
+          "author": "Aharon Abraham Kabak",
+          "work_id": "hbo:benyehuda.m13354",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Asher Barash",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": 0.004316644030016863,
+            "Moshe Smilansky": -0.0004744045825736936,
+            "Nechama Pukhachevsky": 0.004089144327316334,
+            "Yehuda Steinberg": -0.00793138377475728
+          }
+        },
+        {
+          "id": "benchmark:54beadbeff230cbc:9500",
+          "author": "Aharon Abraham Kabak",
+          "work_id": "hbo:benyehuda.m13354",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.009252553937916146,
+            "Moshe Smilansky": 0.013945809823894265,
+            "Nechama Pukhachevsky": 0.010654656153689055,
+            "Yehuda Steinberg": -0.015347912039664966
+          }
+        },
+        {
+          "id": "benchmark:54beadbeff230cbc:10500",
+          "author": "Aharon Abraham Kabak",
+          "work_id": "hbo:benyehuda.m13354",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Nechama Pukhachevsky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": 0.00144256168050528,
+            "Moshe Smilansky": -0.01867767253344773,
+            "Nechama Pukhachevsky": 0.01877173794107716,
+            "Yehuda Steinberg": -0.0015366270881324083
+          }
+        },
+        {
+          "id": "benchmark:54beadbeff230cbc:12000",
+          "author": "Aharon Abraham Kabak",
+          "work_id": "hbo:benyehuda.m13354",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.001767852206393244,
+            "Moshe Smilansky": 0.010894233094002252,
+            "Nechama Pukhachevsky": -0.001588069156230984,
+            "Yehuda Steinberg": -0.0075383117313758
+          }
+        },
+        {
+          "id": "benchmark:6dc1820f9c7794b6:0",
+          "author": "Alexander Ziskind Rabinovich",
+          "work_id": "hbo:benyehuda.m8036",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.028813860095280842,
+            "Moshe Smilansky": 0.012298047781161482,
+            "Nechama Pukhachevsky": 0.005444228912056891,
+            "Yehuda Steinberg": 0.011071583402064598
+          }
+        },
+        {
+          "id": "benchmark:6dc1820f9c7794b6:2000",
+          "author": "Alexander Ziskind Rabinovich",
+          "work_id": "hbo:benyehuda.m8036",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.04502580797140533,
+            "Moshe Smilansky": 0.015746145692696775,
+            "Nechama Pukhachevsky": 0.015137103310733651,
+            "Yehuda Steinberg": 0.01414255896797714
+          }
+        },
+        {
+          "id": "benchmark:6dc1820f9c7794b6:4000",
+          "author": "Alexander Ziskind Rabinovich",
+          "work_id": "hbo:benyehuda.m8036",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Yehuda Steinberg",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.04076339097094451,
+            "Moshe Smilansky": 0.013257186875785882,
+            "Nechama Pukhachevsky": 0.0046175753853476475,
+            "Yehuda Steinberg": 0.022888628709813053
+          }
+        },
+        {
+          "id": "benchmark:6dc1820f9c7794b6:6000",
+          "author": "Alexander Ziskind Rabinovich",
+          "work_id": "hbo:benyehuda.m8036",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.041089841192739444,
+            "Moshe Smilansky": 0.0333711474899425,
+            "Nechama Pukhachevsky": 0.01725953531830351,
+            "Yehuda Steinberg": -0.009540841615504394
+          }
+        },
+        {
+          "id": "benchmark:6dc1820f9c7794b6:8000",
+          "author": "Alexander Ziskind Rabinovich",
+          "work_id": "hbo:benyehuda.m8036",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Yehuda Steinberg",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.037207716687362544,
+            "Moshe Smilansky": 0.006422675226390785,
+            "Nechama Pukhachevsky": 0.013261311542020008,
+            "Yehuda Steinberg": 0.017523729918953908
+          }
+        },
+        {
+          "id": "benchmark:6dc1820f9c7794b6:10000",
+          "author": "Alexander Ziskind Rabinovich",
+          "work_id": "hbo:benyehuda.m8036",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.013774572477854307,
+            "Moshe Smilansky": 0.03523875908519291,
+            "Nechama Pukhachevsky": -0.01122146647118661,
+            "Yehuda Steinberg": -0.010242720136149639
+          }
+        },
+        {
+          "id": "benchmark:6dc1820f9c7794b6:12000",
+          "author": "Alexander Ziskind Rabinovich",
+          "work_id": "hbo:benyehuda.m8036",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Nechama Pukhachevsky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.03141773564377381,
+            "Moshe Smilansky": 0.014827999745637747,
+            "Nechama Pukhachevsky": 0.015437508511255766,
+            "Yehuda Steinberg": 0.0011522273868824024
+          }
+        },
+        {
+          "id": "benchmark:6dc1820f9c7794b6:14000",
+          "author": "Alexander Ziskind Rabinovich",
+          "work_id": "hbo:benyehuda.m8036",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.035036177477623234,
+            "Moshe Smilansky": 0.03190071728780614,
+            "Nechama Pukhachevsky": -0.0036568811780201315,
+            "Yehuda Steinberg": 0.006792341367839401
+          }
+        },
+        {
+          "id": "benchmark:6dc1820f9c7794b6:16000",
+          "author": "Alexander Ziskind Rabinovich",
+          "work_id": "hbo:benyehuda.m8036",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.04181700723988409,
+            "Moshe Smilansky": 0.02246656018881638,
+            "Nechama Pukhachevsky": 0.005581862211867766,
+            "Yehuda Steinberg": 0.013768584839202111
+          }
+        },
+        {
+          "id": "benchmark:6dc1820f9c7794b6:18000",
+          "author": "Alexander Ziskind Rabinovich",
+          "work_id": "hbo:benyehuda.m8036",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.036866641374820396,
+            "Moshe Smilansky": 0.01629007749864143,
+            "Nechama Pukhachevsky": 0.008910220392117604,
+            "Yehuda Steinberg": 0.011666343484063578
+          }
+        },
+        {
+          "id": "benchmark:6dc1820f9c7794b6:20000",
+          "author": "Alexander Ziskind Rabinovich",
+          "work_id": "hbo:benyehuda.m8036",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.0356342178213436,
+            "Moshe Smilansky": 0.03267461184709512,
+            "Nechama Pukhachevsky": -0.0003026614365317367,
+            "Yehuda Steinberg": 0.0032622674107823167
+          }
+        },
+        {
+          "id": "benchmark:6dc1820f9c7794b6:22500",
+          "author": "Alexander Ziskind Rabinovich",
+          "work_id": "hbo:benyehuda.m8036",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.03019629031397082,
+            "Moshe Smilansky": 0.04323459991765668,
+            "Nechama Pukhachevsky": 0.003649668132184953,
+            "Yehuda Steinberg": -0.01668797773586862
+          }
+        },
+        {
+          "id": "benchmark:e3c0e8b0c38a7921:0",
+          "author": "Alexander Ziskind Rabinovich",
+          "work_id": "hbo:benyehuda.m7953",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.04510164223595072,
+            "Moshe Smilansky": 0.07265700043016896,
+            "Nechama Pukhachevsky": -0.026559519128077486,
+            "Yehuda Steinberg": -0.0009958390661385758
+          }
+        },
+        {
+          "id": "benchmark:e3c0e8b0c38a7921:500",
+          "author": "Alexander Ziskind Rabinovich",
+          "work_id": "hbo:benyehuda.m7953",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.038579374684452,
+            "Moshe Smilansky": 0.06496266235542579,
+            "Nechama Pukhachevsky": -0.02457266338621739,
+            "Yehuda Steinberg": -0.001810624284754255
+          }
+        },
+        {
+          "id": "benchmark:e3c0e8b0c38a7921:1000",
+          "author": "Alexander Ziskind Rabinovich",
+          "work_id": "hbo:benyehuda.m7953",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.03209521053075485,
+            "Moshe Smilansky": 0.023730503308449495,
+            "Nechama Pukhachevsky": -0.00494489677536227,
+            "Yehuda Steinberg": 0.01330960399766979
+          }
+        },
+        {
+          "id": "benchmark:e3c0e8b0c38a7921:1500",
+          "author": "Alexander Ziskind Rabinovich",
+          "work_id": "hbo:benyehuda.m7953",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.03238465786728275,
+            "Moshe Smilansky": 0.06773062676284988,
+            "Nechama Pukhachevsky": -0.02354935460650245,
+            "Yehuda Steinberg": -0.011796614289062653
+          }
+        },
+        {
+          "id": "benchmark:e3c0e8b0c38a7921:2000",
+          "author": "Alexander Ziskind Rabinovich",
+          "work_id": "hbo:benyehuda.m7953",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.0349845756266145,
+            "Moshe Smilansky": 0.05085589719083317,
+            "Nechama Pukhachevsky": -0.017571956139402618,
+            "Yehuda Steinberg": 0.0017006345751861246
+          }
+        },
+        {
+          "id": "benchmark:e3c0e8b0c38a7921:2500",
+          "author": "Alexander Ziskind Rabinovich",
+          "work_id": "hbo:benyehuda.m7953",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.03735845735047006,
+            "Moshe Smilansky": 0.03529732089850271,
+            "Nechama Pukhachevsky": -0.009380895242636763,
+            "Yehuda Steinberg": 0.011442031694606326
+          }
+        },
+        {
+          "id": "benchmark:e3c0e8b0c38a7921:3000",
+          "author": "Alexander Ziskind Rabinovich",
+          "work_id": "hbo:benyehuda.m7953",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.03681766100934361,
+            "Moshe Smilansky": 0.04374499016153164,
+            "Nechama Pukhachevsky": -0.024841163808882794,
+            "Yehuda Steinberg": 0.017913834656696763
+          }
+        },
+        {
+          "id": "benchmark:e3c0e8b0c38a7921:3500",
+          "author": "Alexander Ziskind Rabinovich",
+          "work_id": "hbo:benyehuda.m7953",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.018123351939034943,
+            "Moshe Smilansky": 0.04029026439240223,
+            "Nechama Pukhachevsky": -0.014377865122971624,
+            "Yehuda Steinberg": -0.0077890473303935176
+          }
+        },
+        {
+          "id": "benchmark:e3c0e8b0c38a7921:4000",
+          "author": "Alexander Ziskind Rabinovich",
+          "work_id": "hbo:benyehuda.m7953",
+          "genre": "literary_prose",
+          "topic": "modern_social_and_psychological_fiction",
+          "known": false,
+          "correct": false,
+          "accepted": false,
+          "correct_accepted": false,
+          "wrong_accepted": false,
+          "nearest_reference_author": "Moshe Smilansky",
+          "decision": null,
+          "candidate_scores": {
+            "Asher Barash": -0.029147415202643495,
+            "Moshe Smilansky": 0.06223228873866946,
+            "Nechama Pukhachevsky": -0.022489899146937317,
+            "Yehuda Steinberg": -0.01059497438908635
+          }
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "Fresh evaluation is conditional on conventional catalogue attributions and a small author panel.",
+    "Refit intervals resample unfamiliar authors as blocks and whole works within roles; the known candidate panel is fixed. Forty replicates are a rough pilot, not calibrated population uncertainty.",
+    "Singleton work strata cannot supply between-work uncertainty; small calibration and unknown panels cannot establish a 5% population error rate.",
+    "This dataset becomes exposed after evaluation. New tuning requires another final test set.",
+    "Scripture transfer, Arabic, Biblical Hebrew and AI profiles remain unvalidated."
+  ]
+}

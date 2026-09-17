@@ -1,8 +1,9 @@
 """AI style profiling: one structured style profile per verse unit, produced by Claude.
 
 The model sees a whole chapter-sized chunk of consecutive units at a time (so it has context) and
-returns one JSON profile per unit.  Profiles are appended to ``data/processed/profiles.jsonl`` as they
-arrive, so every backend is resumable: units that already have a profile are skipped.
+returns one JSON profile per unit. Complete, validated requests are appended to
+``data/processed/profiles.jsonl`` as they arrive. Resuming skips complete requests and preserves
+the original context for incomplete requests; changed text or generation settings require a new file.
 
 Backends
 --------
@@ -12,8 +13,8 @@ batch  Message Batches API - 50% cheaper, asynchronous.  ``profile`` submits, ``
        downloads the finished results.
 cli    the local ``claude`` CLI in print mode.  Uses your Claude subscription, no API key needed.
        Slower per call and pays for the CLI's own system prompt, so best for small runs.
-deepseek  DeepSeek's OpenAI-compatible API (DEEPSEEK_API_KEY).  Much cheaper; JSON mode only, so
-       every profile is validated and coerced here instead of schema-enforced by the server.
+deepseek  DeepSeek's OpenAI-compatible API (DEEPSEEK_API_KEY). JSON mode only, so every profile
+       is validated here instead of schema-enforced by the server.
 openai    any other OpenAI-compatible endpoint (``--base-url``, ``--api-key-env``, ``--model``).
 
 Profiles from different models should not be mixed in one clustering run: keep them in separate
@@ -21,16 +22,22 @@ files with ``--profiles``.
 """
 from __future__ import annotations
 
+import hashlib
 import json
+import math
 import os
+import re
 import subprocess
 import time
+import warnings
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Callable, Iterable
 
 MODEL_DEFAULT = "claude-opus-5"
 MAX_TOKENS = 16000
+PROMPT_VERSION = "blinded-v2"
+SCHEMA_VERSION = 2
 
 # $ per million tokens (input, output).  Batch API halves both; cached input reads are ~10%.
 PRICES: dict[str, tuple[float, float]] = {
@@ -102,7 +109,7 @@ Categorical fields use only the listed values:
 - voice: narrator, deity ({deity_note}), protagonist ({protagonist_note}), prophet_or_apostle, opponent_or_crowd, author_first_person, other.
 - quotation: none, scripture, other_source.
 
-style_tags: 3-8 lowercase snake_case tags naming concrete devices or tics visible IN THIS UNIT, e.g. {tag_examples}. Reuse the same tag for the same device so tags are comparable across units.
+style_tags: 1-8 lowercase snake_case tags naming concrete devices or tics visible IN THIS UNIT, e.g. {tag_examples}. Reuse the same tag for the same device so tags are comparable across units.
 distinctive_phrases: up to 4 short verbatim {language_name} snippets from the unit that a stylometrist would flag as diagnostic of an author's habits (formulae, favourite connectives, idioms). Empty list if none.
 signature: one short sentence characterising the hand behind this unit.
 
@@ -161,9 +168,9 @@ def output_schema() -> dict:
         props[d] = {"type": "number", "minimum": 0, "maximum": 1}
     for d, values in CATEGORICAL_DIMS.items():
         props[d] = {"type": "string", "enum": values}
-    props["style_tags"] = {"type": "array", "items": {"type": "string"}, "minItems": 1, "maxItems": 8}
-    props["distinctive_phrases"] = {"type": "array", "items": {"type": "string"}, "maxItems": 4}
-    props["signature"] = {"type": "string"}
+    props["style_tags"] = {"type": "array", "items": {"type": "string", "pattern": r"^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"}, "minItems": 1, "maxItems": 8}
+    props["distinctive_phrases"] = {"type": "array", "items": {"type": "string", "minLength": 1}, "maxItems": 4}
+    props["signature"] = {"type": "string", "minLength": 1}
     return {
         "type": "object",
         "properties": {
@@ -186,7 +193,7 @@ JSON_EXAMPLE = json.dumps(
     {
         "profiles": [
             {
-                "id": "MARK.1.4",
+                "id": "unit_0001",
                 "register": 0.2,
                 "semitic_interference": 0.7,
                 "hypotaxis": 0.1,
@@ -194,8 +201,8 @@ JSON_EXAMPLE = json.dumps(
                 "rhetorical_polish": 0.1,
                 "emotional_intensity": 0.2,
                 "discourse_mode": "narrative",
-                "narrative_tense": "aorist",
-                "connective_style": "kai_parataxis",
+                "narrative_tense": "past_narrative",
+                "connective_style": "parataxis",
                 "voice": "narrator",
                 "quotation": "none",
                 "style_tags": ["kai_egeneto", "participle_chain", "pleonastic_pronoun"],
@@ -207,16 +214,6 @@ JSON_EXAMPLE = json.dumps(
     ensure_ascii=False,
 )
 
-# Where a model returns a value outside the allowed set.
-DEFAULT_CATEGORY = {
-    "discourse_mode": "other",
-    "narrative_tense": "mixed",
-    "connective_style": "mixed",
-    "voice": "other",
-    "quotation": "none",
-}
-
-
 def json_mode_system_prompt(lang: str = "grc") -> str:
     """System prompt for endpoints that offer JSON mode but no schema enforcement."""
     allowed = "; ".join(f"{d}: {', '.join(v)}" for d, v in CATEGORICAL_DIMS.items())
@@ -227,39 +224,66 @@ def json_mode_system_prompt(lang: str = "grc") -> str:
     )
 
 
-def coerce_profile(p: object) -> dict | None:
-    """Clamp scales, map unknown categories to their default, normalise tag lists."""
+def coerce_profile(p: object, *, allow_legacy: bool = False) -> dict | None:
+    """Validate measurements without inventing, clamping or stringifying missing values.
+
+    The historical function name is retained for callers. The only supported migration is
+    mapping documented categorical aliases when explicitly loading a legacy record.
+    """
     if not isinstance(p, dict):
         return None
-    out: dict = {"id": str(p.get("id", "")).strip("[] ")}
+    ident = p.get("id")
+    if not isinstance(ident, str) or not ident.strip():
+        return None
+    out: dict = {"id": ident}
     for d in NUMERIC_DIMS:
-        try:
-            out[d] = min(1.0, max(0.0, float(p.get(d, 0.5))))
-        except (TypeError, ValueError):
-            out[d] = 0.5
+        value = p.get(d)
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            return None
+        if not 0 <= value <= 1 or not math.isfinite(value):
+            return None
+        out[d] = float(value)
     for d, values in CATEGORICAL_DIMS.items():
-        v = str(p.get(d, "")).strip().lower().replace(" ", "_")
-        v = LEGACY_VALUES.get(v, v)
-        out[d] = v if v in values else DEFAULT_CATEGORY[d]
-    tags = p.get("style_tags") if isinstance(p.get("style_tags"), list) else []
-    out["style_tags"] = [str(t).strip().lower().replace(" ", "_") for t in tags if str(t).strip()][:8]
-    phrases = p.get("distinctive_phrases") if isinstance(p.get("distinctive_phrases"), list) else []
-    out["distinctive_phrases"] = [str(x).strip() for x in phrases if str(x).strip()][:4]
-    out["signature"] = str(p.get("signature", "")).strip()
+        value = p.get(d)
+        if not isinstance(value, str):
+            return None
+        if allow_legacy:
+            value = LEGACY_VALUES.get(value, value)
+        if value not in values:
+            return None
+        out[d] = value
+    tags = p.get("style_tags")
+    if not isinstance(tags, list) or not 1 <= len(tags) <= 8:
+        return None
+    if any(not isinstance(t, str) or not re.fullmatch(r"[a-z][a-z0-9]*(?:_[a-z0-9]+)*", t) for t in tags):
+        return None
+    phrases = p.get("distinctive_phrases")
+    if not isinstance(phrases, list) or len(phrases) > 4:
+        return None
+    if any(not isinstance(p, str) or not p.strip() for p in phrases):
+        return None
+    signature = p.get("signature")
+    if not isinstance(signature, str) or not signature.strip():
+        return None
+    out["style_tags"] = list(tags)
+    out["distinctive_phrases"] = list(phrases)
+    out["signature"] = signature
     return out
 
 
 # --- chunking & prompts ------------------------------------------------------------------------------
 
 def chunk_verses(verses: list[dict], size: int = 25) -> list[list[dict]]:
-    """Consecutive units of one work, preferring chapter boundaries, at most ``size`` per chunk."""
+    """Uninterrupted units of one passage, at most ``size`` per chunk."""
+    from .continuity import consecutive
+
+    if size < 1:
+        raise ValueError("chunk size must be positive")
     chunks: list[list[dict]] = []
     cur: list[dict] = []
     for v in verses:
         if cur:
-            new_work = v["work"] != cur[-1]["work"]
-            new_chapter = v["chapter"] != cur[-1]["chapter"]
-            if new_work or len(cur) >= size or (new_chapter and len(cur) >= size // 2):
+            if not consecutive(cur[-1], v) or len(cur) >= size:
                 chunks.append(cur)
                 cur = []
         cur.append(v)
@@ -273,17 +297,19 @@ def _lang(chunk: list[dict]) -> str:
 
 
 def user_message(chunk: list[dict]) -> str:
-    from .corpus.meta import WITNESSES
-    from .lang import LANGUAGE_NAMES
+    """Only text and anonymous request-local identifiers are exposed to the model."""
+    return "\n".join(f"[unit_{i:04d}] {v['text']}" for i, v in enumerate(chunk, 1))
 
-    v0 = chunk[0]
-    witness = WITNESSES.get(v0.get("witness", ""), v0.get("witness", ""))
-    head = (
-        f"Language: {LANGUAGE_NAMES.get(_lang(chunk), _lang(chunk))}. Work: {v0['work_title']} ({v0['work']})"
-        + (f", witness: {witness}" if witness else "")
-        + f". Units {v0['ref']} to {chunk[-1]['ref']}.\n\n"
-    )
-    return head + "\n".join(f"[{v['id']}] {v['text']}" for v in chunk)
+
+def _text_hash(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def _request_context(chunk: list[dict]) -> dict:
+    units = [{"id": v["id"], "language": v.get("language", "grc"), "text_sha256": _text_hash(v["text"])} for v in chunk]
+    payload = {"prompt_version": PROMPT_VERSION, "schema_version": SCHEMA_VERSION, "units": units}
+    digest = hashlib.sha256(json.dumps(payload, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()
+    return {**payload, "request_group": digest}
 
 
 def estimate_tokens_in(chunk: list[dict]) -> int:
@@ -291,8 +317,9 @@ def estimate_tokens_in(chunk: list[dict]) -> int:
     return 40 + sum(len(v["text"]) // 2 + 25 for v in chunk)
 
 
-def estimate_cost(verses: list[dict], model: str, chunk_size: int = 25, batch: bool = False) -> dict:
-    chunks = chunk_verses(verses, chunk_size)
+def estimate_cost(verses: list[dict], model: str, chunk_size: int = 25, batch: bool = False,
+                  *, chunks: list[list[dict]] | None = None) -> dict:
+    chunks = chunk_verses(verses, chunk_size) if chunks is None else chunks
     price_in, price_out = PRICES.get(model, PRICES[MODEL_DEFAULT])
     tokens_in = sum(estimate_tokens_in(c) for c in chunks)
     system_tokens = len(SYSTEM_PROMPT) // 4
@@ -315,19 +342,71 @@ def estimate_cost(verses: list[dict], model: str, chunk_size: int = 25, batch: b
 # --- storage -----------------------------------------------------------------------------------------
 
 def load_profiles(path: str | Path) -> dict[str, dict]:
+    """Load validated measurements; legacy data remain readable but cannot be resumed.
+
+    Bad rows raise a line-specific error instead of silently becoming observations or being
+    skipped. Legacy categorical aliases are the sole compatibility migration.
+    """
     path = Path(path)
     if not path.exists():
         return {}
     out: dict[str, dict] = {}
+    configuration = None
     with path.open(encoding="utf-8") as fh:
-        for line in fh:
+        for line_no, line in enumerate(fh, 1):
             if line.strip():
-                rec = json.loads(line)
-                for d in CATEGORICAL_DIMS:  # profiles written by the Greek-only prompt use older labels
-                    if d in rec:
-                        rec[d] = LEGACY_VALUES.get(rec[d], rec[d])
+                try:
+                    rec = json.loads(line)
+                except json.JSONDecodeError as exc:
+                    raise ValueError(f"{path}:{line_no}: invalid profile JSON: {exc.msg}") from exc
+                legacy = isinstance(rec, dict) and "provenance" not in rec
+                validated = coerce_profile(rec, allow_legacy=legacy)
+                if validated is None:
+                    raise ValueError(f"{path}:{line_no}: incomplete or invalid profile; regenerate this request")
+                rec.update(validated)
+                if "provenance" in rec and not _valid_provenance(rec["provenance"]):
+                    raise ValueError(f"{path}:{line_no}: invalid profile provenance; regenerate this request")
+                provenance = rec.get("provenance", {})
+                record_config = (rec.get("model"), rec.get("backend"), provenance.get("prompt_version"),
+                                 provenance.get("schema_version"), provenance.get("generation_settings"))
+                if configuration is not None and configuration != record_config:
+                    raise ValueError(f"{path}:{line_no}: mixed profiling configurations; use separate profile files")
+                configuration = record_config
+                previous = out.get(rec["id"])
+                if previous is not None and any(previous.get(k) != rec.get(k) for k in ("model", "backend", "provenance")):
+                    raise ValueError(f"{path}:{line_no}: conflicting generations for {rec['id']}; use separate profile files")
                 out[rec["id"]] = rec
+    if any("provenance" not in p for p in out.values()):
+        warnings.warn(f"{path}: legacy profiles have no verified blinding, text or request provenance; regenerate for validation", UserWarning, stacklevel=2)
     return out
+
+
+def _valid_provenance(provenance: object) -> bool:
+    if not isinstance(provenance, dict):
+        return False
+    return (
+        isinstance(provenance.get("prompt_version"), str)
+        and isinstance(provenance.get("schema_version"), int)
+        and all(isinstance(provenance.get(k), str) and re.fullmatch(r"[a-f0-9]{64}", provenance[k])
+                for k in ("text_sha256", "request_group"))
+        and isinstance(provenance.get("generation_settings"), dict)
+    )
+
+
+def validate_profiles_for_corpus(verses: list[dict], profiles: dict[str, dict]) -> None:
+    """Reject stale measurements before an analysis uses them; legacy text is unverified."""
+    for verse in verses:
+        profile = profiles.get(verse["id"])
+        if profile is None:
+            continue
+        if coerce_profile(profile, allow_legacy="provenance" not in profile) is None:
+            raise ValueError(f"incomplete or invalid profile for {verse['id']}; regenerate this request")
+        provenance = profile.get("provenance")
+        if provenance is not None:
+            if not _valid_provenance(provenance):
+                raise ValueError(f"invalid profile provenance for {verse['id']}")
+            if provenance["text_sha256"] != _text_hash(verse["text"]):
+                raise ValueError(f"profile text changed for {verse['id']}; regenerate profiles before analysis")
 
 
 def _append(path: Path, records: Iterable[dict]) -> None:
@@ -337,25 +416,35 @@ def _append(path: Path, records: Iterable[dict]) -> None:
             fh.write(json.dumps(r, ensure_ascii=False) + "\n")
 
 
-def _validate(chunk: list[dict], data: dict, model: str, backend: str) -> list[dict]:
-    wanted = {v["id"] for v in chunk}
-    # Some models echo the id without its language prefix ("MARK.1.1" for "grc:MARK.1.1").
-    aliases = {v["id"].split(":", 1)[-1]: v["id"] for v in chunk}
+def _validate(chunk: list[dict], data: dict, model: str, backend: str, generation_settings: dict | None = None) -> list[dict]:
+    """Accept a complete request atomically and map anonymous IDs back to corpus IDs."""
+    if not chunk or len({v["id"] for v in chunk}) != len(chunk):
+        raise ValueError("profiling requests require unique, nonempty corpus units")
+    aliases = {f"unit_{i:04d}": v["id"] for i, v in enumerate(chunk, 1)}
+    profiles = data.get("profiles") if isinstance(data, dict) else None
+    if not isinstance(profiles, list) or len(profiles) != len(chunk):
+        raise ValueError(f"response must contain exactly {len(chunk)} profiles; no measurements saved")
+    context = _request_context(chunk)
+    units = {u["id"]: u for u in context["units"]}
     got: dict[str, dict] = {}
-    profiles = data.get("profiles", []) if isinstance(data, dict) else (data if isinstance(data, list) else [])
     for raw in profiles:
         p = coerce_profile(raw)
-        if not p:
-            continue
-        p["id"] = aliases.get(p["id"], p["id"])
-        if p["id"] in wanted:
-            p["model"] = model
-            p["backend"] = backend
-            got[p["id"]] = p
-    missing = wanted - set(got)
-    if missing:
-        print(f"  warning: {len(missing)} of {len(chunk)} units missing from response ({sorted(missing)[:3]}...)")
-    return [got[v["id"]] for v in chunk if v["id"] in got]
+        if p is None:
+            raise ValueError("response contains an incomplete or invalid profile; no measurements saved")
+        if p["id"] not in aliases:
+            raise ValueError(f"response contains unexpected unit id {p['id']!r}; no measurements saved")
+        p["id"] = aliases[p["id"]]
+        if p["id"] in got:
+            raise ValueError("response contains duplicate unit ids; no measurements saved")
+        p["model"] = model
+        p["backend"] = backend
+        p["provenance"] = {
+            "prompt_version": PROMPT_VERSION, "schema_version": SCHEMA_VERSION,
+            "text_sha256": units[p["id"]]["text_sha256"], "request_group": context["request_group"],
+            "generation_settings": dict(generation_settings or {}),
+        }
+        got[p["id"]] = p
+    return [got[v["id"]] for v in chunk]
 
 
 # --- backends ----------------------------------------------------------------------------------------
@@ -386,13 +475,8 @@ def sdk_call(client, model: str, effort: str, chunk: list[dict]) -> tuple[dict, 
     last: Exception | None = None
     for attempt in range(4):
         try:
-            try:
-                # Server-side refusal fallback (routes a declined request to another model in-call).
-                resp = client.beta.messages.create(
-                    betas=["server-side-fallback-2026-07-01"], fallbacks="default", **kwargs
-                )
-            except TypeError:  # SDK predates the fallbacks parameter
-                resp = client.messages.create(**kwargs)
+            # A fallback model would change the measurement instrument mid-run.
+            resp = client.messages.create(**kwargs)
             break
         except anthropic.RateLimitError as e:
             last = e
@@ -544,6 +628,49 @@ def openai_call(
 
 # --- drivers -----------------------------------------------------------------------------------------
 
+def profile_settings(backend: str, effort: str = "high", thinking: bool = False, base_url: str | None = None) -> dict:
+    """Generation options that must remain fixed across a profile file."""
+    return {"effort": effort, "thinking": thinking,
+            "endpoint": base_url or OPENAI_PRESETS.get(backend, {}).get("base_url")}
+
+def _resume_chunks(
+    verses: list[dict], done: dict[str, dict], model: str, backend: str,
+    settings: dict, chunk_size: int, limit: int | None,
+) -> list[list[dict]]:
+    """Keep original context boundaries, including when an earlier request was partial."""
+    if limit is not None and limit < 1:
+        raise ValueError("profile limit must be positive")
+    if len({v["id"] for v in verses}) != len(verses):
+        raise ValueError("corpus contains duplicate unit ids")
+    _ensure_compatible_profiles(done, model, backend, settings)
+    pending = []
+    requested = 0
+    for chunk in chunk_verses(verses, chunk_size):
+        context = _request_context(chunk)
+        for v in chunk:
+            p = done.get(v["id"])
+            if p is not None and (p["provenance"]["text_sha256"] != _text_hash(v["text"])
+                                  or p["provenance"]["request_group"] != context["request_group"]):
+                raise ValueError(f"text or request context changed for {v['id']}; choose a new --profiles file")
+        if not all(v["id"] in done for v in chunk) and (limit is None or requested < limit):
+            pending.append(chunk)
+            requested += len(chunk)
+    return pending
+
+
+def _ensure_compatible_profiles(done: dict[str, dict], model: str, backend: str, settings: dict) -> None:
+    for ident, p in done.items():
+        provenance = p.get("provenance", {})
+        compatible = (
+            p.get("model") == model and p.get("backend") == backend
+            and provenance.get("prompt_version") == PROMPT_VERSION
+            and provenance.get("schema_version") == SCHEMA_VERSION
+            and provenance.get("generation_settings") == settings
+        )
+        if not compatible:
+            raise ValueError(f"existing profile {ident} uses a legacy or different profiling configuration; choose a new --profiles file")
+
+
 def run_profile(
     verses: list[dict],
     out_path: str | Path,
@@ -565,16 +692,17 @@ def run_profile(
             raise SystemExit(f"--model is required for the {backend} backend")
         progress(f"using {model} for the {backend} backend")
     done = load_profiles(out_path)
-    todo = [v for v in verses if v["id"] not in done]
-    if limit:
-        todo = todo[:limit]
-    chunks = chunk_verses(todo, chunk_size)
-    progress(f"{len(done)} units already profiled; {len(todo)} to do in {len(chunks)} requests via {backend} ({model}, effort={effort})")
+    settings = profile_settings(backend, effort, thinking, base_url)
+    chunks = _resume_chunks(verses, done, model, backend, settings, chunk_size, limit)
+    count = sum(len(c) for c in chunks)
+    progress(f"{len(done)} units already profiled; {count} to do in {len(chunks)} requests via {backend} ({model}, effort={effort})")
+    if limit is not None and count > limit:
+        progress(f"  limit rounded from {limit} to {count} units to preserve complete request context")
     if not chunks:
         return {"profiled": 0, "requests": 0}
 
     if backend == "batch":
-        return submit_batch(chunks, out_path, model, effort)
+        return submit_batch(chunks, out_path, model, effort, generation_settings=settings)
 
     call: Callable[[list[dict]], tuple[dict, dict]]
     if backend == "sdk":
@@ -593,17 +721,26 @@ def run_profile(
     err_path = out_path.with_name(out_path.stem + "_errors.jsonl")
     started = time.time()
 
-    def work(chunk: list[dict]) -> tuple[list[dict], list[dict], dict]:
-        data, usage = call(chunk)
-        return chunk, _validate(chunk, data, model, backend), usage
-
     with ThreadPoolExecutor(max_workers=max(1, workers)) as pool:
-        futures = {pool.submit(work, c): c for c in chunks}
+        futures = {pool.submit(call, c): c for c in chunks}
         for fut in as_completed(futures):
             chunk = futures[fut]
             totals["requests"] += 1
             try:
-                _, records, usage = fut.result()
+                data, usage = fut.result()
+                # Rejected measurements still incur API costs; account before validation.
+                totals["input_tokens"] += usage.get("input_tokens", 0) + usage.get("cache_read_input_tokens", 0)
+                totals["output_tokens"] += usage.get("output_tokens", 0)
+                totals["cost_usd"] += usage.get("cost_usd", 0.0)
+                if "input_tokens" in usage:
+                    pi, po = PRICES.get(model, PRICES[MODEL_DEFAULT])
+                    totals["cost_usd"] += (
+                        usage["input_tokens"] * pi
+                        + usage.get("cache_read_input_tokens", 0) * pi * 0.1
+                        + usage.get("cache_creation_input_tokens", 0) * pi * 1.25
+                        + usage["output_tokens"] * po
+                    ) / 1e6
+                records = _validate(chunk, data, model, backend, settings)
             except Exception as e:  # keep going; the run is resumable
                 totals["errors"] += 1
                 _append(err_path, [{"ids": [v["id"] for v in chunk], "error": str(e)[:500], "ts": time.time()}])
@@ -611,24 +748,13 @@ def run_profile(
                 continue
             _append(out_path, records)
             totals["profiled"] += len(records)
-            totals["input_tokens"] += usage.get("input_tokens", 0) + usage.get("cache_read_input_tokens", 0)
-            totals["output_tokens"] += usage.get("output_tokens", 0)
-            totals["cost_usd"] += usage.get("cost_usd", 0.0)
-            if "input_tokens" in usage:
-                pi, po = PRICES.get(model, PRICES[MODEL_DEFAULT])
-                totals["cost_usd"] += (
-                    usage["input_tokens"] * pi
-                    + usage.get("cache_read_input_tokens", 0) * pi * 0.1
-                    + usage.get("cache_creation_input_tokens", 0) * pi * 1.25
-                    + usage["output_tokens"] * po
-                ) / 1e6
             elapsed = time.time() - started
             progress(
                 f"  [{totals['requests']}/{len(chunks)}] {chunk[0]['id']}..{chunk[-1]['id']} "
                 f"{len(records)} profiles  total ${totals['cost_usd']:.2f}  {elapsed/60:.1f} min"
             )
     totals["seconds"] = round(time.time() - started, 1)
-    if totals["profiled"]:  # sidecar used by `stylometry compare-models` to measure $/verse
+    if totals["requests"]:  # retain paid failed attempts in the comparison's $/verse
         _append(out_path.with_name(out_path.stem + "_runs.jsonl"), [
             {"ts": time.time(), "model": model, "backend": backend, "effort": effort, "thinking": thinking,
              "chunk_size": chunk_size, **totals}
@@ -642,22 +768,35 @@ def _batch_state_path(out_path: Path) -> Path:
     return out_path.with_name(out_path.stem + "_batches.json")
 
 
-def submit_batch(chunks: list[list[dict]], out_path: Path, model: str, effort: str) -> dict:
+def submit_batch(chunks: list[list[dict]], out_path: Path, model: str, effort: str, generation_settings: dict | None = None) -> dict:
     from anthropic.types.message_create_params import MessageCreateParamsNonStreaming
     from anthropic.types.messages.batch_create_params import Request
 
-    client = _sdk_client()
     state_path = _batch_state_path(out_path)
+    state_path.parent.mkdir(parents=True, exist_ok=True)
     state = json.loads(state_path.read_text()) if state_path.exists() else {"batches": []}
+    settings = generation_settings or {}
+    requested_ids = {v["id"] for c in chunks for v in c}
+    for b in state["batches"]:
+        if b["collected"]:
+            continue
+        if b.get("model") != model or b.get("generation_settings") != settings or "contexts" not in b:
+            raise ValueError("pending batches use a legacy or different profiling configuration; choose a new --profiles file")
+        if requested_ids.intersection(i for ids in b["index"].values() for i in ids):
+            raise ValueError("these units already have a pending batch; collect its results before resubmitting")
+    _ensure_compatible_profiles(load_profiles(out_path), model, "batch", settings)
+    client = _sdk_client()
     schema = output_schema()
     submitted = 0
     for start in range(0, len(chunks), 10000):  # API limit is 100k requests; keep batches modest
         group = chunks[start : start + 10000]
         requests = []
         index: dict[str, list[str]] = {}
+        contexts: dict[str, dict] = {}
         for i, chunk in enumerate(group):
             cid = f"c{start + i:06d}"
             index[cid] = [v["id"] for v in chunk]
+            contexts[cid] = _request_context(chunk)
             params = dict(
                 model=model,
                 max_tokens=MAX_TOKENS,
@@ -669,7 +808,9 @@ def submit_batch(chunks: list[list[dict]], out_path: Path, model: str, effort: s
                 params["output_config"]["effort"] = effort
             requests.append(Request(custom_id=cid, params=MessageCreateParamsNonStreaming(**params)))
         batch = client.messages.batches.create(requests=requests)
-        state["batches"].append({"id": batch.id, "model": model, "status": batch.processing_status, "index": index, "collected": False})
+        state["batches"].append({"id": batch.id, "model": model, "status": batch.processing_status, "index": index,
+                                 "contexts": contexts, "generation_settings": generation_settings or {}, "collected": False})
+        state_path.write_text(json.dumps(state, ensure_ascii=False, indent=1))
         submitted += len(requests)
         print(f"submitted batch {batch.id} with {len(requests)} requests")
     state_path.write_text(json.dumps(state, ensure_ascii=False, indent=1))
@@ -683,8 +824,20 @@ def collect_batches(out_path: str | Path, verses_by_id: dict[str, dict], wait: b
     if not state_path.exists():
         print("no batches have been submitted")
         return {}
-    client = _sdk_client()
     state = json.loads(state_path.read_text())
+    existing = load_profiles(out_path)
+    pending_config = None
+    for b in state["batches"]:
+        if not b["collected"] and "contexts" not in b:
+            raise ValueError("pending batch has legacy, unblinded requests; collect it with the previous version into a separate file, or submit a new run")
+        if not b["collected"]:
+            settings = b.get("generation_settings", {})
+            _ensure_compatible_profiles(existing, b["model"], "batch", settings)
+            config = (b["model"], settings)
+            if pending_config is not None and config != pending_config:
+                raise ValueError("pending batches mix profiling configurations; collect into separate profile files")
+            pending_config = config
+    client = _sdk_client()
     totals = {"profiled": 0, "errored": 0, "pending": 0}
     while True:
         pending = 0
@@ -710,9 +863,13 @@ def collect_batches(out_path: str | Path, verses_by_id: dict[str, dict], wait: b
                     continue
                 text = next((blk.text for blk in msg.content if blk.type == "text"), "")
                 try:
-                    records += _validate(chunk, json.loads(text), b["model"], "batch")
-                except json.JSONDecodeError:
+                    if len(chunk) != len(ids) or _request_context(chunk) != b["contexts"].get(result.custom_id):
+                        raise ValueError("corpus text or request context changed since batch submission")
+                    records += _validate(chunk, json.loads(text), b["model"], "batch", b.get("generation_settings", {}))
+                except (json.JSONDecodeError, ValueError) as exc:
                     totals["errored"] += 1
+                    _append(out_path.with_name(out_path.stem + "_errors.jsonl"),
+                            [{"ids": ids, "error": str(exc)[:500], "batch": b["id"], "ts": time.time()}])
             _append(out_path, records)
             totals["profiled"] += len(records)
             b["collected"] = True

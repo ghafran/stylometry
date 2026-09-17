@@ -29,3 +29,8 @@ packages = ["stylometry"]
 dev = [
     "pytest>=9.1.1",
 ]
+
+[tool.pytest.ini_options]
+markers = [
+    "empirical: real reference-author acceptance gate (opt-in with --run-empirical; needs cached benchmark data)",
+]

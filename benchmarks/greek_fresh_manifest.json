@@ -1,0 +1,1362 @@
+{
+  "schema_version": 1,
+  "corpus_id": "perseus-fresh-author-evaluation-v1",
+  "description": "Fresh original-language Ancient Greek prose from eight authors absent from the original six-author pilot: 18 reference works, five calibration-only unfamiliar-author works, and three final unfamiliar-author works. No classification or model scoring was run by the curator.",
+  "selection_protocol": "Source-only selection before new-corpus scoring. Roles were predeclared by the root agent based on author IDs and corpus availability. Select complete independently catalogued compositions, not chapters treated as separate works. Use the three Aeschines speeches; six first substantial Isaeus inheritance speeches (exclude the fourth because its body has fewer than 2000 tokens); six authentic conventional Plutarch moral/religious essays and Delphic dialogues; three separately catalogued Dionysius compositions (On Thucydides, On Literary Composition, Letter to Pompeius). Calibration unfamiliar writers are the two authentic Antiphon homicide speeches and the first three catalogue-numbered Aelius Aristides prose hymns. Final unfamiliar authors are the first two Andocides speeches and Galen On the Natural Faculties as one whole work. All reference works exceed 2000 normalized tokens. No text, author, threshold or feature selection used classification performance.",
+  "role_assignment_basis": "Initially Antiphon was proposed as a reference author. Source research found specific attribution doubts about Against the Stepmother; before any scoring that work was excluded, Antiphon was moved to calibration_unknown, and Dionysius moved to reference because three independent cleanly catalogued works were available. The change was prompted solely by source authenticity and work availability, not model results.",
+  "evaluation_roles": {
+    "reference": [
+      "Aeschines",
+      "Isaeus",
+      "Plutarch",
+      "Dionysius of Halicarnassus"
+    ],
+    "calibration_unknown": [
+      "Antiphon",
+      "Aelius Aristides"
+    ],
+    "test_unknown": [
+      "Andocides",
+      "Galen"
+    ]
+  },
+  "freshness": {
+    "excluded_previous_pilot_authors": [
+      "Lysias",
+      "Isocrates",
+      "Demosthenes",
+      "Plato",
+      "Xenophon",
+      "Lucian"
+    ],
+    "curator_actions": "Downloaded primary source bytes, inspected catalogue and attribution material, ran existing text extraction, token counts, duplicate/source-ID and checksum audits only. No classifier fitting, predictions, feature analysis or benchmark execution.",
+    "caveat": "Metadata and selected prose were inspected for curation. Fresh means unexposed to model-performance evaluation at acquisition; it does not mean anonymous or unread by a curator. Subsequent evaluation exposure must be recorded by the evaluator."
+  },
+  "attribution_caveat": "Eight author labels are conventional catalogue assumptions, not historically certain identities. This is a small convenience sample with four candidate/reference authors, two calibration unfamiliar authors, and two final unfamiliar authors; they are not eight independent candidate identities or eight unknown-author trials. One final unfamiliar writer (Galen) contributes just one work. Corpus breadth, genre, subject, chronology, editing and quotation remain confounded. Success would not establish named scripture attribution, author counts, Biblical/Koine transfer, or reliability for Hebrew/Arabic. Final test authors and works must not be used to tune decision thresholds.",
+  "known_disputed_works_excluded": [
+    "Antiphon Against the Stepmother for Poisoning (specific historical authenticity/exercise doubts)",
+    "Antiphon Tetralogies",
+    "Andocides Against Alcibiades",
+    "Andocides On the Peace with Sparta (modern authenticity dispute)",
+    "Pseudo-Plutarch On the Education of Children, On Music, Lives of the Ten Orators",
+    "Hippocratic corpus (composite authorship)",
+    "Epictetus discourses as a label for his recorder Arrian"
+  ],
+  "source_review_links": [
+    "https://www.perseus.tufts.edu/hopper/text?doc=Perseus%3Atext%3A1999.04.0075%3Achapter%3D2%3Asection%3D7",
+    "https://ejournals.epublishing.ekt.gr/index.php/tekmiria/article/view/28450/0",
+    "https://www.cambridge.org/core/journals/classical-quarterly/article/abs/rhetoric-and-history-in-andocides-4-against-alcibiades/17E8048D4574313742573A3AAF9AE4D9",
+    "https://www.perseus.tufts.edu/hopper/text?doc=Perseus%3Atext%3A2008.01.0243",
+    "https://academic.oup.com/book/5959/chapter-abstract/149319319"
+  ],
+  "date_downloaded": "2026-09-16",
+  "repository_license_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/license.md",
+  "label_policy": "Manual broad genre/topic labels, not independently validated topic matching. Court oratory crosses reference Aeschines/Isaeus, calibration Antiphon and final Andocides. Aelius Aristides prose hymns and Plutarch religious essays/dialogues share a broad topic but differ in genre.",
+  "parser_policy": "Use existing unchanged tei-greek-v1 extractor: single Greek edition, omitting marked notes/headings/editorial matter/quotations and retaining accepted readings. No model-dependent cleaning. No books or chunks promoted into independent work labels.",
+  "works": [
+    {
+      "source_id": "tlg0026.tlg001.perseus-grc2",
+      "work_id": "tlg0026.tlg001",
+      "role": "attribution",
+      "evaluation_role": "reference",
+      "author": "Aeschines",
+      "work": "Against Timarchus",
+      "catalogue_title": "Against Timarchus",
+      "catalogue_edition_labels": [
+        "Κατὰ Τιμάρχου",
+        "Against Timarchus"
+      ],
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "forensic_oratory",
+      "topic": "athenian_public_affairs",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0026/tlg001/tlg0026.tlg001.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0026/tlg001/tlg0026.tlg001.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0026/tlg001/__cts__.xml",
+      "catalog_sha256": "6c30f403692bf939f2bbebb4a28aaf4b2854ed5a9be46fa96f39e5d6c27ebfd1",
+      "sha256": "9ed9e2dc00b8b121269deef3d9e6466f01427bb4e459a014ae5805e6e3a42b16",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "TEI publicationStmt explicit licence",
+      "attribution": "Perseus Digital Library, Tufts University; source editors and publishers recorded in edition metadata",
+      "edition": {
+        "title": [
+          "The Speeches of Aeschines"
+        ],
+        "editors": [
+          "Charles Darwin Adams"
+        ],
+        "publishers": [
+          "William Heinemann, Ltd.",
+          "Harvard University Press"
+        ],
+        "dates_as_cataloged": [
+          "1919",
+          "1958"
+        ],
+        "catalog_author": [
+          "Aeschines"
+        ]
+      },
+      "n_tokens": 13238,
+      "text_sha256": "4263752c58f2381398b950f2667c201fc26649fead9b1142832b60de25a18e7b",
+      "attribution_caveat": "Conventional source catalogue attribution; edited literary Greek, not independently verified personal authorship."
+    },
+    {
+      "source_id": "tlg0026.tlg002.perseus-grc2",
+      "work_id": "tlg0026.tlg002",
+      "role": "attribution",
+      "evaluation_role": "reference",
+      "author": "Aeschines",
+      "work": "On the Embassy",
+      "catalogue_title": "On the Embassy",
+      "catalogue_edition_labels": [
+        "Περὶ τῆς παραπρεσβείας",
+        "On the Embassy"
+      ],
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "forensic_oratory",
+      "topic": "athenian_public_affairs",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0026/tlg002/tlg0026.tlg002.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0026/tlg002/tlg0026.tlg002.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0026/tlg002/__cts__.xml",
+      "catalog_sha256": "e2ea245f590781a4b54ba28ac6635e44c0e70eb6fd73d4c458c720583585e94e",
+      "sha256": "4666a70537eae6bbd286de0a0a23b53691ec344aecbf1773f9663340d16d4ce5",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "TEI publicationStmt explicit licence",
+      "attribution": "Perseus Digital Library, Tufts University; source editors and publishers recorded in edition metadata",
+      "edition": {
+        "title": [
+          "The Speeches of Aeschines"
+        ],
+        "editors": [
+          "Charles Darwin Adams"
+        ],
+        "publishers": [
+          "William Heinemann, Ltd.",
+          "Harvard University Press"
+        ],
+        "dates_as_cataloged": [
+          "1919",
+          "1958"
+        ],
+        "catalog_author": [
+          "Aeschines"
+        ]
+      },
+      "n_tokens": 12266,
+      "text_sha256": "fbfb00f7b23df8c526a3ab548325fcfdd919807b5975911d54cf72165083651f",
+      "attribution_caveat": "Conventional source catalogue attribution; edited literary Greek, not independently verified personal authorship."
+    },
+    {
+      "source_id": "tlg0026.tlg003.perseus-grc2",
+      "work_id": "tlg0026.tlg003",
+      "role": "attribution",
+      "evaluation_role": "reference",
+      "author": "Aeschines",
+      "work": "Against Ctesiphon",
+      "catalogue_title": "Against Ctesiphon",
+      "catalogue_edition_labels": [
+        "Κατά Κτησιφώντος",
+        "Against Ctesiphon"
+      ],
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "forensic_oratory",
+      "topic": "athenian_public_affairs",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0026/tlg003/tlg0026.tlg003.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0026/tlg003/tlg0026.tlg003.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0026/tlg003/__cts__.xml",
+      "catalog_sha256": "d7a153de1b561589ea67a7a3b07066e9558fca9a3416057f97460a0be67c9b03",
+      "sha256": "2f8d73c078b2f9a9039c5c9573d90062ab307602a268972d778e14ccc11b019d",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "TEI publicationStmt explicit licence",
+      "attribution": "Perseus Digital Library, Tufts University; source editors and publishers recorded in edition metadata",
+      "edition": {
+        "title": [
+          "The Speeches of Aeschines"
+        ],
+        "editors": [
+          "Charles Darwin Adams"
+        ],
+        "publishers": [
+          "William Heinemann, Ltd.",
+          "Harvard University Press"
+        ],
+        "dates_as_cataloged": [
+          "1919",
+          "1958"
+        ],
+        "catalog_author": [
+          "Aeschines"
+        ]
+      },
+      "n_tokens": 18288,
+      "text_sha256": "a418272d591873c0ed0fd2b50c0768bd579412b4997c162c7b700730980276e2",
+      "attribution_caveat": "Conventional source catalogue attribution; edited literary Greek, not independently verified personal authorship."
+    },
+    {
+      "source_id": "tlg0017.tlg001.perseus-grc2",
+      "work_id": "tlg0017.tlg001",
+      "role": "attribution",
+      "evaluation_role": "reference",
+      "author": "Isaeus",
+      "work": "On The Estate of Cleonymus",
+      "catalogue_title": "On The Estate of Cleonymus",
+      "catalogue_edition_labels": [
+        "Περὶ τοῦ Κλεωνύμου κλήρου",
+        "On The Estate of Cleonymus"
+      ],
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "forensic_oratory",
+      "topic": "athenian_inheritance",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0017/tlg001/tlg0017.tlg001.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0017/tlg001/tlg0017.tlg001.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0017/tlg001/__cts__.xml",
+      "catalog_sha256": "40970bdb22fabbbfe6345098a32dca531399a3bf9568f1b4caec21f711707382",
+      "sha256": "478a631faf2c93c757f2a6f33c56d5e0114d819b84fef92fc3510c1375eae0d3",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "TEI publicationStmt explicit licence",
+      "attribution": "Perseus Digital Library, Tufts University; source editors and publishers recorded in edition metadata",
+      "edition": {
+        "title": [
+          "Isaeus with an English translation"
+        ],
+        "editors": [
+          "Edward Seymour Forster"
+        ],
+        "publishers": [
+          "Harvard University Press",
+          "William Heinemann Ltd."
+        ],
+        "dates_as_cataloged": [
+          "1962",
+          "1927"
+        ],
+        "catalog_author": [
+          "Isaeus"
+        ]
+      },
+      "n_tokens": 2710,
+      "text_sha256": "867cb59556aeef95205e1be0cb33f1ad11a66e28dd78a314a84fc5ef0c23ad3a",
+      "attribution_caveat": "Conventional source catalogue attribution; edited literary Greek, not independently verified personal authorship. Composer labels refer to the attributed speechwriter, not the litigant speaking; unmarked legal quotations may remain."
+    },
+    {
+      "source_id": "tlg0017.tlg002.perseus-grc2",
+      "work_id": "tlg0017.tlg002",
+      "role": "attribution",
+      "evaluation_role": "reference",
+      "author": "Isaeus",
+      "work": "On the Estate of Menecles",
+      "catalogue_title": "On the Estate of Menecles",
+      "catalogue_edition_labels": [
+        "Περὶ τοῦ Μενεκλέους κλήρου",
+        "On the Estate of Menecles"
+      ],
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "forensic_oratory",
+      "topic": "athenian_inheritance",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0017/tlg002/tlg0017.tlg002.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0017/tlg002/tlg0017.tlg002.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0017/tlg002/__cts__.xml",
+      "catalog_sha256": "6634ab4c09ed542fd6434a1a2f609947f65205a4023e829ad595451ceb4f4b53",
+      "sha256": "26efd94d37fe8197c1558156689535223aaee8e59d93881fddf4e3372ce08761",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "TEI publicationStmt explicit licence",
+      "attribution": "Perseus Digital Library, Tufts University; source editors and publishers recorded in edition metadata",
+      "edition": {
+        "title": [
+          "Isaeus with an English translation"
+        ],
+        "editors": [
+          "Edward Seymour Forster"
+        ],
+        "publishers": [
+          "Harvard University Press",
+          "William Heinemann Ltd."
+        ],
+        "dates_as_cataloged": [
+          "1962",
+          "1927"
+        ],
+        "catalog_author": [
+          "Isaeus"
+        ]
+      },
+      "n_tokens": 2749,
+      "text_sha256": "2ca083d473b8088f79bb5ef7f999b6ca03c19713ba01429a4c47dbd8bdac1b1d",
+      "attribution_caveat": "Conventional source catalogue attribution; edited literary Greek, not independently verified personal authorship. Composer labels refer to the attributed speechwriter, not the litigant speaking; unmarked legal quotations may remain."
+    },
+    {
+      "source_id": "tlg0017.tlg003.perseus-grc2",
+      "work_id": "tlg0017.tlg003",
+      "role": "attribution",
+      "evaluation_role": "reference",
+      "author": "Isaeus",
+      "work": "On The Estate Of Pyrrhus",
+      "catalogue_title": "On The Estate Of Pyrrhus",
+      "catalogue_edition_labels": [
+        "Περὶ τοῦ Πύρρου κλήρου",
+        "On The Estate Of Pyrrhus"
+      ],
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "forensic_oratory",
+      "topic": "athenian_inheritance",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0017/tlg003/tlg0017.tlg003.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0017/tlg003/tlg0017.tlg003.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0017/tlg003/__cts__.xml",
+      "catalog_sha256": "125f3b6dbcc780fd38303c1313884f6642816f9067d080a27499094b3f787ee5",
+      "sha256": "1c81e2747004ec51c73a23396d32501ac1b7b7009cbddf70f8fc3069a556ea75",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "TEI publicationStmt explicit licence",
+      "attribution": "Perseus Digital Library, Tufts University; source editors and publishers recorded in edition metadata",
+      "edition": {
+        "title": [
+          "Isaeus with an English translation"
+        ],
+        "editors": [
+          "Edward Seymour Forster"
+        ],
+        "publishers": [
+          "Harvard University Press",
+          "William Heinemann Ltd."
+        ],
+        "dates_as_cataloged": [
+          "1962",
+          "1927"
+        ],
+        "catalog_author": [
+          "Isaeus"
+        ]
+      },
+      "n_tokens": 4429,
+      "text_sha256": "7621716e1bad29969c0692bfc91352731501c36bff61a04c02680d066b698dca",
+      "attribution_caveat": "Conventional source catalogue attribution; edited literary Greek, not independently verified personal authorship. Composer labels refer to the attributed speechwriter, not the litigant speaking; unmarked legal quotations may remain."
+    },
+    {
+      "source_id": "tlg0017.tlg005.perseus-grc2",
+      "work_id": "tlg0017.tlg005",
+      "role": "attribution",
+      "evaluation_role": "reference",
+      "author": "Isaeus",
+      "work": "On the Estate of Dicaeogenes",
+      "catalogue_title": "On the Estate of Dicaeogenes",
+      "catalogue_edition_labels": [
+        "Περὶ τοῦ Δικαιογένους κλήρου",
+        "On the Estate of Dicaeogenes"
+      ],
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "forensic_oratory",
+      "topic": "athenian_inheritance",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0017/tlg005/tlg0017.tlg005.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0017/tlg005/tlg0017.tlg005.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0017/tlg005/__cts__.xml",
+      "catalog_sha256": "39afe86662e8b7b9a264ed205a0fe74e1f4a86c34c6f57e422b0e6e5263ae60e",
+      "sha256": "0e22b85fa37fefa22fe7b685f18f745d0b8524e39701d37565a1be2589dd86ad",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "TEI publicationStmt explicit licence",
+      "attribution": "Perseus Digital Library, Tufts University; source editors and publishers recorded in edition metadata",
+      "edition": {
+        "title": [
+          "Isaeus with an English translation"
+        ],
+        "editors": [
+          "Edward Seymour Forster"
+        ],
+        "publishers": [
+          "Harvard University Press",
+          "William Heinemann Ltd."
+        ],
+        "dates_as_cataloged": [
+          "1962",
+          "1927"
+        ],
+        "catalog_author": [
+          "Isaeus"
+        ]
+      },
+      "n_tokens": 3073,
+      "text_sha256": "ed374cbf8b7c40d12eed9de04d0a930c9e807ae0988aeae6818adaa046770c96",
+      "attribution_caveat": "Conventional source catalogue attribution; edited literary Greek, not independently verified personal authorship. Composer labels refer to the attributed speechwriter, not the litigant speaking; unmarked legal quotations may remain."
+    },
+    {
+      "source_id": "tlg0017.tlg006.perseus-grc2",
+      "work_id": "tlg0017.tlg006",
+      "role": "attribution",
+      "evaluation_role": "reference",
+      "author": "Isaeus",
+      "work": "On the Estate of Philoctemon",
+      "catalogue_title": "On the Estate of Philoctemon",
+      "catalogue_edition_labels": [
+        "Περὶ τοῦ Φιλοκτήμονος κλήρου",
+        "On the Estate of Philoctemon"
+      ],
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "forensic_oratory",
+      "topic": "athenian_inheritance",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0017/tlg006/tlg0017.tlg006.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0017/tlg006/tlg0017.tlg006.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0017/tlg006/__cts__.xml",
+      "catalog_sha256": "27152d3fed5fc2c7b43fc926604429c222f19c7bd72a7d4cd28c3063cc05ca6d",
+      "sha256": "4925f56fba8fbe282c87188460fa4f31d0f9f3227cbf3c94b6ad780dc588141a",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "TEI publicationStmt explicit licence",
+      "attribution": "Perseus Digital Library, Tufts University; source editors and publishers recorded in edition metadata",
+      "edition": {
+        "title": [
+          "Isaeus with an English translation"
+        ],
+        "editors": [
+          "Edward Seymour Forster"
+        ],
+        "publishers": [
+          "Harvard University Press",
+          "William Heinemann Ltd."
+        ],
+        "dates_as_cataloged": [
+          "1962",
+          "1927"
+        ],
+        "catalog_author": [
+          "Isaeus"
+        ]
+      },
+      "n_tokens": 3633,
+      "text_sha256": "669913bcb4bc3d42fa662a6681c5e2492a7631d324d5b0994ea19b1415cc34e5",
+      "attribution_caveat": "Conventional source catalogue attribution; edited literary Greek, not independently verified personal authorship. Composer labels refer to the attributed speechwriter, not the litigant speaking; unmarked legal quotations may remain."
+    },
+    {
+      "source_id": "tlg0017.tlg007.perseus-grc2",
+      "work_id": "tlg0017.tlg007",
+      "role": "attribution",
+      "evaluation_role": "reference",
+      "author": "Isaeus",
+      "work": "On The Estate of Apollodorus",
+      "catalogue_title": "On The Estate of Apollodorus",
+      "catalogue_edition_labels": [
+        "Περὶ τοῦ Απολλοδώρου κλήρου",
+        "On The Estate of Apollodorus"
+      ],
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "forensic_oratory",
+      "topic": "athenian_inheritance",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0017/tlg007/tlg0017.tlg007.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0017/tlg007/tlg0017.tlg007.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0017/tlg007/__cts__.xml",
+      "catalog_sha256": "0108c4106d2af6d67651071900066ab4c2ce0118d5dd90aabf214850adbd3437",
+      "sha256": "c8d50ac8c6aead5e45268535a093c484f79976ca91a3a7d1111efd36085064e8",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "TEI publicationStmt explicit licence",
+      "attribution": "Perseus Digital Library, Tufts University; source editors and publishers recorded in edition metadata",
+      "edition": {
+        "title": [
+          "Isaeus with an English translation"
+        ],
+        "editors": [
+          "Edward Seymour Forster"
+        ],
+        "publishers": [
+          "Harvard University Press",
+          "William Heinemann Ltd."
+        ],
+        "dates_as_cataloged": [
+          "1962",
+          "1927"
+        ],
+        "catalog_author": [
+          "Isaeus"
+        ]
+      },
+      "n_tokens": 2792,
+      "text_sha256": "171d49bd3827cdfce461115e35f7d3dcc4510f98f83d4a5364cd83a4c3189231",
+      "attribution_caveat": "Conventional source catalogue attribution; edited literary Greek, not independently verified personal authorship. Composer labels refer to the attributed speechwriter, not the litigant speaking; unmarked legal quotations may remain."
+    },
+    {
+      "source_id": "tlg0007.tlg070.perseus-grc2",
+      "work_id": "tlg0007.tlg070",
+      "role": "attribution",
+      "evaluation_role": "reference",
+      "author": "Plutarch",
+      "work": "How to Tell a Flatterer from a Friend",
+      "catalogue_title": "Quomodo adulator ab amico internoscatur",
+      "catalogue_edition_labels": [
+        "How to Tell a Flatterer from a Friend",
+        "How to Know a Flatterer from a Friend",
+        "Πῶς ἄν τις διακρίνειε τὸν κόλακα τοῦ φίλοῦ"
+      ],
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "philosophical_essay",
+      "topic": "ethical_conduct",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0007/tlg070/tlg0007.tlg070.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0007/tlg070/tlg0007.tlg070.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0007/tlg070/__cts__.xml",
+      "catalog_sha256": "e1641bdce63aadd15c1d806ed7efd72a96da41edfee55c4dd9114836e3637f57",
+      "sha256": "eeea71567f294e11c64959c55780b61506647667014611ec18f8dc5661312552",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "TEI publicationStmt explicit licence",
+      "attribution": "Perseus Digital Library, Tufts University; source editors and publishers recorded in edition metadata",
+      "edition": {
+        "title": [
+          "Moralia"
+        ],
+        "editors": [
+          "Grēgorios N. Vernardakēs"
+        ],
+        "publishers": [
+          "Teubner"
+        ],
+        "dates_as_cataloged": [
+          "1888"
+        ],
+        "catalog_author": [
+          "Plutarch"
+        ]
+      },
+      "n_tokens": 11240,
+      "text_sha256": "b54b510c20f379245601c84bb98bcdc0affd75cb6e79e39921123a8f7b6afc9a",
+      "attribution_caveat": "Conventional source catalogue attribution; edited literary Greek, not independently verified personal authorship. The six Moralia essays/dialogues are separately catalogued compositions, not chapters created as artificial works; literary dependence and shared collection/editorial conventions remain possible."
+    },
+    {
+      "source_id": "tlg0007.tlg071.perseus-grc2",
+      "work_id": "tlg0007.tlg071",
+      "role": "attribution",
+      "evaluation_role": "reference",
+      "author": "Plutarch",
+      "work": "How a Man May Become Aware of His Progress in Virtue",
+      "catalogue_title": "Quomodo quis suos in virtute sentiat profectus",
+      "catalogue_edition_labels": [
+        "How a Man May Become Aware of His Progress in Virtue",
+        "How a Man May Be Sensible of His Progress in Virtue.",
+        "Πῶς ἄν τις αἴσθοιτο ἑαυτοῦ προκόπτοντος ἐπʼ ἀρετή"
+      ],
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "philosophical_essay",
+      "topic": "ethical_conduct",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0007/tlg071/tlg0007.tlg071.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0007/tlg071/tlg0007.tlg071.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0007/tlg071/__cts__.xml",
+      "catalog_sha256": "9e3a5969e8624f4eb5d7c255da681008fbf17a50de6f388215acf3ac1785520f",
+      "sha256": "61cf0830fb5621bba7ee46f7e26ed75c307cc3815824c7e3b922a73331440cb7",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "TEI publicationStmt explicit licence",
+      "attribution": "Perseus Digital Library, Tufts University; source editors and publishers recorded in edition metadata",
+      "edition": {
+        "title": [
+          "Moralia"
+        ],
+        "editors": [
+          "Grēgorios N. Vernardakēs"
+        ],
+        "publishers": [
+          "Teubner"
+        ],
+        "dates_as_cataloged": [
+          "1888"
+        ],
+        "catalog_author": [
+          "Plutarch"
+        ]
+      },
+      "n_tokens": 4912,
+      "text_sha256": "52366a4aa6c737af6cba69bd0664427f20a4163c678dd3307a8a78bfdc38d5d5",
+      "attribution_caveat": "Conventional source catalogue attribution; edited literary Greek, not independently verified personal authorship. The six Moralia essays/dialogues are separately catalogued compositions, not chapters created as artificial works; literary dependence and shared collection/editorial conventions remain possible."
+    },
+    {
+      "source_id": "tlg0007.tlg080.perseus-grc2",
+      "work_id": "tlg0007.tlg080",
+      "role": "attribution",
+      "evaluation_role": "reference",
+      "author": "Plutarch",
+      "work": "On Superstition",
+      "catalogue_title": "De Superstitione",
+      "catalogue_edition_labels": [
+        "Superstition",
+        "Of Superstition, or Indiscreet Devotion",
+        "Περὶ δεισιδαιμονίας"
+      ],
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "philosophical_essay",
+      "topic": "religion_and_divination",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0007/tlg080/tlg0007.tlg080.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0007/tlg080/tlg0007.tlg080.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0007/tlg080/__cts__.xml",
+      "catalog_sha256": "b9c33fb01489419a9d58a2beefea4058dc1e8aaaebf50fc8d893d0763200bf20",
+      "sha256": "1fe03fc5f5e75fdc6a25f3b8769faeaa4f488dd7283139dd76226e6fa00b2f01",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "TEI publicationStmt explicit licence",
+      "attribution": "Perseus Digital Library, Tufts University; source editors and publishers recorded in edition metadata",
+      "edition": {
+        "title": [
+          "Moralia"
+        ],
+        "editors": [
+          "Grēgorios N. Vernardakēs"
+        ],
+        "publishers": [
+          "Teubner"
+        ],
+        "dates_as_cataloged": [
+          "1888"
+        ],
+        "catalog_author": [
+          "Plutarch"
+        ]
+      },
+      "n_tokens": 3139,
+      "text_sha256": "c79e0bb309eae1f84edbccfc13ffb6e6d152abd5ac929ccf6a68836e7f1cec54",
+      "attribution_caveat": "Conventional source catalogue attribution; edited literary Greek, not independently verified personal authorship. The six Moralia essays/dialogues are separately catalogued compositions, not chapters created as artificial works; literary dependence and shared collection/editorial conventions remain possible."
+    },
+    {
+      "source_id": "tlg0007.tlg090.perseus-grc2",
+      "work_id": "tlg0007.tlg090",
+      "role": "attribution",
+      "evaluation_role": "reference",
+      "author": "Plutarch",
+      "work": "On the E at Delphi",
+      "catalogue_title": "De E apud Delphos",
+      "catalogue_edition_labels": [
+        "The Ε at Delphi",
+        "Of the word ΕΙ engraven over the gate of Apollo's temple at Delphi",
+        "Περὶ τοῦ Ε τοῦ ἐν Δελφοῖς"
+      ],
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "philosophical_dialogue",
+      "topic": "religion_and_divination",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0007/tlg090/tlg0007.tlg090.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0007/tlg090/tlg0007.tlg090.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0007/tlg090/__cts__.xml",
+      "catalog_sha256": "c83ee6028fd2704422bba3ea6928c638578b9151c4d960a80ca6e7e4321a5704",
+      "sha256": "483c2a394070aef57e19da4831f9b45771494343f6ed90b23a4451e1c598a777",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "TEI publicationStmt explicit licence",
+      "attribution": "Perseus Digital Library, Tufts University; source editors and publishers recorded in edition metadata",
+      "edition": {
+        "title": [
+          "Moralia"
+        ],
+        "editors": [
+          "Grēgorios N. Vernardakēs"
+        ],
+        "publishers": [
+          "Teubner"
+        ],
+        "dates_as_cataloged": [
+          "1891"
+        ],
+        "catalog_author": [
+          "Plutarch"
+        ]
+      },
+      "n_tokens": 4768,
+      "text_sha256": "e164c249696101a03157966694ce3bd5cc7981897442f23430565e5e8548c6b8",
+      "attribution_caveat": "Conventional source catalogue attribution; edited literary Greek, not independently verified personal authorship. The six Moralia essays/dialogues are separately catalogued compositions, not chapters created as artificial works; literary dependence and shared collection/editorial conventions remain possible."
+    },
+    {
+      "source_id": "tlg0007.tlg091.perseus-grc2",
+      "work_id": "tlg0007.tlg091",
+      "role": "attribution",
+      "evaluation_role": "reference",
+      "author": "Plutarch",
+      "work": "On the Pythian Oracles",
+      "catalogue_title": "De Pythiae oraculis",
+      "catalogue_edition_labels": [
+        "The Oracle at Delphi no Longer Given in Verse",
+        "Wherefore the Pythian Priestess now Ceases to Deliver her Oracles in Verse",
+        "Περὶ τοῦ μὴ χρᾶν ἔμμετρα νῦν τὴν Πυθίαν"
+      ],
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "philosophical_dialogue",
+      "topic": "religion_and_divination",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0007/tlg091/tlg0007.tlg091.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0007/tlg091/tlg0007.tlg091.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0007/tlg091/__cts__.xml",
+      "catalog_sha256": "5b62f92030323d7cbccb5d63f6bd9e6e1c2ff4e31d3474c021134c75bebe69ab",
+      "sha256": "0c5cf348a963882b65c6d92a44a53c2011705a4d1766f3cf8b9ff8c6770858c1",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "TEI publicationStmt explicit licence",
+      "attribution": "Perseus Digital Library, Tufts University; source editors and publishers recorded in edition metadata",
+      "edition": {
+        "title": [
+          "Moralia"
+        ],
+        "editors": [
+          "Grēgorios N. Vernardakēs"
+        ],
+        "publishers": [
+          "Teubner"
+        ],
+        "dates_as_cataloged": [
+          "1891"
+        ],
+        "catalog_author": [
+          "Plutarch"
+        ]
+      },
+      "n_tokens": 6867,
+      "text_sha256": "a1f28de2f86f39a8d452ec2b7a6a0e35256a4fa9fb39f0612663bbdad2a70769",
+      "attribution_caveat": "Conventional source catalogue attribution; edited literary Greek, not independently verified personal authorship. The six Moralia essays/dialogues are separately catalogued compositions, not chapters created as artificial works; literary dependence and shared collection/editorial conventions remain possible."
+    },
+    {
+      "source_id": "tlg0007.tlg092.perseus-grc2",
+      "work_id": "tlg0007.tlg092",
+      "role": "attribution",
+      "evaluation_role": "reference",
+      "author": "Plutarch",
+      "work": "On the Obsolescence of Oracles",
+      "catalogue_title": "De Defectu Oraculorum",
+      "catalogue_edition_labels": [
+        "The Obsolesence of Oracles",
+        "Why the Oracles Cease to Give Answers",
+        "Περὶ τῶν ἐκλελοιπότων"
+      ],
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "philosophical_dialogue",
+      "topic": "religion_and_divination",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0007/tlg092/tlg0007.tlg092.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0007/tlg092/tlg0007.tlg092.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0007/tlg092/__cts__.xml",
+      "catalog_sha256": "02b45fd7a8fb9bd99790c7414f030d097715fd7cf5fca101d96afc67405863b4",
+      "sha256": "d435e26ce9f2685a25616187085779bab87b4c861532748062b85ec22adeb4c0",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "TEI publicationStmt explicit licence",
+      "attribution": "Perseus Digital Library, Tufts University; source editors and publishers recorded in edition metadata",
+      "edition": {
+        "title": [
+          "Moralia"
+        ],
+        "editors": [
+          "Grēgorios N. Vernardakēs"
+        ],
+        "publishers": [
+          "Teubner"
+        ],
+        "dates_as_cataloged": [
+          "1891"
+        ],
+        "catalog_author": [
+          "Plutarch"
+        ]
+      },
+      "n_tokens": 13330,
+      "text_sha256": "055e1bed3d5a3db11f5e6ac46274f22041f4f8a80c2a74704b05c42a7a72479b",
+      "attribution_caveat": "Conventional source catalogue attribution; edited literary Greek, not independently verified personal authorship. The six Moralia essays/dialogues are separately catalogued compositions, not chapters created as artificial works; literary dependence and shared collection/editorial conventions remain possible."
+    },
+    {
+      "source_id": "tlg0081.tlg010.perseus-grc2",
+      "work_id": "tlg0081.tlg010",
+      "role": "attribution",
+      "evaluation_role": "reference",
+      "author": "Dionysius of Halicarnassus",
+      "work": "On Thucydides",
+      "catalogue_title": "De Thucydide",
+      "catalogue_edition_labels": [
+        "Περὶ Θουκιδίδου"
+      ],
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "rhetorical_criticism",
+      "topic": "literary_style",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0081/tlg010/tlg0081.tlg010.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0081/tlg010/tlg0081.tlg010.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0081/tlg010/__cts__.xml",
+      "catalog_sha256": "4d27ab87950d80e998e0704429cf3336fdb809fdf8847d37bb72082a35344dcd",
+      "sha256": "3f278b32e5b76e52b4f7033c09424736b0cfe6b47a7ad43eb4b300ba3e960b2b",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "TEI publicationStmt explicit licence",
+      "attribution": "Perseus Digital Library, Tufts University; source editors and publishers recorded in edition metadata",
+      "edition": {
+        "title": [
+          "Dionysii Halicarnasei Opuscula"
+        ],
+        "editors": [
+          "Hermann Usener",
+          "Ludwig Radermacher"
+        ],
+        "publishers": [
+          "Teubner"
+        ],
+        "dates_as_cataloged": [
+          "1899"
+        ],
+        "catalog_author": [
+          "Dionysius of Halicarnassus"
+        ]
+      },
+      "n_tokens": 16849,
+      "text_sha256": "174367b60b5100fe6e5ac6758fa3c24a95ee22bfc4415bf57b98042b4d177082",
+      "attribution_caveat": "Conventional source catalogue attribution; edited literary Greek, not independently verified personal authorship. Critical works discuss and quote other writers, including authors in the old pilot. Marked quotations are removed by the unchanged parser, but unmarked reuse may remain. No exact content-independent ground truth is claimed."
+    },
+    {
+      "source_id": "tlg0081.tlg012.perseus-grc2",
+      "work_id": "tlg0081.tlg012",
+      "role": "attribution",
+      "evaluation_role": "reference",
+      "author": "Dionysius of Halicarnassus",
+      "work": "On Literary Composition",
+      "catalogue_title": "De Compositione Verborum",
+      "catalogue_edition_labels": [
+        "Περὶ συνθέσεως ὀνομάτων"
+      ],
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "rhetorical_criticism",
+      "topic": "literary_style",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0081/tlg012/tlg0081.tlg012.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0081/tlg012/tlg0081.tlg012.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0081/tlg012/__cts__.xml",
+      "catalog_sha256": "3dd12d16cfb974a2b978f683c59bd3f760f99b5177a6f0099b6ed9c14d901e7c",
+      "sha256": "66c20ba8205ed7a197d9a3c3b974ae6ac27b71cd1739fe4ae8b81926d949debd",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "TEI publicationStmt explicit licence",
+      "attribution": "Perseus Digital Library, Tufts University; source editors and publishers recorded in edition metadata",
+      "edition": {
+        "title": [
+          "Dionysii Halicarnasei Opuscula"
+        ],
+        "editors": [
+          "Hermann Usener",
+          "Ludwig Radermacher"
+        ],
+        "publishers": [
+          "Teubner"
+        ],
+        "dates_as_cataloged": [
+          "1904"
+        ],
+        "catalog_author": [
+          "Dionysius of Halicarnassus"
+        ]
+      },
+      "n_tokens": 18882,
+      "text_sha256": "e5d00f291e5a0cc22b0ed12e6ae4e4142e415c32bbd7af103777728e031dfd18",
+      "attribution_caveat": "Conventional source catalogue attribution; edited literary Greek, not independently verified personal authorship. Critical works discuss and quote other writers, including authors in the old pilot. Marked quotations are removed by the unchanged parser, but unmarked reuse may remain. No exact content-independent ground truth is claimed."
+    },
+    {
+      "source_id": "tlg0081.tlg015.perseus-grc2",
+      "work_id": "tlg0081.tlg015",
+      "role": "attribution",
+      "evaluation_role": "reference",
+      "author": "Dionysius of Halicarnassus",
+      "work": "Letter to Pompeius Geminus",
+      "catalogue_title": "Epistula ad Pompeium Geminum",
+      "catalogue_edition_labels": [
+        "Ἐπιστολὴ πρὸς Πομπήιον"
+      ],
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "rhetorical_criticism",
+      "topic": "literary_style",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0081/tlg015/tlg0081.tlg015.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0081/tlg015/tlg0081.tlg015.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0081/tlg015/__cts__.xml",
+      "catalog_sha256": "17b0d65c6b55f6e59926ad9e39656c5a933db019ed4735888a244147d223e7d2",
+      "sha256": "f4ad7760cc3e320e7fd837fefd33b56c275b6bc09e6af273293e80fb2c1d6b7d",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "TEI publicationStmt explicit licence",
+      "attribution": "Perseus Digital Library, Tufts University; source editors and publishers recorded in edition metadata",
+      "edition": {
+        "title": [
+          "Dionysii Halicarnasei Opuscula"
+        ],
+        "editors": [
+          "Hermann Usener",
+          "Ludwig Radermacher"
+        ],
+        "publishers": [
+          "Teubner"
+        ],
+        "dates_as_cataloged": [
+          "1904"
+        ],
+        "catalog_author": [
+          "Dionysius of Halicarnassus"
+        ]
+      },
+      "n_tokens": 4299,
+      "text_sha256": "8d14f8ab72c9f65c4c7ab8b808a31ca4f0f130a5821f48678cbde31b8687fe4b",
+      "attribution_caveat": "Conventional source catalogue attribution; edited literary Greek, not independently verified personal authorship. Critical works discuss and quote other writers, including authors in the old pilot. Marked quotations are removed by the unchanged parser, but unmarked reuse may remain. No exact content-independent ground truth is claimed."
+    },
+    {
+      "source_id": "tlg0028.tlg005.perseus-grc2",
+      "work_id": "tlg0028.tlg005",
+      "role": "attribution",
+      "evaluation_role": "calibration_unknown",
+      "author": "Antiphon",
+      "work": "On the murder of Herodes",
+      "catalogue_title": "On the murder of Herodes",
+      "catalogue_edition_labels": [
+        "Περὶ τοῦ Ἡρῷδου φόνου",
+        "On the Murder of Herodes"
+      ],
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "forensic_oratory",
+      "topic": "athenian_homicide",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0028/tlg005/tlg0028.tlg005.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0028/tlg005/tlg0028.tlg005.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0028/tlg005/__cts__.xml",
+      "catalog_sha256": "51757ee3f76bdc474972120049b94bd3103d142361264519ca0a65246fe0c031",
+      "sha256": "201083f28215328296d47d9ba4a970851c7472228d24b50a731d534998f31e03",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "TEI publicationStmt explicit licence",
+      "attribution": "Perseus Digital Library, Tufts University; source editors and publishers recorded in edition metadata",
+      "edition": {
+        "title": [
+          "Minor Attic Orators"
+        ],
+        "editors": [
+          "Kenneth John Maidment"
+        ],
+        "publishers": [
+          "William Heinemann, Ltd.",
+          "Harvard University Press"
+        ],
+        "dates_as_cataloged": [
+          "1941",
+          "1960"
+        ],
+        "catalog_author": [
+          "Andocides"
+        ]
+      },
+      "n_tokens": 6348,
+      "text_sha256": "833d5f67267a7a1d93994c0142e532dfb86233b1e451891287ef94526c5f0293",
+      "attribution_caveat": "Conventional source catalogue attribution; edited literary Greek, not independently verified personal authorship. Composer labels refer to the attributed speechwriter, not the litigant speaking; unmarked legal quotations may remain."
+    },
+    {
+      "source_id": "tlg0028.tlg006.perseus-grc2",
+      "work_id": "tlg0028.tlg006",
+      "role": "attribution",
+      "evaluation_role": "calibration_unknown",
+      "author": "Antiphon",
+      "work": "On the Choreutes",
+      "catalogue_title": "On the Choreutes",
+      "catalogue_edition_labels": [
+        "Περὶ τοῦ χορευτοῦ",
+        "On the Choreutes"
+      ],
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "forensic_oratory",
+      "topic": "athenian_homicide",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0028/tlg006/tlg0028.tlg006.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0028/tlg006/tlg0028.tlg006.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0028/tlg006/__cts__.xml",
+      "catalog_sha256": "3f16f448fbdec3973739327e8ea1e091c75790bc0cf3b79eeb0ee4eb8a709f4a",
+      "sha256": "2aeeb3345a5659c8b77c939e4c99b5d148b6f5760459f63e3100de4b9fdc91ee",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "TEI publicationStmt explicit licence",
+      "attribution": "Perseus Digital Library, Tufts University; source editors and publishers recorded in edition metadata",
+      "edition": {
+        "title": [
+          "Minor Attic Orators"
+        ],
+        "editors": [
+          "Kenneth John Maidment"
+        ],
+        "publishers": [
+          "William Heinemann, Ltd.",
+          "Harvard University Press"
+        ],
+        "dates_as_cataloged": [
+          "1941",
+          "1960"
+        ],
+        "catalog_author": [
+          "Andocides"
+        ]
+      },
+      "n_tokens": 3400,
+      "text_sha256": "7e57fb770ea7a7d77f4d81789179dd2c44707a344e4c31e5190dfcabab025d54",
+      "attribution_caveat": "Conventional source catalogue attribution; edited literary Greek, not independently verified personal authorship. Composer labels refer to the attributed speechwriter, not the litigant speaking; unmarked legal quotations may remain."
+    },
+    {
+      "source_id": "tlg0284.tlg001.perseus-grc2",
+      "work_id": "tlg0284.tlg001",
+      "role": "attribution",
+      "evaluation_role": "calibration_unknown",
+      "author": "Aelius Aristides",
+      "work": "To Zeus (catalogue Orationes 1)",
+      "catalogue_title": "Orationes 1",
+      "catalogue_edition_labels": [
+        "Εἰς Δία"
+      ],
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "epideictic_prose_hymn",
+      "topic": "religion_and_divination",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0284/tlg001/tlg0284.tlg001.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0284/tlg001/tlg0284.tlg001.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0284/tlg001/__cts__.xml",
+      "catalog_sha256": "3a2d4e3e53499a4814cc218a42a577e01830a400852794ea8967864d43061669",
+      "sha256": "0367a19c8239880199fe0270b3d36d8f3b1c95a7593a54da0cade857299f19c2",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "TEI publicationStmt explicit licence",
+      "attribution": "Perseus Digital Library, Tufts University; source editors and publishers recorded in edition metadata",
+      "edition": {
+        "title": [
+          "Aristides"
+        ],
+        "editors": [
+          "Wilhelm Dindorf"
+        ],
+        "publishers": [
+          "Reimer"
+        ],
+        "dates_as_cataloged": [
+          "1829"
+        ],
+        "catalog_author": [
+          "Aristides"
+        ]
+      },
+      "n_tokens": 2019,
+      "text_sha256": "aef2c7b14c8074cbc1a7bb840a9f4b30e99ff0c03c370d77eac644cb4931ec47",
+      "attribution_caveat": "Conventional source catalogue attribution; edited literary Greek, not independently verified personal authorship. These are prose hymns, not forensic court speeches; genre and religious subject overlap with Plutarch only broadly. Catalogue numbering differs from some modern editions; canonical CTS identifiers define the selected works."
+    },
+    {
+      "source_id": "tlg0284.tlg002.perseus-grc2",
+      "work_id": "tlg0284.tlg002",
+      "role": "attribution",
+      "evaluation_role": "calibration_unknown",
+      "author": "Aelius Aristides",
+      "work": "Athena (catalogue Orationes 2)",
+      "catalogue_title": "Orationes 2",
+      "catalogue_edition_labels": [
+        "Ἀθηνᾶ"
+      ],
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "epideictic_prose_hymn",
+      "topic": "religion_and_divination",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0284/tlg002/tlg0284.tlg002.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0284/tlg002/tlg0284.tlg002.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0284/tlg002/__cts__.xml",
+      "catalog_sha256": "10969bce0aad2dd4fbe4eaaa8356e7cb570404b1d9a4b617c65b3c5b8a126443",
+      "sha256": "ac9d5c33455e396920c5f632490a524681c016180c65e2f97db35b6e54c15966",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "TEI publicationStmt explicit licence",
+      "attribution": "Perseus Digital Library, Tufts University; source editors and publishers recorded in edition metadata",
+      "edition": {
+        "title": [
+          "Aristides"
+        ],
+        "editors": [
+          "Wilhelm Dindorf"
+        ],
+        "publishers": [
+          "Reimer"
+        ],
+        "dates_as_cataloged": [
+          "1829"
+        ],
+        "catalog_author": [
+          "Aristides"
+        ]
+      },
+      "n_tokens": 2235,
+      "text_sha256": "d192f75cec7ef377d1ef1be0263dbbc0140f2d4c582b1cb212a1167776ba88ee",
+      "attribution_caveat": "Conventional source catalogue attribution; edited literary Greek, not independently verified personal authorship. These are prose hymns, not forensic court speeches; genre and religious subject overlap with Plutarch only broadly. Catalogue numbering differs from some modern editions; canonical CTS identifiers define the selected works."
+    },
+    {
+      "source_id": "tlg0284.tlg003.perseus-grc2",
+      "work_id": "tlg0284.tlg003",
+      "role": "attribution",
+      "evaluation_role": "calibration_unknown",
+      "author": "Aelius Aristides",
+      "work": "Isthmian Oration to Poseidon (catalogue Orationes 3)",
+      "catalogue_title": "Orationes 3",
+      "catalogue_edition_labels": [
+        "Ἰσθμικὸς εἰς Ποσειδῶνα"
+      ],
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "epideictic_prose_hymn",
+      "topic": "religion_and_divination",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0284/tlg003/tlg0284.tlg003.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0284/tlg003/tlg0284.tlg003.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0284/tlg003/__cts__.xml",
+      "catalog_sha256": "5e10b477de2b4e67be13ef965875aa0635bf191a7d9506e0d3473147d33249e9",
+      "sha256": "980f29ca23d8511a6c5412922c7cfe218844754ba3418ac0ba1cb6c80ce12251",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "TEI publicationStmt explicit licence",
+      "attribution": "Perseus Digital Library, Tufts University; source editors and publishers recorded in edition metadata",
+      "edition": {
+        "title": [
+          "Aristides"
+        ],
+        "editors": [
+          "Wilhelm Dindorf"
+        ],
+        "publishers": [
+          "Reimer"
+        ],
+        "dates_as_cataloged": [
+          "1829"
+        ],
+        "catalog_author": [
+          "Aristides"
+        ]
+      },
+      "n_tokens": 3393,
+      "text_sha256": "4ac77645bc0eac772206c5ed9c746425243c08f4194e08a97e65b8ec0f6c58ba",
+      "attribution_caveat": "Conventional source catalogue attribution; edited literary Greek, not independently verified personal authorship. These are prose hymns, not forensic court speeches; genre and religious subject overlap with Plutarch only broadly. Catalogue numbering differs from some modern editions; canonical CTS identifiers define the selected works."
+    },
+    {
+      "source_id": "tlg0027.tlg001.perseus-grc2",
+      "work_id": "tlg0027.tlg001",
+      "role": "attribution",
+      "evaluation_role": "test_unknown",
+      "author": "Andocides",
+      "work": "On the Mysteries",
+      "catalogue_title": "On the Mysteries",
+      "catalogue_edition_labels": [
+        "Περὶ τῶν μυστηρίων",
+        "On the Mysteries"
+      ],
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "forensic_oratory",
+      "topic": "athenian_public_affairs",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0027/tlg001/tlg0027.tlg001.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0027/tlg001/tlg0027.tlg001.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0027/tlg001/__cts__.xml",
+      "catalog_sha256": "cea2da0a772b1910525cd5f843ecff093d0e0606d2ceb868199e0d09282357c9",
+      "sha256": "ef5bdf303d37194254658172fafe4d33ca21100836adda1bb4653d4b83445d37",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "TEI publicationStmt explicit licence",
+      "attribution": "Perseus Digital Library, Tufts University; source editors and publishers recorded in edition metadata",
+      "edition": {
+        "title": [
+          "Minor Attic Orators"
+        ],
+        "editors": [
+          "Kenneth John Maidment"
+        ],
+        "publishers": [
+          "William Heinemann, Ltd.",
+          "Harvard University Press"
+        ],
+        "dates_as_cataloged": [
+          "1941",
+          "1960"
+        ],
+        "catalog_author": [
+          "Andocides"
+        ]
+      },
+      "n_tokens": 9213,
+      "text_sha256": "5d7852cb60cf7fe568738ea400239aca536cce3c17b3d41d60bdb9caa1c42be2",
+      "attribution_caveat": "Conventional source catalogue attribution; edited literary Greek, not independently verified personal authorship."
+    },
+    {
+      "source_id": "tlg0027.tlg002.perseus-grc2",
+      "work_id": "tlg0027.tlg002",
+      "role": "attribution",
+      "evaluation_role": "test_unknown",
+      "author": "Andocides",
+      "work": "On His Return",
+      "catalogue_title": "On His Return",
+      "catalogue_edition_labels": [
+        "Περὶ τῆς ἑαυτοῦ καθόδου",
+        "On His Return"
+      ],
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "deliberative_oratory",
+      "topic": "athenian_public_affairs",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0027/tlg002/tlg0027.tlg002.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0027/tlg002/tlg0027.tlg002.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0027/tlg002/__cts__.xml",
+      "catalog_sha256": "770c001dfe3a828128508441ce4500ad45e81c8f8103c05e2f640cc17d454198",
+      "sha256": "8ba9957c8c84e787dd584abe541e51ce4b5a7e091279305a8ca1ce69de0c21ef",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "TEI publicationStmt explicit licence",
+      "attribution": "Perseus Digital Library, Tufts University; source editors and publishers recorded in edition metadata",
+      "edition": {
+        "title": [
+          "Minor Attic Orators"
+        ],
+        "editors": [
+          "Kenneth John Maidment"
+        ],
+        "publishers": [
+          "William Heinemann, Ltd.",
+          "Harvard University Press"
+        ],
+        "dates_as_cataloged": [
+          "1941",
+          "1960"
+        ],
+        "catalog_author": [
+          "Andocides"
+        ]
+      },
+      "n_tokens": 1945,
+      "text_sha256": "d3d929fa758f6baddbe143bd28b0cf4f884efcabafaf7d42681c405bdcd51d6b",
+      "attribution_caveat": "Conventional source catalogue attribution; edited literary Greek, not independently verified personal authorship."
+    },
+    {
+      "source_id": "tlg0057.tlg010.perseus-grc2",
+      "work_id": "tlg0057.tlg010",
+      "role": "attribution",
+      "evaluation_role": "test_unknown",
+      "author": "Galen",
+      "work": "On the Natural Faculties",
+      "catalogue_title": "De naturalibus facultatibus",
+      "catalogue_edition_labels": [
+        "Περί φυσικῶν δυνάμεων",
+        "On the Natural Faculties"
+      ],
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "medical_treatise",
+      "topic": "physiology",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0057/tlg010/tlg0057.tlg010.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0057/tlg010/tlg0057.tlg010.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0057/tlg010/__cts__.xml",
+      "catalog_sha256": "9c1619e4a2b96c7bdc533896bbb81ca02b007fbd736a2deac28c0dd88b9becf7",
+      "sha256": "b293ff121132f4c4e73eca0493f9a9aef863e1a3589ebdb4bcfb887a28463afa",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "TEI publicationStmt explicit licence",
+      "attribution": "Perseus Digital Library, Tufts University; source editors and publishers recorded in edition metadata",
+      "edition": {
+        "title": [
+          "On the Natural Faculties"
+        ],
+        "editors": [
+          "A. J. Brock"
+        ],
+        "publishers": [
+          "Harvard University Press",
+          "William Heinemann Ltd."
+        ],
+        "dates_as_cataloged": [
+          "1916"
+        ],
+        "catalog_author": [
+          "Galen"
+        ]
+      },
+      "n_tokens": 31807,
+      "text_sha256": "4cd8dc60164eadc4c2913e2fc4f6dcbee0c35f2f90a196bfb58332b15338e262",
+      "attribution_caveat": "Conventional source catalogue attribution; edited literary Greek, not independently verified personal authorship. A single complete treatise is one independent work despite its three internal books; this provides only one work from one medically specialized unknown author."
+    }
+  ]
+}

@@ -1,0 +1,853 @@
+{
+  "schema_version": 1,
+  "corpus_id": "perseus-greek-known-author-v1",
+  "description": "Original-language Ancient Greek prose: six cataloged authors, three distinct works each, plus a two-edition control of a separate Lucian work.",
+  "selection_protocol": "Selected before scoring: choose three substantial, conventionally attributed distinct works per author, with at least 2,000 extracted Greek tokens each. Include three Attic forensic orators and two authors of Socratic prose for shared-genre/topic challenges. Lucian supplies a later author and a separate same-work edition control. No work, author, threshold, or feature is selected by observed benchmark accuracy.",
+  "attribution_caveat": "Author identities are conventional Perseus catalog labels, not independent proof of ancient historical authorship. This is a small convenience benchmark of edited literary Greek, not scripture, and cannot validate biblical attribution, number of hands, or Hebrew/Arabic transfer. The same editor/edition tradition is often confounded with author; coarse genre/topic labels do not fully control subgenre, subject, chronology, or literary dependence. Forensic speeches may be ghostwritten for speakers; the author label refers to the attributed composer.",
+  "known_disputed_works_excluded": [
+    "Isocrates To Demonicus",
+    "Plato Alcibiades II and other dubia/spuria",
+    "Xenophon Constitution of the Athenians",
+    "Lucian Macrobii and De astrologia"
+  ],
+  "date_downloaded": "2026-09-16",
+  "repository_license_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/license.md",
+  "parser_policy": "Extract only the single Greek edition within TEI body. Remove headers, notes, headings, speaker labels, bibliographic material, rejected readings/deletions, marked quotations/citations, and non-Greek spans. Keep main-text names and authored direct speech; select lem/corr/reg preferred readings. Normalize through the application Greek tokenizer; punctuation is omitted. Never count an alternate edition as an independent work.",
+  "label_policy": "genre and topic are manually assigned broad challenge strata, not independent scholarly taxonomies. socratic_prose includes apology, dialogue, and recollection; forensic_oratory includes public and private cases.",
+  "controls_note": "The two How to Write History files have the same work_id and role=witness_control. They are excluded from load_benchmark by default; they may be compared for edition sensitivity, never added as independent attribution works. Edition dates are reproduced as cataloged and have not been bibliographically corrected.",
+  "works": [
+    {
+      "source_id": "tlg0540.tlg012.perseus-grc2",
+      "work_id": "tlg0540.tlg012",
+      "role": "attribution",
+      "author": "Lysias",
+      "work": "Against Eratosthenes",
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "forensic_oratory",
+      "topic": "athenian_litigation",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0540/tlg012/tlg0540.tlg012.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0540/tlg012/tlg0540.tlg012.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0540/tlg012/__cts__.xml",
+      "sha256": "b5ace4b9e0117b7f09b2f59c0fbe7a9600e0ac70b0e20470dca5b2429587510b",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "TEI publicationStmt explicit licence",
+      "attribution": "Perseus Digital Library, Tufts University; original edition credited below",
+      "edition": {
+        "title": [
+          "Lysias"
+        ],
+        "editors": [
+          "W.R.M. Lamb"
+        ],
+        "publishers": [
+          "William Heinemann Ltd.",
+          "Harvard University Press"
+        ],
+        "dates_as_cataloged": [
+          "1930"
+        ],
+        "catalog_author": [
+          "Lysias"
+        ]
+      },
+      "n_tokens": 4843,
+      "text_sha256": "d27af14d1a4bbf840aafb1c52a4923783669a3a23ca821ced7ca41ecc06bfa86"
+    },
+    {
+      "source_id": "tlg0540.tlg013.perseus-grc2",
+      "work_id": "tlg0540.tlg013",
+      "role": "attribution",
+      "author": "Lysias",
+      "work": "Against Agoratus",
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "forensic_oratory",
+      "topic": "athenian_litigation",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0540/tlg013/tlg0540.tlg013.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0540/tlg013/tlg0540.tlg013.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0540/tlg013/__cts__.xml",
+      "sha256": "8012f5bc0171a771b09066fef26ef3ba6eea8052f1bc18903a7657b00d4594d7",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "TEI publicationStmt explicit licence",
+      "attribution": "Perseus Digital Library, Tufts University; original edition credited below",
+      "edition": {
+        "title": [
+          "Lysias"
+        ],
+        "editors": [
+          "W.R.M. Lamb"
+        ],
+        "publishers": [
+          "William Heinemann Ltd.",
+          "Harvard University Press"
+        ],
+        "dates_as_cataloged": [
+          "1930"
+        ],
+        "catalog_author": [
+          "Lysias"
+        ]
+      },
+      "n_tokens": 4794,
+      "text_sha256": "020534da30d7833c1340270e092fb0f498e0108e5ecab7979303c4bb1afe6493"
+    },
+    {
+      "source_id": "tlg0540.tlg019.perseus-grc2",
+      "work_id": "tlg0540.tlg019",
+      "role": "attribution",
+      "author": "Lysias",
+      "work": "On the Property of Aristophanes",
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "forensic_oratory",
+      "topic": "athenian_litigation",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0540/tlg019/tlg0540.tlg019.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0540/tlg019/tlg0540.tlg019.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0540/tlg019/__cts__.xml",
+      "sha256": "10172b3a2cdd37f5ebecdc9aa8e795e57969c4073be3f9985af62903b8b05679",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "TEI publicationStmt explicit licence",
+      "attribution": "Perseus Digital Library, Tufts University; original edition credited below",
+      "edition": {
+        "title": [
+          "Lysias"
+        ],
+        "editors": [
+          "W.R.M. Lamb"
+        ],
+        "publishers": [
+          "William Heinemann Ltd.",
+          "Harvard University Press"
+        ],
+        "dates_as_cataloged": [
+          "1930"
+        ],
+        "catalog_author": [
+          "Lysias"
+        ]
+      },
+      "n_tokens": 3102,
+      "text_sha256": "d3dea5191c54ccd54d37ee59e88872beb36fc31ef0e7c673d8a5db3eb68d78ae"
+    },
+    {
+      "source_id": "tlg0010.tlg002.perseus-grc2",
+      "work_id": "tlg0010.tlg002",
+      "role": "attribution",
+      "author": "Isocrates",
+      "work": "Against Callimachus",
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "forensic_oratory",
+      "topic": "athenian_litigation",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0010/tlg002/tlg0010.tlg002.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0010/tlg002/tlg0010.tlg002.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0010/tlg002/__cts__.xml",
+      "sha256": "af3ef470a5a3b9d0b0f59793e3695c89e952affe240b0533716a3b67f97d632d",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "TEI publicationStmt explicit licence",
+      "attribution": "Perseus Digital Library, Tufts University; original edition credited below",
+      "edition": {
+        "title": [
+          "Isocrates"
+        ],
+        "editors": [
+          "Larue Van Hook"
+        ],
+        "publishers": [
+          "Harvard University Press",
+          "William Heinemann Ltd."
+        ],
+        "dates_as_cataloged": [
+          "1945"
+        ],
+        "catalog_author": [
+          "Isocrates"
+        ]
+      },
+      "n_tokens": 3558,
+      "text_sha256": "7894cd71ce5f70bf5fbd01865e33ccf78e8a58df49d1b1ad9fb7a0981d8c17b4"
+    },
+    {
+      "source_id": "tlg0010.tlg004.perseus-grc2",
+      "work_id": "tlg0010.tlg004",
+      "role": "attribution",
+      "author": "Isocrates",
+      "work": "Concerning the Team of Horses",
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "forensic_oratory",
+      "topic": "athenian_litigation",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0010/tlg004/tlg0010.tlg004.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0010/tlg004/tlg0010.tlg004.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0010/tlg004/__cts__.xml",
+      "sha256": "037110d7cd26b96c8b101b0043d689dcd16c86df79d808e845bb10425bcf44b2",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "TEI publicationStmt explicit licence",
+      "attribution": "Perseus Digital Library, Tufts University; original edition credited below",
+      "edition": {
+        "title": [
+          "Isocrates"
+        ],
+        "editors": [
+          "Larue Van Hook"
+        ],
+        "publishers": [
+          "Harvard University Press",
+          "William Heinemann Ltd."
+        ],
+        "dates_as_cataloged": [
+          "1945"
+        ],
+        "catalog_author": [
+          "Isocrates"
+        ]
+      },
+      "n_tokens": 2901,
+      "text_sha256": "64104ff98532ad1dc92761a4d5f0a505c5c0ad1d5c6e92443cbbb8621b6b53bc"
+    },
+    {
+      "source_id": "tlg0010.tlg005.perseus-grc2",
+      "work_id": "tlg0010.tlg005",
+      "role": "attribution",
+      "author": "Isocrates",
+      "work": "Trapeziticus",
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "forensic_oratory",
+      "topic": "athenian_litigation",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0010/tlg005/tlg0010.tlg005.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0010/tlg005/tlg0010.tlg005.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0010/tlg005/__cts__.xml",
+      "sha256": "481e9016d8c2ba2add6dbbb4d8b8b72044a539f729111ad08e5126dd4061248a",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "TEI publicationStmt explicit licence",
+      "attribution": "Perseus Digital Library, Tufts University; original edition credited below",
+      "edition": {
+        "title": [
+          "Isocrates"
+        ],
+        "editors": [
+          "Larue Van Hook"
+        ],
+        "publishers": [
+          "Harvard University Press",
+          "William Heinemann Ltd."
+        ],
+        "dates_as_cataloged": [
+          "1945"
+        ],
+        "catalog_author": [
+          "Isocrates"
+        ]
+      },
+      "n_tokens": 3363,
+      "text_sha256": "7a91ce4a6fea2909f2d92472098975191e5fb777c82644103d56cc5108736b58"
+    },
+    {
+      "source_id": "tlg0014.tlg018.perseus-grc2",
+      "work_id": "tlg0014.tlg018",
+      "role": "attribution",
+      "author": "Demosthenes",
+      "work": "On the Crown",
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "forensic_oratory",
+      "topic": "athenian_litigation",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0014/tlg018/tlg0014.tlg018.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0014/tlg018/tlg0014.tlg018.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0014/tlg018/__cts__.xml",
+      "sha256": "e90d85ec007e5f7d4078736b27510a909b2ebe4fed0ab92ceecbe966adb49109",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "Repository default license; no file-specific override present",
+      "attribution": "Perseus Digital Library, Tufts University; original edition credited below",
+      "edition": {
+        "title": [
+          "Demosthenis Orationes"
+        ],
+        "editors": [
+          "Samuel Henry Butcher"
+        ],
+        "publishers": [
+          "Clarendon Press"
+        ],
+        "dates_as_cataloged": [
+          "1903"
+        ],
+        "catalog_author": [
+          "Demosthenes"
+        ]
+      },
+      "n_tokens": 19396,
+      "text_sha256": "65992fb4762605790c2fb5d0e1cc59a285a12308c7d52527bba4d8e563f7318b"
+    },
+    {
+      "source_id": "tlg0014.tlg019.perseus-grc2",
+      "work_id": "tlg0014.tlg019",
+      "role": "attribution",
+      "author": "Demosthenes",
+      "work": "On the False Embassy",
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "forensic_oratory",
+      "topic": "athenian_litigation",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0014/tlg019/tlg0014.tlg019.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0014/tlg019/tlg0014.tlg019.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0014/tlg019/__cts__.xml",
+      "sha256": "f32d568c4ada86ba408c45bdaa5817bb257dbd94516b7d0ad52a13eedcc6bee9",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "Repository default license; no file-specific override present",
+      "attribution": "Perseus Digital Library, Tufts University; original edition credited below",
+      "edition": {
+        "title": [
+          "Demosthenis Orationes"
+        ],
+        "editors": [
+          "Samuel Henry Butcher"
+        ],
+        "publishers": [
+          "Clarendon Press"
+        ],
+        "dates_as_cataloged": [
+          "1903"
+        ],
+        "catalog_author": [
+          "Demosthenes"
+        ]
+      },
+      "n_tokens": 22644,
+      "text_sha256": "9aca35275c733c86b63bbb1fbf4655f341be047fb4d83d396196e53cd942bc7a"
+    },
+    {
+      "source_id": "tlg0014.tlg021.perseus-grc2",
+      "work_id": "tlg0014.tlg021",
+      "role": "attribution",
+      "author": "Demosthenes",
+      "work": "Against Meidias",
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "forensic_oratory",
+      "topic": "athenian_litigation",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0014/tlg021/tlg0014.tlg021.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0014/tlg021/tlg0014.tlg021.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0014/tlg021/__cts__.xml",
+      "sha256": "c0498dddda8aca54796cbe8055910c2feca6c467ab22431ee6755fa10c874ed6",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "Repository default license; no file-specific override present",
+      "attribution": "Perseus Digital Library, Tufts University; original edition credited below",
+      "edition": {
+        "title": [
+          "Demosthenes Orationes"
+        ],
+        "editors": [
+          "Samuel Henry Butcher"
+        ],
+        "publishers": [
+          "Clarendon Press"
+        ],
+        "dates_as_cataloged": [
+          "1907"
+        ],
+        "catalog_author": [
+          "Demosthenes"
+        ]
+      },
+      "n_tokens": 14780,
+      "text_sha256": "c1699e51f15ea0c05d7d861541abd364e37486e17d70ca5e2ee2a237144e7bd9"
+    },
+    {
+      "source_id": "tlg0059.tlg002.perseus-grc2",
+      "work_id": "tlg0059.tlg002",
+      "role": "attribution",
+      "author": "Plato",
+      "work": "Apology",
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "socratic_prose",
+      "topic": "socrates",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0059/tlg002/tlg0059.tlg002.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0059/tlg002/tlg0059.tlg002.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0059/tlg002/__cts__.xml",
+      "sha256": "6077e9014cf806d7d70e22133946125dc222e9ff8c6207ca6c324993ee95a8a9",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "Repository default license; no file-specific override present",
+      "attribution": "Perseus Digital Library, Tufts University; original edition credited below",
+      "edition": {
+        "title": [
+          "Platonis Opera"
+        ],
+        "editors": [
+          "John Burnet"
+        ],
+        "publishers": [
+          "Clarendon Press"
+        ],
+        "dates_as_cataloged": [
+          "1905"
+        ],
+        "catalog_author": [
+          "Plato"
+        ]
+      },
+      "n_tokens": 8745,
+      "text_sha256": "06917497be73e9efd900920fb75273f665dc8912e027123b4492466a0957de91"
+    },
+    {
+      "source_id": "tlg0059.tlg003.perseus-grc2",
+      "work_id": "tlg0059.tlg003",
+      "role": "attribution",
+      "author": "Plato",
+      "work": "Crito",
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "socratic_prose",
+      "topic": "socrates",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0059/tlg003/tlg0059.tlg003.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0059/tlg003/tlg0059.tlg003.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0059/tlg003/__cts__.xml",
+      "sha256": "c75911f867c2ffcc9ebfffeaacdbcc0c558256dd135e0209ac17c06cd7fc97f9",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "Repository default license; no file-specific override present",
+      "attribution": "Perseus Digital Library, Tufts University; original edition credited below",
+      "edition": {
+        "title": [
+          "Platonis Opera"
+        ],
+        "editors": [
+          "John Burnet"
+        ],
+        "publishers": [
+          "Clarendon Press"
+        ],
+        "dates_as_cataloged": [
+          "1905"
+        ],
+        "catalog_author": [
+          "Plato"
+        ]
+      },
+      "n_tokens": 4159,
+      "text_sha256": "2943a65c39df87dd769d8481269ad759da91e25d640198aeec9d1bbb543f2e09"
+    },
+    {
+      "source_id": "tlg0059.tlg004.perseus-grc2",
+      "work_id": "tlg0059.tlg004",
+      "role": "attribution",
+      "author": "Plato",
+      "work": "Phaedo",
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "socratic_prose",
+      "topic": "socrates",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0059/tlg004/tlg0059.tlg004.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0059/tlg004/tlg0059.tlg004.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0059/tlg004/__cts__.xml",
+      "sha256": "baf65d8cb72f857e80ea4e2326a6808c1cf3cbc8df7b4340f14e79d142227d98",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "Repository default license; no file-specific override present",
+      "attribution": "Perseus Digital Library, Tufts University; original edition credited below",
+      "edition": {
+        "title": [
+          "Platonis Opera"
+        ],
+        "editors": [
+          "John Burnet"
+        ],
+        "publishers": [
+          "Clarendon Press"
+        ],
+        "dates_as_cataloged": [
+          "1905"
+        ],
+        "catalog_author": [
+          "Plato"
+        ]
+      },
+      "n_tokens": 22252,
+      "text_sha256": "c2a4d727c5a561dfdb360c11ceec4f17804d40563799fc9381379c64e2521065"
+    },
+    {
+      "source_id": "tlg0032.tlg002.perseus-grc2",
+      "work_id": "tlg0032.tlg002",
+      "role": "attribution",
+      "author": "Xenophon",
+      "work": "Memorabilia",
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "socratic_prose",
+      "topic": "socrates",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0032/tlg002/tlg0032.tlg002.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0032/tlg002/tlg0032.tlg002.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0032/tlg002/__cts__.xml",
+      "sha256": "c13f629736b60929fcb0910065edf23221b2c030ffd28eea07721bf67ae21629",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "TEI publicationStmt explicit licence",
+      "attribution": "Perseus Digital Library, Tufts University; original edition credited below",
+      "edition": {
+        "title": [
+          "Xenophontis opera omnia"
+        ],
+        "editors": [
+          "Edgar Carew Marchant"
+        ],
+        "publishers": [
+          "Clarendon Press"
+        ],
+        "dates_as_cataloged": [
+          "1921",
+          "1971"
+        ],
+        "catalog_author": [
+          "Xenophon"
+        ]
+      },
+      "n_tokens": 35554,
+      "text_sha256": "88224287cd9b59a39b81d35d8f15b5e931423e9ec9dc952834a9282f87508d57"
+    },
+    {
+      "source_id": "tlg0032.tlg003.perseus-grc2",
+      "work_id": "tlg0032.tlg003",
+      "role": "attribution",
+      "author": "Xenophon",
+      "work": "Oeconomicus",
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "socratic_prose",
+      "topic": "socrates",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0032/tlg003/tlg0032.tlg003.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0032/tlg003/tlg0032.tlg003.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0032/tlg003/__cts__.xml",
+      "sha256": "7701f6b8b1a11bd1cfa91c1a10d510f5cfb5afd7ecf90e4d19d523fabe0fa6ee",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "TEI publicationStmt explicit licence",
+      "attribution": "Perseus Digital Library, Tufts University; original edition credited below",
+      "edition": {
+        "title": [
+          "Xenophontis opera omnia"
+        ],
+        "editors": [
+          "Edgar Carew Marchant"
+        ],
+        "publishers": [
+          "Clarendon Press"
+        ],
+        "dates_as_cataloged": [
+          "1921",
+          "1971"
+        ],
+        "catalog_author": [
+          "Xenophon"
+        ]
+      },
+      "n_tokens": 17819,
+      "text_sha256": "83015038234e4b1a57c4e4e18ac10fa10171c04c08caed9de60ac9b3f845937d"
+    },
+    {
+      "source_id": "tlg0032.tlg004.perseus-grc2",
+      "work_id": "tlg0032.tlg004",
+      "role": "attribution",
+      "author": "Xenophon",
+      "work": "Symposium",
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "socratic_prose",
+      "topic": "socrates",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0032/tlg004/tlg0032.tlg004.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0032/tlg004/tlg0032.tlg004.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0032/tlg004/__cts__.xml",
+      "sha256": "ee8b9c69a9c913c980432db72309fc758c27640191e2a57be8e033001375cc28",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "TEI publicationStmt explicit licence",
+      "attribution": "Perseus Digital Library, Tufts University; original edition credited below",
+      "edition": {
+        "title": [
+          "Xenophontis opera omnia"
+        ],
+        "editors": [
+          "Edgar Carew Marchant"
+        ],
+        "publishers": [
+          "Clarendon Press"
+        ],
+        "dates_as_cataloged": [
+          "1921",
+          "1971"
+        ],
+        "catalog_author": [
+          "Xenophon"
+        ]
+      },
+      "n_tokens": 9478,
+      "text_sha256": "ad745d2f58ba7a82cab66e869cc7fc69cb41582a3e12dfb61e0b46f1c7e1d3d2"
+    },
+    {
+      "source_id": "tlg0062.tlg012.perseus-grc2",
+      "work_id": "tlg0062.tlg012",
+      "role": "attribution",
+      "author": "Lucian",
+      "work": "True Histories",
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "satirical_prose",
+      "topic": "fantastic_narrative",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0062/tlg012/tlg0062.tlg012.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0062/tlg012/tlg0062.tlg012.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0062/tlg012/__cts__.xml",
+      "sha256": "fbb92decef4abacfaf46668c84b05ab4201e57ea8fed6c0787a8af7ba1429fcf",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "TEI publicationStmt explicit licence",
+      "attribution": "Perseus Digital Library, Tufts University; original edition credited below",
+      "edition": {
+        "title": [
+          "Lucian"
+        ],
+        "editors": [
+          "Austin Morris Harmon"
+        ],
+        "publishers": [
+          "William Heinemann Ltd.",
+          "Harvard University Press"
+        ],
+        "dates_as_cataloged": [
+          "1913"
+        ],
+        "catalog_author": [
+          "Lucian"
+        ]
+      },
+      "n_tokens": 11149,
+      "text_sha256": "f7bac69a97991fa5e56e8a3d4de5aa5c4329bca08dfb24d0f4f098aae6d1cb57"
+    },
+    {
+      "source_id": "tlg0062.tlg021.perseus-grc2",
+      "work_id": "tlg0062.tlg021",
+      "role": "attribution",
+      "author": "Lucian",
+      "work": "Icaromenippus",
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "satirical_prose",
+      "topic": "fantastic_narrative",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0062/tlg021/tlg0062.tlg021.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0062/tlg021/tlg0062.tlg021.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0062/tlg021/__cts__.xml",
+      "sha256": "3b9bd480a39d5b13f7f87f9529284400332d9de1582355dd3fcc98f607fabbf3",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "TEI publicationStmt explicit licence",
+      "attribution": "Perseus Digital Library, Tufts University; original edition credited below",
+      "edition": {
+        "title": [
+          "Lucian"
+        ],
+        "editors": [
+          "Austin Morris Harmon"
+        ],
+        "publishers": [
+          "William Heinemann Ltd.",
+          "Harvard University Press"
+        ],
+        "dates_as_cataloged": [
+          "1915"
+        ],
+        "catalog_author": [
+          "Lucian"
+        ]
+      },
+      "n_tokens": 5138,
+      "text_sha256": "d6c1cabeb86ec595ba5c92afbccadb84119597b0fefcbb4c93e75a52b21fa9c2"
+    },
+    {
+      "source_id": "tlg0062.tlg031.perseus-grc2",
+      "work_id": "tlg0062.tlg031",
+      "role": "attribution",
+      "author": "Lucian",
+      "work": "Philopseudes",
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "satirical_prose",
+      "topic": "fantastic_narrative",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0062/tlg031/tlg0062.tlg031.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0062/tlg031/tlg0062.tlg031.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0062/tlg031/__cts__.xml",
+      "sha256": "dca3a539bf6285c6a102fc9b7cbab61a521f108ceabe961d65604729c78b7825",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "TEI publicationStmt explicit licence",
+      "attribution": "Perseus Digital Library, Tufts University; original edition credited below",
+      "edition": {
+        "title": [
+          "Lucian"
+        ],
+        "editors": [
+          "Austin Morris Harmon"
+        ],
+        "publishers": [
+          "William Heinemann Ltd.",
+          "Harvard University Press"
+        ],
+        "dates_as_cataloged": [
+          "1921"
+        ],
+        "catalog_author": [
+          "Lucian"
+        ]
+      },
+      "n_tokens": 6243,
+      "text_sha256": "52d04128de565467e95657bbdb751c16800f578cfa55e554b0b086756caacb6a"
+    },
+    {
+      "source_id": "tlg0062.tlg053.perseus-grc2",
+      "work_id": "tlg0062.tlg053",
+      "role": "witness_control",
+      "author": "Lucian",
+      "work": "How to Write History",
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "literary_criticism",
+      "topic": "historiography",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0062/tlg053/tlg0062.tlg053.perseus-grc2.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0062/tlg053/tlg0062.tlg053.perseus-grc2.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0062/tlg053/__cts__.xml",
+      "sha256": "4d065bc17ecf10982b42913a9ba5fc456a20274b3110ea27450ee5445326c7d6",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "TEI publicationStmt explicit licence",
+      "attribution": "Perseus Digital Library, Tufts University; original edition credited below",
+      "edition": {
+        "title": [
+          "Luciani Samosatensis Opera"
+        ],
+        "editors": [
+          "Karl Jacobitz"
+        ],
+        "publishers": [
+          "Teubner"
+        ],
+        "dates_as_cataloged": [
+          "1913"
+        ],
+        "catalog_author": [
+          "Lucian"
+        ]
+      },
+      "n_tokens": 7543,
+      "text_sha256": "aa3df4e4df384664460cc42bd9eb46cae9b00255e4987cdf860a9bd36e217a06"
+    },
+    {
+      "source_id": "tlg0062.tlg053.perseus-grc3",
+      "work_id": "tlg0062.tlg053",
+      "role": "witness_control",
+      "author": "Lucian",
+      "work": "How to Write History",
+      "language": "grc",
+      "source_language": "grc",
+      "genre": "literary_criticism",
+      "topic": "historiography",
+      "source_repository": "https://github.com/PerseusDL/canonical-greekLit",
+      "source_commit": "9839fe84c883e47ca5dab8872d8c684d9e14fe14",
+      "source_path": "data/tlg0062/tlg053/tlg0062.tlg053.perseus-grc3.xml",
+      "url": "https://raw.githubusercontent.com/PerseusDL/canonical-greekLit/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0062/tlg053/tlg0062.tlg053.perseus-grc3.xml",
+      "catalog_url": "https://github.com/PerseusDL/canonical-greekLit/blob/9839fe84c883e47ca5dab8872d8c684d9e14fe14/data/tlg0062/tlg053/__cts__.xml",
+      "sha256": "d4322b415f0aa25bfd805cb4e1a03329a4c5ca5cd7d67a5681f7e5a6b4a5ffe2",
+      "parser": "tei-greek-v1",
+      "license": "CC-BY-SA-4.0",
+      "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+      "license_basis": "TEI publicationStmt explicit licence",
+      "attribution": "Perseus Digital Library, Tufts University; original edition credited below",
+      "edition": {
+        "title": [
+          "Lucian with an English Translation"
+        ],
+        "editors": [
+          "Kenneth Kilburn"
+        ],
+        "publishers": [
+          "William Heinemann Ltd.",
+          "Harvard University Press"
+        ],
+        "dates_as_cataloged": [
+          "1959"
+        ],
+        "catalog_author": [
+          "Lucian of Samosata"
+        ]
+      },
+      "n_tokens": 7528,
+      "text_sha256": "34b229e9767a3d9b6916b64a1804493860b4ba5a3f7a0bcc5ee66e00d3a07253"
+    }
+  ]
+}
