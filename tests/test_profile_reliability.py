@@ -188,14 +188,63 @@ def test_limit_preserves_whole_original_chunks():
 
 
 def test_invalid_run_logs_error_without_saving_fabricated_profiles(tmp_path, monkeypatch):
-    monkeypatch.setattr(ap, "cli_call", lambda *args: ({"profiles": [{"id": "unit_0001"}]}, {"cost_usd": 0.02}))
+    calls = []
+
+    def always_invalid(*args):
+        calls.append(1)
+        return {"profiles": [{"id": "unit_0001"}]}, {"cost_usd": 0.02}
+
+    monkeypatch.setattr(ap, "cli_call", always_invalid)
+    monkeypatch.setattr(ap, "time", NS(time=lambda: 0.0, sleep=lambda _: None))
     path = tmp_path / "profiles.jsonl"
     totals = ap.run_profile(verses(1), path, backend="cli", model="test-model", progress=lambda _: None)
     assert totals["errors"] == 1 and totals["profiled"] == 0
-    assert totals["cost_usd"] == 0.02
+    assert len(calls) == ap.VALIDATION_ATTEMPTS, "an unusable answer is re-asked before it is given up on"
+    assert totals["cost_usd"] == pytest.approx(0.02 * ap.VALIDATION_ATTEMPTS), "every paid attempt is charged"
     assert not path.exists()
-    assert "invalid profile" in json.loads((tmp_path / "profiles_errors.jsonl").read_text())["error"]
-    assert json.loads((tmp_path / "profiles_runs.jsonl").read_text())["cost_usd"] == 0.02
+    logged = json.loads((tmp_path / "profiles_errors.jsonl").read_text())["error"]
+    assert "invalid profile" in logged and f"attempt {ap.VALIDATION_ATTEMPTS}" in logged
+    assert json.loads((tmp_path / "profiles_runs.jsonl").read_text())["cost_usd"] == pytest.approx(
+        0.02 * ap.VALIDATION_ATTEMPTS)
+
+
+def test_a_schema_violation_is_retried_rather_than_costing_the_whole_request(tmp_path, monkeypatch):
+    """DeepSeek offers no schema enforcement, so one bad field must not discard 24 good profiles."""
+    chunk = verses(4)
+    attempts = []
+
+    def flaky(*args):
+        attempts.append(1)
+        data = response(chunk)
+        if len(attempts) < 3:  # an undeclared categorical value, as measured on Quranic Arabic
+            data["profiles"][2]["connective_style"] = "fa_chain"
+        return data, {"cost_usd": 0.01}
+
+    monkeypatch.setattr(ap, "cli_call", flaky)
+    monkeypatch.setattr(ap, "time", NS(time=lambda: 0.0, sleep=lambda _: None))
+    path = tmp_path / "profiles.jsonl"
+    totals = ap.run_profile(chunk, path, backend="cli", model="test-model", chunk_size=4,
+                            progress=lambda _: None)
+    assert totals["profiled"] == 4 and totals["errors"] == 0
+    assert totals["retries"] == 2 and len(attempts) == 3
+    assert totals["cost_usd"] == pytest.approx(0.03), "the two discarded attempts were still paid for"
+    assert not (tmp_path / "profiles_errors.jsonl").exists()
+    assert set(ap.load_profiles(path)) == {v["id"] for v in chunk}
+
+
+def test_malformed_json_reports_what_it_cost(tmp_path, monkeypatch):
+    """A response that never parses is still billed, so the run's cost must include it."""
+    def broken(*args):
+        raise ap.ResponseError("invalid JSON in response: boom", {"input_tokens": 100, "output_tokens": 50})
+
+    monkeypatch.setattr(ap, "cli_call", broken)
+    monkeypatch.setattr(ap, "time", NS(time=lambda: 0.0, sleep=lambda _: None))
+    path = tmp_path / "profiles.jsonl"
+    totals = ap.run_profile(verses(1), path, backend="cli", model="test-model", progress=lambda _: None)
+    assert totals["errors"] == 1 and totals["profiled"] == 0
+    assert totals["input_tokens"] == 100 * ap.VALIDATION_ATTEMPTS
+    assert totals["output_tokens"] == 50 * ap.VALIDATION_ATTEMPTS
+    assert totals["cost_usd"] > 0, "tokens spent on unparseable answers are not free"
 
 
 def test_chunking_breaks_at_missing_passages_and_witness_changes():

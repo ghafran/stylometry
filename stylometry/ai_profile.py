@@ -39,6 +39,21 @@ MAX_TOKENS = 16000
 PROMPT_VERSION = "blinded-v2"
 SCHEMA_VERSION = 2
 
+# JSON mode is not schema-enforced, so a model may answer with an undeclared categorical value,
+# a mis-echoed unit id or malformed JSON. Measured on Quranic Arabic, about a quarter of requests
+# came back unusable for one of those reasons, and the same request generally succeeded on a retry,
+# so a request is re-asked rather than abandoned. Every attempt is billed and is counted.
+VALIDATION_ATTEMPTS = 4
+
+
+class ResponseError(ValueError):
+    """A response that was paid for but cannot be used; carries its usage so cost stays honest."""
+
+    def __init__(self, message: str, usage: dict | None = None):
+        super().__init__(message)
+        self.usage = dict(usage or {})
+
+
 # $ per million tokens (input, output).  Batch API halves both; cached input reads are ~10%.
 PRICES: dict[str, tuple[float, float]] = {
     "claude-opus-5": (5.0, 25.0),
@@ -612,7 +627,6 @@ def openai_call(
     else:
         raise RuntimeError(f"gave up after retries: {last}")
 
-    data = json.loads(_strip_fences(text))
     u = resp.usage
     cached = getattr(u, "prompt_cache_hit_tokens", None)
     if cached is None:
@@ -623,6 +637,10 @@ def openai_call(
         "output_tokens": getattr(u, "completion_tokens", 0) or 0,
         "cache_read_input_tokens": cached or 0,
     }
+    try:
+        data = json.loads(_strip_fences(text))
+    except json.JSONDecodeError as exc:
+        raise ResponseError(f"invalid JSON in response: {exc}", usage) from exc
     return data, usage
 
 
@@ -717,41 +735,78 @@ def run_profile(
     else:
         raise ValueError(f"unknown backend {backend!r}")
 
-    totals = {"profiled": 0, "requests": 0, "errors": 0, "input_tokens": 0, "output_tokens": 0, "cost_usd": 0.0}
+    def attempt(chunk: list[dict]) -> tuple[list[dict], dict, list[str]]:
+        """One request, validated atomically, re-asked while the answer is unusable.
+
+        A response that parses but breaks the declared schema is indistinguishable, to the caller,
+        from one that arrives malformed: both are paid for and neither can be stored. Both are
+        retried here rather than costing the whole chunk. Usage accumulates across attempts so the
+        run's reported cost includes the discarded ones.
+        """
+        usage_total: dict = {}
+        problems: list[str] = []
+
+        def bill(usage: dict) -> None:
+            for key, value in usage.items():
+                usage_total[key] = usage_total.get(key, 0) + value
+
+        for i in range(VALIDATION_ATTEMPTS):
+            try:
+                data, usage = call(chunk)
+                bill(usage)
+                return _validate(chunk, data, model, backend, settings), usage_total, problems
+            except ValueError as exc:  # schema violation, or JSON the model malformed
+                bill(getattr(exc, "usage", {}))
+                problems.append(f"attempt {i + 1}: {str(exc)[:160]}")
+                if i + 1 == VALIDATION_ATTEMPTS:
+                    raise ResponseError(
+                        f"unusable after {VALIDATION_ATTEMPTS} attempts: " + "; ".join(problems), usage_total
+                    ) from exc
+                time.sleep(min(10, 2 ** i))
+        raise AssertionError("unreachable")
+
+    totals = {"profiled": 0, "requests": 0, "errors": 0, "retries": 0,
+              "input_tokens": 0, "output_tokens": 0, "cost_usd": 0.0}
     err_path = out_path.with_name(out_path.stem + "_errors.jsonl")
     started = time.time()
 
+    def charge(usage: dict) -> None:
+        # Rejected measurements still incur API costs; account for them either way.
+        totals["input_tokens"] += usage.get("input_tokens", 0) + usage.get("cache_read_input_tokens", 0)
+        totals["output_tokens"] += usage.get("output_tokens", 0)
+        totals["cost_usd"] += usage.get("cost_usd", 0.0)
+        if "input_tokens" in usage:
+            pi, po = PRICES.get(model, PRICES[MODEL_DEFAULT])
+            totals["cost_usd"] += (
+                usage["input_tokens"] * pi
+                + usage.get("cache_read_input_tokens", 0) * pi * 0.1
+                + usage.get("cache_creation_input_tokens", 0) * pi * 1.25
+                + usage["output_tokens"] * po
+            ) / 1e6
+
     with ThreadPoolExecutor(max_workers=max(1, workers)) as pool:
-        futures = {pool.submit(call, c): c for c in chunks}
+        futures = {pool.submit(attempt, c): c for c in chunks}
         for fut in as_completed(futures):
             chunk = futures[fut]
             totals["requests"] += 1
             try:
-                data, usage = fut.result()
-                # Rejected measurements still incur API costs; account before validation.
-                totals["input_tokens"] += usage.get("input_tokens", 0) + usage.get("cache_read_input_tokens", 0)
-                totals["output_tokens"] += usage.get("output_tokens", 0)
-                totals["cost_usd"] += usage.get("cost_usd", 0.0)
-                if "input_tokens" in usage:
-                    pi, po = PRICES.get(model, PRICES[MODEL_DEFAULT])
-                    totals["cost_usd"] += (
-                        usage["input_tokens"] * pi
-                        + usage.get("cache_read_input_tokens", 0) * pi * 0.1
-                        + usage.get("cache_creation_input_tokens", 0) * pi * 1.25
-                        + usage["output_tokens"] * po
-                    ) / 1e6
-                records = _validate(chunk, data, model, backend, settings)
+                records, usage, problems = fut.result()
+                charge(usage)
+                totals["retries"] += len(problems)
             except Exception as e:  # keep going; the run is resumable
+                charge(getattr(e, "usage", {}))
                 totals["errors"] += 1
+                totals["retries"] += VALIDATION_ATTEMPTS - 1
                 _append(err_path, [{"ids": [v["id"] for v in chunk], "error": str(e)[:500], "ts": time.time()}])
                 progress(f"  [{totals['requests']}/{len(chunks)}] ERROR {chunk[0]['id']}: {str(e)[:120]}")
                 continue
             _append(out_path, records)
             totals["profiled"] += len(records)
             elapsed = time.time() - started
+            retried = f"  ({len(problems)} retried)" if problems else ""
             progress(
                 f"  [{totals['requests']}/{len(chunks)}] {chunk[0]['id']}..{chunk[-1]['id']} "
-                f"{len(records)} profiles  total ${totals['cost_usd']:.2f}  {elapsed/60:.1f} min"
+                f"{len(records)} profiles  total ${totals['cost_usd']:.2f}  {elapsed/60:.1f} min{retried}"
             )
     totals["seconds"] = round(time.time() - started, 1)
     if totals["requests"]:  # retain paid failed attempts in the comparison's $/verse
