@@ -132,3 +132,7 @@ The follow-up [passage-model study](study_v1/README.md) implements larger passag
 comparisons, separate unfamiliar calibration authors and a locked fresh-author evaluation.
 Its [results](study_v1/RESULTS.md) also fail the empirical acceptance gate. It is a separate
 study; its different author panel must not be used as a direct before/after improvement claim.
+
+The subsequent [pair-verification development experiment](verification_v1/README.md) learns
+cross-work comparisons on the now-exposed combined corpus, with separate training, calibration
+and evaluation author identities. Previous benchmark snapshots stay frozen.

@@ -322,6 +322,30 @@ def cmd_author_study(args) -> None:
         raise SystemExit(str(exc)) from exc
 
 
+def cmd_verification_study(args) -> None:
+    from .verification_study import DEFAULT_MANIFESTS, run_study
+    from .benchmark_data import load_benchmark, read_manifest
+
+    try:
+        works = []
+        for manifest in args.manifest or DEFAULT_MANIFESTS:
+            if args.language and not any(w['language'] == args.language for w in read_manifest(manifest)['works']):
+                continue
+            works.extend(w for w in load_benchmark(manifest, args.cache, download=args.download)
+                         if not args.language or w['language'] == args.language)
+        result = run_study(works, args.out, progress=lambda s: print(s, flush=True))
+        print('Pair-verification development completed; independent authorship and scripture validation remain outstanding.')
+        print(f"Report: {Path(args.out) / 'development.md'}")
+        main_runs = [r for r in result['runs'] if r['genre'] is None]
+        missing_languages = (set(result.get('requested_languages', []))
+                             - {r.get('language') for r in main_runs})
+        if args.check and (not main_runs or missing_languages or
+                           not all(r['summary']['pair_verifier']['preliminary_development_signal'] for r in result['runs'])):
+            raise SystemExit(1)
+    except (ValueError, FileNotFoundError) as exc:
+        raise SystemExit(str(exc)) from exc
+
+
 def _load_dotenv(path: Path = ROOT / ".env") -> None:
     """Minimal .env loader: KEY=VALUE lines, no expansion; existing environment wins."""
     import os
@@ -491,6 +515,15 @@ def main(argv: list[str] | None = None) -> None:
     study.add_argument('--language', choices=LANGS, help='development-language selection')
     study.add_argument('--check', action='store_true', help='fail if fresh evaluation is failed or inconclusive')
     study.set_defaults(func=cmd_author_study)
+
+    verifier = sub.add_parser('verification-study', help='author-disjoint cross-work pair verification on exposed development sources')
+    verifier.add_argument('--manifest', action='append', help='exposed development manifest (repeatable; defaults to all four previous reference manifests)')
+    verifier.add_argument('--cache', default=str(RAW / 'benchmarks'))
+    verifier.add_argument('--out', default=str(OUTPUT / 'verification-development-v1'))
+    verifier.add_argument('--download', action='store_true', help='download missing checksum-pinned development texts')
+    verifier.add_argument('--language', choices=LANGS)
+    verifier.add_argument('--check', action='store_true', help='fail unless all main development panels meet the preliminary signal criteria; never a final validation claim')
+    verifier.set_defaults(func=cmd_verification_study)
 
     args = p.parse_args(argv)
     args.func(args)

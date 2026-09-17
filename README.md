@@ -55,6 +55,14 @@ and rejection using two separate unfamiliar calibration authors. It refits model
 uncertainty checks. [Fresh results](benchmarks/study_v1/RESULTS.md) show useful known-candidate
 discrimination but still fail safe, useful unknown-author attribution.
 
+The [cross-work verification experiment](benchmarks/verification_v1/README.md) learns from
+same-author and different-author work pairs, then requires support from two reference works
+per candidate. `uv run --frozen stylometry verification-study --check` compares it with the
+previous fixed model recipes using author-disjoint training, calibration and evaluation roles.
+It uses all 92 previously exposed works for development; it is not another fresh validation.
+The [measured result](benchmarks/verification_v1/RESULTS.md) fails in both languages: none of
+the ten verifier calibration rounds provides adequate correct acceptance within the error limits.
+
 `uv run --frozen stylometry cluster-passages --language grc --tokens 1000` pools normalized
 source words before feature extraction, without additional smoothing or AI calls. It preserves
 chapter, witness and gap boundaries and records source-token mappings and excluded text in

@@ -11,6 +11,12 @@ checks have now been implemented and run. See [the study and reproduction guide]
 and [fresh results](study_v1/RESULTS.md). The fresh empirical gate still fails; the changes must
 not be described as established scripture attribution.
 
+The next [cross-work verification experiment](verification_v1/README.md) trains an explicit
+same-author/different-author comparison model. It combines the exposed corpora for strictly
+author-disjoint development, balances difficult same-genre negatives, requires two reference
+works per candidate, and calibrates complete two-candidate searches. The limited development
+author pool cannot validate larger candidate lists or substitute for another untouched study.
+
 ## 1. Calibrate an explicit unknown outcome — implemented as a development experiment
 
 The original rejection threshold retains 95% of genuine known-author calibration matches.
