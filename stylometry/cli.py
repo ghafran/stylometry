@@ -122,6 +122,9 @@ def cmd_profile(args) -> None:
         base_url=args.base_url, api_key_env=args.api_key_env, thinking=args.thinking,
     )
     print(json.dumps(totals, indent=1))
+    if totals.get("aborted"):
+        sys.exit(f"run stopped early: {totals['aborted']}. "
+                 f"{totals['profiled']} units were saved; rerun the same command to continue.")
 
 
 def cmd_collect(args) -> None:

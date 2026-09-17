@@ -346,3 +346,42 @@ def test_legacy_batch_is_rejected_before_network_access(tmp_path, monkeypatch):
     monkeypatch.setattr(ap, "_sdk_client", lambda: pytest.fail("must not contact API"))
     with pytest.raises(ValueError, match="legacy, unblinded"):
         ap.collect_batches(path, {})
+
+
+def test_an_empty_account_stops_the_run_instead_of_retrying_every_chunk(tmp_path, monkeypatch):
+    """A 402 is an account fact, not a request fact; 1,114 further requests cannot fix it."""
+    class Rejected(Exception):
+        status_code = 402
+
+    import time as real_time
+
+    calls = []
+
+    def broke(*args):
+        calls.append(1)
+        real_time.sleep(0.02)  # a real request is not instant; without this the pool drains first
+        raise Rejected("Insufficient Balance")
+
+    monkeypatch.setattr(ap, "cli_call", broke)
+    monkeypatch.setattr(ap, "time", NS(time=lambda: 0.0, sleep=lambda _: None))
+    path = tmp_path / "profiles.jsonl"
+    totals = ap.run_profile(verses(40), path, backend="cli", model="test-model", chunk_size=4,
+                            workers=1, progress=lambda _: None)
+    assert totals["aborted"] == "the account is out of credit"
+    assert totals["requests"] == 1, "the run stops at the first account-level refusal"
+    assert len(calls) < 10, f"the nine remaining requests were not cancelled: {len(calls)} calls"
+    logged = (tmp_path / "profiles_errors.jsonl").read_text().strip().splitlines()
+    assert len(logged) == 1, "one account-level refusal is logged once, not once per chunk"
+    assert not path.exists()
+
+
+@pytest.mark.parametrize("status,expected", [
+    (401, "the API key was rejected"), (402, "the account is out of credit"),
+    (403, "the account is not permitted to use this model"),
+    (429, None), (500, None), (None, None),
+])
+def test_only_account_level_refusals_are_treated_as_fatal(status, expected):
+    exc = Exception("boom")
+    if status is not None:
+        exc.status_code = status
+    assert ap.fatal_reason(exc) == expected

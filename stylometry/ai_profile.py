@@ -54,6 +54,19 @@ class ResponseError(ValueError):
         self.usage = dict(usage or {})
 
 
+# An exhausted balance or a rejected key is a property of the account, not of the request: every
+# remaining request will fail the same way. A Sinaiticus run spent three minutes pushing 1,114
+# requests at an empty account and wrote 1,114 identical errors, burying the one that mattered.
+FATAL_STATUS = {401: "the API key was rejected", 402: "the account is out of credit",
+                403: "the account is not permitted to use this model"}
+
+
+def fatal_reason(exc: BaseException) -> str | None:
+    """Why no later request in this run can succeed either, or None if it is worth continuing."""
+    status = getattr(exc, "status_code", None)
+    return FATAL_STATUS.get(status) if isinstance(status, int) else None
+
+
 # $ per million tokens (input, output).  Batch API halves both; cached input reads are ~10%.
 PRICES: dict[str, tuple[float, float]] = {
     "claude-opus-5": (5.0, 25.0),
@@ -799,6 +812,14 @@ def run_profile(
                 totals["retries"] += VALIDATION_ATTEMPTS - 1
                 _append(err_path, [{"ids": [v["id"] for v in chunk], "error": str(e)[:500], "ts": time.time()}])
                 progress(f"  [{totals['requests']}/{len(chunks)}] ERROR {chunk[0]['id']}: {str(e)[:120]}")
+                reason = fatal_reason(e)
+                if reason:
+                    for pending in futures:
+                        pending.cancel()
+                    totals["aborted"] = reason
+                    progress(f"  stopping after {totals['requests']} of {len(chunks)} requests: {reason}. "
+                             f"Everything profiled so far is saved; rerun the same command to continue.")
+                    break
                 continue
             _append(out_path, records)
             totals["profiled"] += len(records)
