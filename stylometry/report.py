@@ -96,8 +96,17 @@ def render(out_dir: str | Path) -> str:
     else:
         md.append("Legacy output: single-group BIC and passage-resampling checks were not recorded. "
                   "Regenerate this analysis with the current pipeline before interpreting cluster support.\n")
+    def _num(value, places: int) -> str:
+        """Round a k-selection cell. The table is read back from CSV, so every cell is text, and
+        k=1 has no silhouette or separation scores at all: those cells arrive empty and stay empty."""
+        try:
+            return f"{float(value):.{places}f}"
+        except (TypeError, ValueError):
+            return ""
+
     md.append(_table(["k", "silhouette", "Calinski-Harabasz", "Davies-Bouldin", "GMM BIC"],
-                     [[r["k"], r["silhouette"], r["calinski_harabasz"], r["davies_bouldin"], r["gmm_bic"]] for r in ktable]))
+                     [[r["k"], _num(r["silhouette"], 3), _num(r["calinski_harabasz"], 1),
+                       _num(r["davies_bouldin"], 3), _num(r["gmm_bic"], 0)] for r in ktable]))
 
     md.append("\n\n## Style groups at a glance\n")
     rows = []
@@ -110,20 +119,31 @@ def render(out_dir: str | Path) -> str:
         rows.append([a, e["n_verses"], f"{e['share']:.1%}", f"{e['mean_confidence']:.2f}", top_works, ai_s])
     md.append(_table(["style group", units, "share", "mean margin", "main works", "AI style means"], rows))
 
+    single_group = len(author_ids) == 1
     md.append("\n\n## Style-group markers\n")
-    md.append("Markers are the features whose mean inside the cluster differs most from the corpus mean (in standard deviations). "
-              "`fw:` predefined function/common-word rate, `sfx:` word-ending rate, `misc:` length/connective habits, `cng:` character n-gram axis, "
-              "`ai:` model-rated style scale, `cat:` model-assigned category, `tag:` model-assigned device tag.\n")
+    if single_group:
+        md.append("A marker is how far a group's mean sits from the corpus mean. With one group the two are the "
+                  "same text, so every marker is 0.00σ by construction and the contrast is omitted. What remains "
+                  "below describes the corpus as a whole, not anything that distinguishes a group within it.\n")
+    else:
+        md.append("Markers are the features whose mean inside the cluster differs most from the corpus mean (in standard deviations). "
+                  "`fw:` predefined function/common-word rate, `sfx:` word-ending rate, `misc:` length/connective habits, `cng:` character n-gram axis, "
+                  "`ai:` model-rated style scale, `cat:` model-assigned category, `tag:` model-assigned device tag.\n")
     for a in author_ids:
         e = authors[a]
         md.append(f"\n### {a} — {e['n_verses']} {units} ({e['share']:.1%})\n")
         md.append("**Works:** " + ", ".join(f"{w} {n}" for w, n in e["works"].items()) + "\n")
         if e.get("copyists"):
             md.append("**Sinaiticus scribes:** " + ", ".join(f"{s} {n}" for s, n in sorted(e["copyists"].items())) + "\n")
-        md.append("**Over-represented:** " + ", ".join(_fmt_marker(n, x) for n, x in e["markers_high"][:10]) + "\n")
-        md.append("**Under-represented:** " + ", ".join(_fmt_marker(n, x) for n, x in e["markers_low"][:8]) + "\n")
+        if not single_group:
+            md.append("**Over-represented:** " + ", ".join(_fmt_marker(n, x) for n, x in e["markers_high"][:10]) + "\n")
+            md.append("**Under-represented:** " + ", ".join(_fmt_marker(n, x) for n, x in e["markers_low"][:8]) + "\n")
         if e.get("tag_lift"):
-            md.append("**Device tags (lift ×, count):** " + ", ".join(f"{t} ×{l} ({c})" for t, l, c in e["tag_lift"][:10]) + "\n")
+            # Lift is also measured against the corpus, so it too is 1.0 for a single group; the
+            # counts still say which devices the model saw most often, so they are kept.
+            md.append(("**Device tags (count):** " + ", ".join(f"{t} ({c})" for t, _, c in e["tag_lift"][:10])
+                       if single_group else
+                       "**Device tags (lift ×, count):** " + ", ".join(f"{t} ×{l} ({c})" for t, l, c in e["tag_lift"][:10])) + "\n")
         if e.get("phrases"):
             md.append("**Diagnostic phrases:** " + ", ".join(f"«{p}» ({c})" for p, c in e["phrases"][:8]) + "\n")
         if e.get("discourse_modes"):

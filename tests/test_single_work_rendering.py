@@ -152,3 +152,54 @@ def test_divine_name_counts_match_the_text(tmp_path: Path) -> None:
     ]
     got = divine_name_crosstab(verses, np.array(["A1", "A1", "A1", "A1"]))
     assert got["A1"] == {"YHWH": 1, "Elohim": 1, "both": 1, "neither": 1}
+
+
+# --- one style group: a group cannot be contrasted with itself -------------------------------------
+
+def _profiles(verses: list[dict]) -> dict[str, dict]:
+    """Minimal valid AI profiles, so the device-tag and marker branches are actually reached."""
+    from stylometry.ai_profile import CATEGORICAL_DIMS, NUMERIC_DIMS
+
+    return {v["id"]: {"id": v["id"], **{d: 0.4 for d in NUMERIC_DIMS},
+                      **{d: values[0] for d, values in CATEGORICAL_DIMS.items()},
+                      "style_tags": ["short_clauses", "parallelism"],
+                      "distinctive_phrases": [], "signature": "Short clauses."}
+            for v in verses}
+
+
+def _one_group(verses: list[dict], out: Path) -> str:
+    """Force a single style group, the outcome whenever no split is supported."""
+    run(verses, _profiles(verses), out, window=0, alpha=0, kmin=1, kmax=1, k=1)
+    return render(out)
+
+
+def test_single_group_report_omits_markers_that_are_zero_by_construction(tmp_path: Path) -> None:
+    """Markers measure distance from the corpus mean; with one group that distance is always zero.
+
+    The Quran run printed ten over-represented features at "+0.00σ" and ten device tags at "×1.0",
+    which reads as a finding and is an artefact of there being nothing to compare against.
+    """
+    report = _one_group(_one_work(), tmp_path / "out")
+    assert "**Over-represented:**" not in report and "**Under-represented:**" not in report
+    # The sentence explaining the omission names the figure, so only marker lines may carry it.
+    assert not [l for l in report.splitlines() if "σ" in l and l.startswith("**")]
+    assert "every marker is 0.00σ by construction" in report
+    assert "**Device tags (count):**" in report, "the counts are real and must survive"
+    assert "×1.0" not in report
+
+
+def test_marker_contrast_is_kept_when_there_is_something_to_contrast(tmp_path: Path) -> None:
+    report, _ = _render(_one_work(), tmp_path / "out")
+    assert "**Over-represented:**" in report and "**Under-represented:**" in report
+    assert "every marker is 0.00σ by construction" not in report
+
+
+def test_k_selection_table_is_rounded_to_readable_precision(tmp_path: Path) -> None:
+    """The table is read back from CSV, so its cells are text; unrounded they print 17 digits."""
+    report = _one_group(_one_work(), tmp_path / "out")
+    line = next(l for l in report.splitlines() if l.startswith("| 1 |"))
+    cells = [c.strip() for c in line.strip("|").split("|")]
+    assert cells[1] == "" and cells[2] == "", "k=1 has no silhouette or separation score"
+    for row in (l for l in report.splitlines() if l.startswith("| 2 |")):
+        digits = [c.strip() for c in row.strip("|").split("|")][1]
+        assert len(digits.split(".")[-1]) <= 3, f"silhouette printed at full float precision: {digits}"
