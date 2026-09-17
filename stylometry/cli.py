@@ -238,6 +238,23 @@ def cmd_witnesses(args) -> None:
     print(f"outputs: {out / 'witness_summary.csv'}, {out / 'site' / 'witnesses.html'}")
 
 
+def _attributable(labels: list[str], works: list[str]) -> tuple[list[int], list[str]]:
+    """Indices that can honestly be scored, and the labels that cannot be.
+
+    Holding out a whole work removes every passage of it. A label carried by only one work therefore
+    has nothing left to match against, and every one of its units is wrong by construction. Scoring
+    them deflates the result without saying anything, so they are reported and set aside.
+    """
+    from collections import defaultdict
+
+    works_per_label: dict = defaultdict(set)
+    for label, work in zip(labels, works):
+        works_per_label[label].add(work)
+    unattributable = sorted(l for l, ws in works_per_label.items() if len(ws) < 2)
+    keep = [i for i, label in enumerate(labels) if label not in set(unattributable)]
+    return keep, unattributable
+
+
 def cmd_delta(args) -> None:
     """Burrows's Delta as a baseline: most-frequent-word rates, z-scored, nearest neighbour.
 
@@ -260,23 +277,96 @@ def cmd_delta(args) -> None:
     docs = [p["text_bare"].split() for p in passages]
     labels = [str(p.get(args.label) or "?") for p in passages]
     works = [p["work"] for p in passages]
+    keep, unattributable = _attributable(labels, works)
+    if len(keep) < 2:
+        sys.exit("every label is carried by a single work, so nothing can be attributed")
+    # Set aside before attributing, not after: a label that can never be right must not be offered
+    # as a candidate either, or it takes predictions while being unable to earn any.
+    dropped = len(docs) - len(keep)
+    docs, labels, works = ([x[i] for i in keep] for x in (docs, labels, works))
     predicted = attribute(docs, labels, groups=works, n_words=args.mfw, metric=args.metric)
+    keep = list(range(len(docs)))
 
-    correct = sum(p == t for p, t in zip(predicted, labels))
-    majority = max(Counter(labels).values()) / len(labels)
+    scored = [(labels[i], predicted[i]) for i in keep]
+    correct = sum(p == t for t, p in scored)
+    kept_labels = [labels[i] for i in keep]
+    majority = max(Counter(kept_labels).values()) / len(kept_labels)
     print(f"{len(docs)} passages of {args.tokens} tokens, {len(set(labels))} {args.label} values, "
           f"{len(set(works))} works")
     print(f"{args.metric} Delta on {args.mfw} most frequent words, held out by work")
-    print(f"  accuracy {correct / len(labels):.1%}   majority baseline {majority:.1%}   "
-          f"chance {1 / len(set(labels)):.1%}")
+    if unattributable:
+        print(f"  {len(unattributable)} {args.label} values come from a single work and cannot be "
+              f"attributed once it is held out; {dropped} units set aside")
+    print(f"  accuracy {correct / len(scored):.1%} over {len(scored)} units   "
+          f"majority baseline {majority:.1%}   chance {1 / len(set(kept_labels)):.1%}")
     per: dict = defaultdict(lambda: [0, 0])
-    for truth, pred in zip(labels, predicted):
+    for truth, pred in scored:
         per[truth][1] += 1
         per[truth][0] += truth == pred
     print(f"\n  {args.label:<26}{'correct':>9}{'n':>6}")
     for value, (hit, total) in sorted(per.items(), key=lambda kv: -kv[1][1]):
         print(f"  {value[:26]:<26}{hit / total:>8.0%}{total:>6}")
     print("\nDelta ranks candidates and never answers 'none of these'; it attributes, it does not verify.")
+
+
+def cmd_wan(args) -> None:
+    """Word adjacency networks: which function word follows which, and how closely."""
+    from collections import Counter, defaultdict
+
+    from .continuity import annotate_continuity
+    from .wan import attribute_pooled
+
+    verses = _select(args, annotate_continuity(_load_corpus(), bridge_chapters=args.bridge_chapters))
+    if not verses:
+        sys.exit(f"no verses for language={args.language} scope={args.scope} works={args.works}")
+    language = args.language or "grc"
+    if args.whole_works:
+        pooled: dict = defaultdict(list)
+        for v in verses:
+            pooled[(v["work"], str(v.get(args.label) or "?"))].append(v["text_bare"])
+        units = [{"tokens": " ".join(t).split(), "work": w, "label": g} for (w, g), t in pooled.items()]
+        units = [u for u in units if len(u["tokens"]) >= 2000]
+    else:
+        from .passages import build_passages
+
+        units = [{"tokens": p["text_bare"].split(), "work": p["work"],
+                  "label": str(p.get(args.label) or "?")}
+                 for p in build_passages(verses, tokens=args.tokens,
+                                         bridge_chapters=args.bridge_chapters)["passages"]]
+    if len(units) < 2:
+        sys.exit(f"only {len(units)} units; try --tokens 500, --bridge-chapters, or --whole-works")
+
+    docs = [u["tokens"] for u in units]
+    labels = [u["label"] for u in units]
+    works = [u["work"] for u in units]
+    keep, unattributable = _attributable(labels, works)
+    if len(keep) < 2:
+        sys.exit("every label is carried by a single work, so nothing can be attributed")
+    dropped = len(docs) - len(keep)
+    docs, labels, works = ([x[i] for i in keep] for x in (docs, labels, works))
+    predicted = attribute_pooled(docs, labels, language=language, groups=works,
+                                 window=args.window, n_markers=args.markers, decay=args.decay)
+    scored = [(t, p) for t, p in zip(labels, predicted) if p is not None]
+    if not scored:
+        sys.exit("every label is carried by a single work, so nothing can be attributed")
+    correct = sum(t == p for t, p in scored)
+    kept_labels = [t for t, _ in scored]
+    print(f"{len(docs)} {'works' if args.whole_works else str(args.tokens) + '-token passages'}, "
+          f"{len(set(labels))} {args.label} values, {len(set(works))} works")
+    print(f"{args.markers} markers, window {args.window}, {args.decay} decay, held out by work")
+    if unattributable:
+        print(f"  {len(unattributable)} {args.label} values come from a single work and cannot be "
+              f"attributed once it is held out; {dropped} units set aside")
+    print(f"  accuracy {correct / len(scored):.1%} over {len(scored)} units   "
+          f"majority baseline {max(Counter(kept_labels).values()) / len(kept_labels):.1%}   "
+          f"chance {1 / len(set(kept_labels)):.1%}")
+    per: dict = defaultdict(lambda: [0, 0])
+    for truth, pred in scored:
+        per[truth][1] += 1
+        per[truth][0] += truth == pred
+    print(f"\n  {args.label:<26}{'correct':>9}{'n':>6}")
+    for value, (hit, total) in sorted(per.items(), key=lambda kv: -kv[1][1]):
+        print(f"  {value[:26]:<26}{hit / total:>8.0%}{total:>6}")
 
 
 def cmd_manifest(args) -> None:
@@ -584,6 +674,22 @@ def main(argv: list[str] | None = None) -> None:
     dl.add_argument('--bridge-chapters', action='store_true',
                     help='treat chapter divisions as continuous text (see cluster-passages)')
     dl.set_defaults(func=cmd_delta)
+
+    wn = sub.add_parser('wan', help='word adjacency networks: how an author arranges function words')
+    _add_scope(wn)
+    wn.add_argument('--tokens', type=int, choices=[500, 1000, 2000], default=1000)
+    wn.add_argument('--markers', type=int, default=100,
+                    help='how many function words form the graph. The matrix is this squared, so more '
+                         'markers need far more text; 200 markers on 1,000-token passages is mostly '
+                         'smoothing and scores near chance.')
+    wn.add_argument('--window', type=int, default=10, help='how far ahead a marker casts weight')
+    wn.add_argument('--decay', choices=['inverse', 'uniform'], default='inverse')
+    wn.add_argument('--label', default='group', help='which corpus field to score against')
+    wn.add_argument('--bridge-chapters', action='store_true')
+    wn.add_argument('--whole-works', action='store_true',
+                    help='one document per work rather than fixed-length passages. The method needs '
+                         'the text: it measures far better on whole works here.')
+    wn.set_defaults(func=cmd_wan)
 
     r = sub.add_parser("report", help="render output/<language>/report.md")
     r.add_argument("--language", choices=LANGS, default="grc")

@@ -292,3 +292,37 @@ question. That is the predicted behaviour: Delta measures only the words an auth
 
 **Check:** Delta's accuracy on the labelled authors is measured and stated before any scripture result
 is quoted, and the same whole-work holdout is used for both methods so the comparison is fair.
+
+### 10.2 Word adjacency networks — tried, and weaker than Delta here
+
+Implemented in `stylometry/wan.py` (Segarra, Eisen & Ribeiro 2015): a directed graph over function
+words, each occurrence casting distance-discounted weight onto the markers that follow it within a
+window, row-normalised into a Markov chain and compared by symmetric Kullback-Leibler divergence.
+One network per candidate, as published. `stylometry wan` runs it.
+
+- [x] 10.2.1 Implement, with tests for the properties that define it: markers only, direction kept,
+      distance discounted, content words stepped over, unseen transitions improbable not impossible.
+- [x] 10.2.2 Validate on the labelled Greek authors before scripture.
+- [x] 10.2.3 Compare against Delta on identical units and holdout.
+- [ ] 10.2.4 Decide whether to keep it in the reported baselines or retire it.
+
+**Measured.** On the six catalogued Greek authors, whole works: WAN **88.9%** at best against Delta's
+**100%**. On 1,000-token passages from those works: WAN **52.9%** at best against Delta's **83.2%**.
+On Codex Sinaiticus whole works: WAN **54.5%** against Delta's 68.2%.
+
+**Why it loses, and it is not the idea.** The graph has one cell per ordered marker pair, so 100
+markers is 10,000 cells, and a 1,000-token passage supplies a few hundred marker tokens to fill them.
+Almost every cell is smoothing, and the divergence measures the smoothing constant rather than the
+text: at 200 markers on 1,000-token passages accuracy fell to 5.8%, below chance. The published
+application was to Elizabethan plays of roughly 20,000 words. Our whole works have a median of 8,517.
+It is also unstable: at 50 markers, changing smoothing from 0.01 to 0.1 moved accuracy from 33.3% to
+88.9%, which is not a result anyone should build on.
+
+**What it did agree on.** WAN and Delta both identify Paul 4/4, Septuagint prophets 3/3 and Luke-Acts
+2/2. WAN gets Johannine 2/2 where Delta gets 1/2. The strong cases are strong under both methods,
+which is worth more than either number alone.
+
+**A scoring bug this exposed, now fixed in both commands.** A label carried by only one work cannot be
+attributed once that work is held out, and was both dragging the score down and stealing predictions
+from labels that could be right. Such labels are now set aside before attribution and the count is
+reported. Delta on Sinaiticus passages reads **58.6%** on this corrected basis, not 45.6%.
