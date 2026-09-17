@@ -39,29 +39,47 @@ def render(out_dir: str | Path) -> str:
     val = summary["validation"]
 
     md: list[str] = []
-    md.append("# Verse-level author discovery\n")
+    md.append("# Exploratory verse-level style analysis\n")
     md.append(
         f"{summary['n_verses']} verse units from {summary['n_works']} works were profiled with "
         f"{'lexical statistics plus AI style profiles' if summary['used_ai_profiles'] else 'lexical statistics only (no AI profiles found)'}, "
         f"smoothed over a ±{summary['window']}-verse window (α={summary['alpha']}), reduced to {summary['pca_dims']} principal components "
         f"({summary['pca_explained_variance']:.0%} of variance) and clustered with k-means.\n"
     )
-    md.append(f"**Result: {summary['k_used']} distinct hands (A1–A{summary['k_used']}).** "
-              f"Silhouette analysis preferred k={summary['k_selected_by_silhouette']}"
-              + ("" if summary["k_used"] == summary["k_selected_by_silhouette"] else f"; k={summary['k_used']} was forced on the command line")
-              + ".")
+    selected = summary.get("k_selected", summary.get("k_selected_by_silhouette"))
+    md.append(f"**Result: {summary['k_used']} exploratory style groups (A1–A{summary['k_used']}).** "
+              f"Selection criterion: {summary.get('k_criterion', 'silhouette')}; preferred k={selected}. "
+              + ("The number of groups was forced. " if summary.get("k_forced") else "")
+              + "These are not identified authors.")
+    status = summary.get("selection_status", "legacy_unvalidated")
+    md.append(f"Selection status: **{status.replace('_', ' ')}**. One group means no supported split, not one proven author.")
+    stability = summary.get("stability", {})
+    if stability.get("available"):
+        md.append(f"Partition tested at k={stability.get('tested_k', summary['k_used'])}: passage subsampling mean ARI {stability['mean_ari']:.3f}, minimum {stability['min_ari']:.3f} "
+                  f"over {stability['repeats']} repeats. The feature map is fixed; this is partition sensitivity, not held-out accuracy.")
+    if summary.get("profile_metadata", {}).get("unverified_profiles"):
+        md.append("**Legacy/unverified AI profiles:** blinding and input provenance are not verified; regenerate profiles before using these results for validation.")
+    if summary.get("n_missing_profiles"):
+        md.append(f"{summary['n_missing_profiles']} input verses had no profile and were excluded; missing passages break continuity.")
+    md.append("Assignment margins measure distance to cluster centers, not probabilities of authorship; single-group margins are zero.")
     hdb = summary.get("hdbscan", {})
     if hdb.get("available"):
         md.append(f"Density clustering (HDBSCAN, min cluster {hdb['min_cluster_size']}) found {hdb['n_clusters']} dense groups with {hdb['noise_fraction']:.0%} of verses unassigned, as a second opinion.\n")
 
-    md.append("\n## How many authors? (k selection)\n")
-    md.append("For each k the partition is fitted on the smoothed vectors and scored on each verse's own, unsmoothed vector, "
-              "so only splits that individual verses can still tell apart score well. "
-              "Higher silhouette / Calinski-Harabasz and lower Davies-Bouldin / BIC are better.\n")
+    md.append("\n## How many style groups? (k selection)\n")
+    if "selection_thresholds" in summary:
+        md.append("For each k the partition is fitted on smoothed vectors and scored on unsmoothed vectors. "
+                  "Higher silhouette / Calinski-Harabasz and lower Davies-Bouldin / BIC are better. "
+                  "Automatic splits must improve BIC over a single Gaussian by at least 10 on a fixed sample of unsmoothed vectors, "
+                  "have positive raw silhouette, and retain ARI of at least 0.8 in all five passage subsamples. "
+                  "These are diagnostic thresholds, not a significance test or proof of authorship.\n")
+    else:
+        md.append("Legacy output: single-group BIC and passage-resampling checks were not recorded. "
+                  "Regenerate this analysis with the current pipeline before interpreting cluster support.\n")
     md.append(_table(["k", "silhouette", "Calinski-Harabasz", "Davies-Bouldin", "GMM BIC"],
                      [[r["k"], r["silhouette"], r["calinski_harabasz"], r["davies_bouldin"], r["gmm_bic"]] for r in ktable]))
 
-    md.append("\n\n## Authors at a glance\n")
+    md.append("\n\n## Style groups at a glance\n")
     rows = []
     for a in author_ids:
         e = authors[a]
@@ -72,7 +90,7 @@ def render(out_dir: str | Path) -> str:
         rows.append([a, e["n_verses"], f"{e['share']:.1%}", f"{e['mean_confidence']:.2f}", top_works, ai_s])
     md.append(_table(["author", "verses", "share", "mean margin", "main works", "AI style means"], rows))
 
-    md.append("\n\n## Author markers\n")
+    md.append("\n\n## Style-group markers\n")
     md.append("Markers are the features whose mean inside the cluster differs most from the corpus mean (in standard deviations). "
               "`fw:` closed-class word rate, `sfx:` word-ending rate, `misc:` length/connective habits, `cng:` character n-gram axis, "
               "`ai:` model-rated style scale, `cat:` model-assigned category, `tag:` model-assigned device tag.\n")
@@ -95,7 +113,7 @@ def render(out_dir: str | Path) -> str:
             md.append(f"- {r['ref']}: {r['text']}")
         md.append("")
 
-    md.append("\n## Works × authors\n")
+    md.append("\n## Works × style groups\n")
     md.append("Each row is a work; columns count how many of its verses each author received. "
               "`purity` is the share held by the work's majority author.\n")
     headers = ["work", "group", "n"] + author_ids + ["majority", "purity"]
@@ -117,11 +135,11 @@ def render(out_dir: str | Path) -> str:
     md.append("\n" + _table(["traditional group", "n"] + author_ids, rows))
     if val.get("author_by_scribe"):
         md.append("\n\nSinaiticus was copied by three scribes (A, B, D). If the discovered authors tracked the *scribes* rather than the *composers*, "
-                  "the table below would be block-diagonal; a mixed table means the signal is not scribal.\n")
+                  "the table below would be block-diagonal; a mixed table alone cannot rule out scribal or edition effects.\n")
         scribes = sorted({s for c in val["author_by_scribe"].values() for s in c})
         md.append(_table(["author"] + scribes, [[a] + [val["author_by_scribe"].get(a, {}).get(s, 0) for s in scribes] for a in author_ids]))
 
-    md.append("\n\n## Passages that break from their work's main hand\n")
+    md.append("\n\n## Passages that break from their work's main style group\n")
     md.append("Runs of at least three consecutive verses assigned to an author other than the work's majority author. "
               "These are the candidates for interpolation, embedded sources, or a change of style worth reading closely.\n")
     minority = [s for s in segs if s["is_majority"] == "False" and int(s["n"]) >= 3]
@@ -135,9 +153,9 @@ def render(out_dir: str | Path) -> str:
     md.append(_table(["ref", "author", "z", "text"], [[o["ref"], o["author"], o["z"], o["text"][:90]] for o in outliers[:40]]))
 
     md.append("\n\n## Caveats\n")
-    md.append("- Unsupervised clusters are *stylistic hands*, not proven persons. Genre (narrative vs. letter vs. vision) is the strongest stylistic signal in any corpus and will shape the top-level split; read the works×authors table with that in mind.")
+    md.append("- Unsupervised clusters are exploratory style groups, not proven persons. Genre (narrative vs. letter vs. vision) is the strongest stylistic signal in any corpus and will shape the top-level split; read the works×authors table with that in mind.")
     md.append("- The number of authors depends on the selection criterion; the k-selection table shows how sharp (or flat) the optimum is.")
-    md.append("- Single verses are short; per-verse labels inherit their neighbourhood through smoothing. Treat minority *runs* as evidence, isolated single-verse flips as noise unless they are also outliers.")
+    md.append("- Single verses are short; per-verse labels inherit their neighbourhood through smoothing. Treat minority runs as hypotheses for further study; smoothing itself induces runs, and quotations or genre shifts can explain them.")
     lang = summary.get("language", "grc")
     if lang == "grc":
         md.append("- Manuscript texts (Sinaiticus, Vaticanus) are the first hand of one copy; LXX books are translations, so their 'authors' are translators.")

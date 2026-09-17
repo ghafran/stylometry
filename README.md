@@ -1,10 +1,52 @@
 # stylometry
 
-Verse-level author discovery across the manuscripts of the Bible and the Quran. Every verse gets a
-style profile - partly from classical stylometry, partly from an LLM - and the verses of each language
-are clustered into stylistic *hands* named A1, A2, ... The outputs say how many hands a corpus needs,
-which verses each hand wrote, what makes each hand recognisable, and how that lines up with traditional
-attributions.
+Exploratory style analysis across the manuscripts of the Bible and the Quran. Each verse receives
+lexical features and optionally a blinded AI style profile. Within each language, verses are grouped
+into style clusters labelled A1, A2, ... . These groups help locate differences worth examining; they
+do not identify authors or establish how many people composed a text. A one-group result means the
+analysis found no supported split, not that a single author has been proved.
+
+## Reliability and verification
+
+Run the offline regression and strategy controls with `uv run --frozen pytest -q`. No model API calls
+or corpus downloads are required. Tests cover:
+
+- Single Gaussian populations, including correlated dimensions, must not be forced into multiple groups.
+- Clear synthetic style populations must survive smoothing and passage subsampling.
+- Shared request effects must not score as successful recovery of held-out works.
+- Missing profiles, manuscript gaps and chapter boundaries must break smoothing and reported runs.
+- Anonymous prompt IDs must map correctly back to corpus IDs. Partial, duplicate, invalid or non-finite
+  responses must fail without creating invented measurements.
+- Resume must preserve the original request context and reject changed text or generation settings.
+- Constant and tiny feature matrices and a forced single group must produce usable outputs.
+
+Automatic clustering always includes a one-group baseline. Candidate partitions are fitted on smoothed
+features and scored on unsmoothed features; PCA is fitted on unsmoothed features. A split must improve
+[Gaussian-mixture BIC](https://scikit-learn.org/stable/auto_examples/mixture/plot_gmm_selection.html) over one Gaussian by at least 10 and have positive unsmoothed silhouette. BIC uses
+a fixed sample of at most 4,000 observations, rotated into its full PCA basis before fitting diagonal
+covariances. The selected split must then have adjusted Rand agreement of at least 0.8 in all five
+80% passage subsamples. Fewer than five passages, unstable partitions or insufficient BIC improvement
+produce one group. `--k` explicitly overrides selection and is labelled as forced. The BIC baseline is
+always considered, even when `--kmin` is 2 or larger.
+
+These thresholds are exploratory diagnostics, not calibrated authorship tests. Passage subsampling
+keeps the feature map fixed and measures partition sensitivity; it does not validate the entire
+pipeline on unseen data. Margins are centroid-distance measures, not probabilities. Full validation
+still needs known-author texts with genre, topic, witness and length controls, repeated blind model
+runs, and sensitivity checks across feature choices and token-based sample sizes. The repository does
+not bundle that benchmark or reproduce the historical pilot results below.
+
+**Existing profiles:** generate a new `--profiles` file for the blinded workflow. Complete legacy
+profiles remain readable with a warning for exploration, but cannot be resumed into a new run and do
+not receive held-out work-recovery scores without request provenance. Invalid profiles are rejected.
+New profiles record prompt/schema versions, input text hashes, generation settings and request groups.
+Resuming rejects incompatible text, model, settings or context. `--limit` is a soft cap rounded up to a
+complete request so changing the limit cannot change the context of an already profiled verse.
+
+[Grouped work-recovery evaluation](https://scikit-learn.org/stable/modules/cross_validation.html#cross-validation-iterators-for-grouped-data) holds out whole chapters and AI requests together, fits tag vocabulary inside
+training folds, and compares models on a common cohort. If independent groups or provenance are
+insufficient, the score is unavailable rather than estimated from random verse splits. Consensus and
+retest agreement measure agreement and repeatability, not accuracy against an authorial ground truth.
 
 ## Corpus
 
@@ -62,8 +104,8 @@ uv run stylometry compare-models --set opus-5=data/processed/profiles.jsonl --se
 ```
 
 `uv run stylometry all --backend deepseek --model deepseek-flash --scope all --yes --profiles ...` chains
-everything for every language present. Every step is resumable: profiles are appended as they arrive and
-units already profiled are skipped.
+everything for every language present. Profiles are appended as complete validated requests arrive. Compatible complete requests are
+skipped on resume; incomplete requests are regenerated with their original context.
 
 ### Scope and language
 
@@ -96,7 +138,8 @@ corpus (74,130 primary units: Greek 41,126, Hebrew 26,768, Arabic 6,236; about 3
 | claude-opus-5 (sync / batch, estimated) | ≈ $460 / $230 | $255 / $128 | $166 / $83 | $39 / $19 |
 | gpt-5.5, low reasoning (sync / batch) | $524 / $262 | $291 / $145 | $189 / $95 | $44 / $22 |
 
-**Which model?** `stylometry compare-models` answers this from the profile files on disk and writes
+**Comparing models.** `stylometry compare-models` reports agreement, repeatability, descriptive work
+recovery and cost from the profile files on disk and writes
 `output/models/` (`index.html`, `model_comparison.md`, `models.csv`, and the clustering re-run with each
 model's profiles under `cluster/`):
 
@@ -108,13 +151,13 @@ uv run stylometry compare-models --set opus-5=data/processed/profiles.jsonl \
     --set deepseek-v4-pro=data/processed/profiles_deepseek.jsonl ...
 ```
 
-There is no ground truth for the style of a verse, so four proxies are used: agreement with a reference
-model (the first `--set`); agreement with the consensus of all the *other* models; stability, i.e.
-agreement of a model with itself on a second run (`NAME_retest` sets); and usefulness, i.e. how well the
-profile alone recovers which of the pilot works a verse comes from, and what the project's own clustering
-does with it. The pilot set is the first 75 verses of Mark, John, Romans, 1 Clement and the Acts of John
-(375 verses, five different hands). Six configurations were run on the 75 Mark verses; Opus 5,
-deepseek-flash and gpt-5.5 on all 375; flash and gpt-5.5 twice on Mark.
+The historical pilot below used unblinded prompts and random verse-level folds, so its work-recovery
+numbers are optimistic and cannot establish model accuracy or author discrimination. They are retained
+as historical measurements only. The revised evaluator uses common cohorts and grouped holdouts;
+these numbers must be regenerated with new blinded profiles before comparing the revised strategy.
+For profile files covering several languages, use `compare-models --language grc` (or `hbo`/`arb`)
+to keep the evaluation and cluster comparisons within one language.
+The pilot covered the first 75 verses of Mark, John, Romans, 1 Clement and Acts of John (375 verses).
 
 | model | consensus score (75 Mark verses) | retest r | work recovery (375) | clustering ARI vs work, k free / fixed | $/verse |
 |---|---|---|---|---|---|
@@ -127,17 +170,10 @@ deepseek-flash and gpt-5.5 on all 375; flash and gpt-5.5 twice on Mark.
 | gpt-5.4-mini | 0.64 | – | – | – | 0.0048 |
 | lexical features only, no AI | – | – | – | 0.46 / 0.69 | 0 |
 
-Reading: gpt-5.5 is the most accurate and by far the most stable model. deepseek-flash is noisy verse
-by verse (a second run agrees with the first only at r = 0.61) but its errors average out: fed into the
-clustering it recovers the five works as well as Opus or gpt-5.5, and averaging two flash runs lifts its
-consensus agreement to 0.83 for $0.0006 per verse. deepseek-v4-pro is not better than flash at three
-times the price; gpt-5.4-mini is the outlier and not worth its price. Categorical agreement with the
-Opus reference is lower outside Mark (57-71%) for every model alike because those Opus profiles were
-made with the first, Greek-only prompt, which labelled the letters `exhortation` / `author_first_person`
-where the current prompt yields `speech` / `prophet_or_apostle`; the numeric scales are unaffected.
-Recommendation: profile everything with deepseek-flash (twice, if you want the stability, still under $50
-for the whole corpus), and spot-check a sample with gpt-5.5. DeepSeek V4 reasons by default at ~1,000
-reasoning tokens per verse; the backend switches it off unless `--thinking` is given.
+The pilot suggests differences in agreement, repeatability and cost, but does not justify an
+accuracy ranking or a whole-corpus model recommendation. A new blinded pilot with enough independent
+passages is required. Numeric and categorical definitions changed between older prompts, which is
+another reason not to pool legacy and current profiles in one evaluation.
 
 ## How it works
 
@@ -150,17 +186,17 @@ reasoning tokens per verse; the backend switches it off unless `--thinking` is g
 2. **Lexical features** (`stylometry/features.py`, no AI): closed-class word rates, word-ending rates,
    length and verse-initial connective habits (καί / waw / wa-), and a character 2-4-gram projection,
    with word lists per language in `stylometry/lang.py`.
-3. **AI style profiles** (`stylometry/ai_profile.py`): the model reads a chapter-sized run of units and
+3. **AI style profiles** (`stylometry/ai_profile.py`): the model reads text with anonymous unit IDs, without work/witness metadata, and
    returns per unit six 0-1 scales (register, foreign interference, hypotaxis, lexical richness,
    rhetorical polish, emotional intensity), five language-neutral categories (discourse mode, narrative
    tense, connective style, voice, quotation), device tags, diagnostic phrases and a one-line signature.
    The prompt carries language-specific anchors (Atticism, Late Biblical Hebrew, saj' ...).
 4. **Clustering** (`stylometry/cluster.py`): blocks standardised and variance-equalised, each verse
-   blended with its ±5 neighbours in the same work, PCA to 30 dims, k chosen by scoring each candidate
-   partition on the verses' own unsmoothed vectors (`--k-criterion`, `--k`), k-means, hands renamed by
-   size. Per hand: effect-size markers, tag lift, phrases, representative verses; per verse: assignment
+   blended with its ±5 neighbours inside an uninterrupted chapter passage, PCA to 30 dims fitted on
+   unsmoothed vectors, and k selected with the single-group and stability checks above (`--k-criterion`,
+   `--k`). K-means groups are named by size. Per hand: effect-size markers, tag lift, phrases, representative verses; per verse: assignment
    margin and outlier score.
-5. **Validation**: adjusted Rand index against work and against traditional groupings (Paul-undisputed /
+5. **Descriptive checks**: adjusted Rand index against work and against traditional groupings (Paul-undisputed /
    Deutero-Pauline / Pastorals, Torah / Former Prophets / Chronicler, Meccan / Medinan ...), purity per
    work, and for Sinaiticus a scribe × hand table.
 
@@ -173,11 +209,11 @@ and `output/models/` holds the model comparison.
 
 ## Reading the results honestly
 
-- Clusters are stylistic hands, not identified persons. Genre is the loudest stylistic signal, so the top
+- Clusters are exploratory style groups, not identified persons. Genre is the loudest stylistic signal, so the top
   split separates narrative from letter from vision; the works × hands table and the ARI figures show how
   much of the structure is book-level.
 - The number of hands depends on the criterion; the k-selection table shows how sharp the optimum is.
-- Runs of several consecutive minority-hand verses are the interesting candidates; isolated flips are
-  mostly noise.
+- Consecutive minority-group verses are hypotheses for closer reading. Smoothing itself produces runs;
+  quotations, topic or genre shifts may also explain them.
 - LXX "authors" are translators; the Old Greek and Theodotion versions of Daniel are kept apart for that
   reason. The Quran's traditional Meccan/Medinan split is the external check for any stylistic split.

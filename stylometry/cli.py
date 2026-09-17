@@ -73,36 +73,40 @@ def cmd_build(args) -> None:
 
 
 def cmd_estimate(args) -> None:
-    from .ai_profile import estimate_cost, load_profiles
+    from .ai_profile import estimate_cost, load_profiles, chunk_verses
 
     verses = _select(args, _load_corpus())
     done = load_profiles(_profiles_path(args))
-    todo = [v for v in verses if v["id"] not in done]
+    chunks = [c for c in chunk_verses(verses, args.chunk_size) if any(v["id"] not in done for v in c)]
+    todo = [v for c in chunks for v in c]
     if args.model.startswith("deepseek"):
-        est = estimate_cost(todo, args.model, args.chunk_size)
+        est = estimate_cost(todo, args.model, args.chunk_size, chunks=chunks)
         print(f"DeepSeek {args.model}: {est['verses']} verses, {est['requests']} requests, "
               f"~{est['est_input_tokens']:,} in / ~{est['est_output_tokens']:,} out tokens, ≈ ${est['est_cost_usd']:.2f} peak "
               f"/ ${est['est_cost_usd'] / 2:.2f} off-peak (--thinking multiplies output tokens by ~6)")
     else:
         for batch in (False, True):
-            est = estimate_cost(todo, args.model, args.chunk_size, batch=batch)
+            est = estimate_cost(todo, args.model, args.chunk_size, batch=batch, chunks=chunks)
             print(f"{'batch API' if batch else 'sync API'}: {est['verses']} verses, {est['requests']} requests, "
                   f"~{est['est_input_tokens']:,} in / ~{est['est_output_tokens']:,} out tokens, ≈ ${est['est_cost_usd']:.2f} ({args.model})")
     print("(±50%: thinking effort and Greek tokenisation vary; run a --limit pilot to calibrate)")
 
 
 def cmd_profile(args) -> None:
-    from .ai_profile import estimate_cost, run_profile
-
-    from .ai_profile import OPENAI_PRESETS
+    from .ai_profile import (estimate_cost, run_profile, load_profiles, profile_settings,
+                             _resume_chunks, OPENAI_PRESETS)
 
     verses = _select(args, _load_corpus())
     model = args.model
     if args.backend in OPENAI_PRESETS and model.startswith("claude"):
         model = OPENAI_PRESETS[args.backend]["model"] or model
-    est = estimate_cost(verses, model, args.chunk_size, batch=args.backend == "batch")
-    print(f"scope={args.scope} works={args.works or 'all'}: {est['verses']} verses ≈ ${est['est_cost_usd']:.2f} on {model}")
-    if not args.yes and not args.limit and est["verses"] > 500:
+    done = load_profiles(_profiles_path(args))
+    settings = profile_settings(args.backend, args.effort, args.thinking, args.base_url)
+    chunks = _resume_chunks(verses, done, model, args.backend, settings, args.chunk_size, args.limit)
+    todo = [v for chunk in chunks for v in chunk]
+    est = estimate_cost(todo, model, args.chunk_size, batch=args.backend == "batch", chunks=chunks)
+    print(f"scope={args.scope} works={args.works or 'all'}: {est['verses']} verses in {len(chunks)} complete requests ≈ ${est['est_cost_usd']:.2f} on {model}")
+    if not args.yes and est["verses"] > 500:
         sys.exit("more than 500 verses: re-run with --yes to confirm the spend, or use --limit N for a pilot")
     totals = run_profile(
         verses, _profiles_path(args), backend=args.backend, model=model, effort=args.effort,
@@ -129,11 +133,9 @@ def cmd_cluster(args) -> None:
         sys.exit(f"no verses for language={args.language} scope={args.scope} works={args.works}")
     profiles = None if args.no_ai else load_profiles(_profiles_path(args))
     if profiles is not None and not profiles:
-        print("no AI profiles found; clustering on lexical features only (run `stylometry profile` to add them)")
-        profiles = None
+        sys.exit("no AI profiles found; generate profiles or explicitly use --no-ai")
     if profiles and not any(v["id"] in profiles for v in verses):
-        print("no AI profiles cover this selection; clustering on lexical features only")
-        profiles = None
+        sys.exit("no AI profiles cover this selection; generate profiles or explicitly use --no-ai")
     weights = {"lex": args.w_lex, "ai": args.w_ai, "tags": args.w_tags}
     out = _lang_out(args)
     summary = run(verses, profiles, out, k=args.k, kmin=args.kmin, kmax=args.kmax,
@@ -195,14 +197,15 @@ def cmd_compare(args) -> None:
     }
     scopes = {k: v for k, v in scopes.items() if v}
     out = Path(args.out) if args.out else OUTPUT / "models"
-    res = build(sets, verses, out, reference=args.reference, scopes=scopes, seed=args.seed, do_cluster=not args.no_cluster,
+    analysis_verses = select_verses(verses, scope="all", language=args.language) if args.language else verses
+    res = build(sets, analysis_verses, out, reference=args.reference, scopes=scopes, seed=args.seed, do_cluster=not args.no_cluster,
                 ensembles=not args.no_ensemble)
     from .html import build_root_index
 
     build_root_index(OUTPUT)
     rec = res["recommendation"]
     if rec:
-        print(f"most accurate: {rec['best']}   best value: {rec['value']}   cheapest: {rec['cheapest']}")
+        print(f"highest consensus agreement: {rec['best']}   best value: {rec['value']}   cheapest: {rec['cheapest']}")
     print(f"wrote {out / 'index.html'}, {out / 'model_comparison.md'}, {out / 'models.csv'}")
 
 
@@ -265,7 +268,7 @@ def main(argv: list[str] | None = None) -> None:
     pr.add_argument("--effort", default="high", choices=["low", "medium", "high", "xhigh", "max"])
     pr.add_argument("--chunk-size", type=int, default=25, help="verse units per request")
     pr.add_argument("--workers", type=int, default=4, help="parallel requests (sdk/deepseek/openai backends)")
-    pr.add_argument("--limit", type=int, help="only profile the first N unprofiled verses (pilot)")
+    pr.add_argument("--limit", type=int, help="profile approximately N units, rounded up to preserve complete request context")
     pr.add_argument("--yes", action="store_true", help="confirm spending on a large run")
     pr.add_argument("--base-url", help="openai backend: endpoint base URL")
     pr.add_argument("--api-key-env", help="environment variable holding the API key (default DEEPSEEK_API_KEY / OPENAI_API_KEY)")
@@ -277,11 +280,11 @@ def main(argv: list[str] | None = None) -> None:
     pc.add_argument("--wait", action="store_true", help="poll until every batch has ended")
     pc.set_defaults(func=cmd_collect)
 
-    c = sub.add_parser("cluster", help="discover authors (one language at a time)")
+    c = sub.add_parser("cluster", help="explore style groups (one language at a time)")
     _add_scope(c)
     _add_profiles(c)
     c.add_argument("--out", default=None, help="output directory (default output/<language>)")
-    c.add_argument("--k", type=int, help="force the number of authors")
+    c.add_argument("--k", type=int, help="force the number of exploratory style groups (including 1)")
     c.add_argument("--kmin", type=int, default=2)
     c.add_argument("--kmax", type=int, default=20)
     c.add_argument("--window", type=int, default=5, help="neighbour verses on each side for smoothing")
@@ -292,7 +295,7 @@ def main(argv: list[str] | None = None) -> None:
     c.add_argument("--no-ai", action="store_true", help="ignore AI profiles even if present")
     c.add_argument("--seed", type=int, default=0)
     c.add_argument("--k-criterion", default="silhouette", choices=["silhouette", "bic", "davies_bouldin", "calinski"],
-                   help="how to pick the number of authors when --k is not given")
+                   help="rank supported style partitions; single-group and stability checks still apply")
     c.set_defaults(func=cmd_cluster)
 
     r = sub.add_parser("report", help="render output/<language>/report.md")
@@ -314,6 +317,7 @@ def main(argv: list[str] | None = None) -> None:
     cm.add_argument("--set", action="append", required=True, metavar="NAME=PATH",
                     help="a profiles file to compare; NAME_retest pairs with NAME as a repeat run")
     cm.add_argument("--reference", help="set to treat as the reference (default: the first --set)")
+    cm.add_argument("--language", choices=LANGS, help="restrict comparison to one language (required for multilingual profile sets with clustering)")
     cm.add_argument("--cost", action="append", metavar="NAME=USD_PER_VERSE",
                     help="override the $/verse measured from NAME's *_runs.jsonl sidecar")
     cm.add_argument("--out", default=None, help=f"output directory (default {OUTPUT / 'models'})")

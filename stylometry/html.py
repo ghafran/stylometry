@@ -92,7 +92,7 @@ def chip(author: str, rel: str = "") -> str:
 def page(title: str, body: str, rel: str, subtitle: str = "", nav: str | None = None) -> str:
     css = CSS.replace("%(light)s", _vars(LIGHT)).replace("%(dark)s", _vars(DARK))
     if nav is None:
-        nav = (f'<a href="{rel}index.html">Dashboard</a><a href="{rel}index.html#authors">Authors</a><a href="{rel}index.html#works">Works</a>\n'
+        nav = (f'<a href="{rel}index.html">Dashboard</a><a href="{rel}index.html#authors">Style groups</a><a href="{rel}index.html#works">Works</a>\n'
                f'<a href="{rel}witnesses.html">Witnesses</a><a href="{rel}../report.md">Report (markdown)</a><a href="{rel}../../index.html">All languages</a>')
     return f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -158,7 +158,7 @@ def build_site(out_dir: str | Path) -> Path:
     tiles = [
         (f"{total:,}", "verse units"),
         (str(len(work_order)), "works"),
-        (str(len(authors)), "distinct hands"),
+        (str(len(authors)), "style groups"),
         (f"{val['ari_vs_group']:.2f}", "ARI vs. traditional groups"),
         (f"{val['mean_purity']:.0%}", "mean purity per work"),
     ]
@@ -181,9 +181,9 @@ def build_site(out_dir: str | Path) -> Path:
         )
     authors_table = (
         '<table><thead><tr><th>author</th><th class="num">verses</th><th style="width:22%">share</th><th class="num">%</th>'
-        '<th class="num">main hand of</th><th class="num">≥10% of</th><th class="num">appears in</th><th>largest contributions</th></tr></thead>'
+        '<th class="num">main group of</th><th class="num">≥10% of</th><th class="num">appears in</th><th>largest contributions</th></tr></thead>'
         f'<tbody>{"".join(author_rows)}</tbody></table>'
-        '<p class="sub">"main hand of" counts works where this author holds the most verses; "≥10% of" counts works where it holds at least a tenth; "appears in" counts any verse at all.</p>'
+        '<p class="sub">"main group of" counts works where this author holds the most verses; "≥10% of" counts works where it holds at least a tenth; "appears in" counts any verse at all.</p>'
     )
 
     work_rows = []
@@ -196,21 +196,26 @@ def build_site(out_dir: str | Path) -> Path:
             f'<td>{chip(majority[w])}</td><td class="num">{purity:.0%}</td></tr>'
         )
     works_table = (
-        '<table><thead><tr><th>work</th><th class="num">verses</th><th>composition</th><th>main hand</th><th class="num">purity</th></tr></thead>'
+        '<table><thead><tr><th>work</th><th class="num">verses</th><th>composition</th><th>main group</th><th class="num">purity</th></tr></thead>'
         f'<tbody>{"".join(work_rows)}</tbody></table>'
     )
 
     k_note = (
-        f"{summary['k_used']} hands were used"
-        + (f" (chosen by {summary.get('k_criterion', 'silhouette')})" if summary["k_used"] == summary["k_selected_by_silhouette"] else " (forced with --k)")
-        + f"; features: {'lexical statistics + AI style profiles' if summary['used_ai_profiles'] else 'lexical statistics only'}."
+        f"{summary['k_used']} exploratory style groups were used"
+        + (f" (chosen by {summary.get('k_criterion', 'silhouette')})" if not summary.get("k_forced", summary["k_used"] != summary["k_selected_by_silhouette"]) else " (forced with --k)")
+        + f"; features: {'lexical statistics + AI style profiles' if summary['used_ai_profiles'] else 'lexical statistics only'}. "
+        + "These are not identified authors. "
+        + h.escape(summary.get("selection_status", "legacy_unvalidated").replace("_", " "))
+        + ". One group means no supported split, not one proven author."
     )
+    if summary.get("profile_metadata", {}).get("unverified_profiles"):
+        k_note += " Legacy/unverified AI profiles: regenerate for validation."
     body = (
         f'<div class="tiles">{tiles_html}</div><p class="sub">{k_note}</p>'
-        f'<h2 id="authors">Authors</h2>{legend(authors)}{authors_table}'
+        f'<h2 id="authors">Style groups</h2>{legend(authors)}{authors_table}'
         f'<h2 id="works">Works</h2>{legend(authors)}{works_table}'
     )
-    (site / "index.html").write_text(page(f"Who wrote what · {lang_name}", body, "", f"Verse-level author discovery in the {lang_name} corpus · <a href=\"../../index.html\">all languages</a>"), encoding="utf-8")
+    (site / "index.html").write_text(page(f"Style groups · {lang_name}", body, "", f"Exploratory style analysis in the {lang_name} corpus · <a href=\"../../index.html\">all languages</a>"), encoding="utf-8")
 
     # ---- per-author pages ------------------------------------------------------------------------
     for a in authors:
@@ -235,7 +240,8 @@ def build_site(out_dir: str | Path) -> Path:
         parts.append("<h2>Works</h2>" + legend([a]) + "<table><thead><tr><th>work</th><th class=\"num\">verses by this hand</th><th>share of the work</th></tr></thead><tbody>" + "".join(
             f'<tr><td><a href="../works/{w}.html">{h.escape(w)}</a></td><td class="num">{n}</td><td style="width:40%"><div class="bar"><span style="width:{100 * n / len(by_work[w]):.1f}%;background:{color_var(a)}"></span></div> {_pct(n / len(by_work[w]))}</td></tr>'
             for w, n in works_here.most_common()) + "</tbody></table>")
-        parts.append("<h2>Everything attributed to this hand</h2><p class=\"sub\">In reading order; the margin column is the assignment confidence (0 = tie between two hands, 1 = unambiguous).</p>")
+        parts.append('<p class="sub">Exploratory style group, not an identified author.</p>')
+        parts.append("<h2>Verses assigned to this style group</h2><p class=\"sub\">In reading order; the margin is relative centroid separation, not a probability of authorship. Zero denotes a tie or a single-group run.</p>")
         for w in work_order:
             vs = [r for r in mine if r["work"] == w]
             if not vs:
@@ -245,7 +251,7 @@ def build_site(out_dir: str | Path) -> Path:
                 flag = " flag" if float(r["outlier_z"]) > 2.5 else ""
                 parts.append(f'<div class="verse{flag}" style="border-left-color:{color_var(a)}"><span class="ref"><a href="../works/{w}.html#{h.escape(r["id"])}">{h.escape(r["ref"])}</a></span>'
                              f'<span class="conf">{float(r["confidence"]):.2f}</span><span class="{gk}" dir="auto">{h.escape(r["text"])}</span></div>')
-        (site / "authors" / f"{a}.html").write_text(page(f"Author {a}", "\n".join(parts), "../", f"{m['n_verses']:,} verses · {_pct(m['share'])} of the corpus"), encoding="utf-8")
+        (site / "authors" / f"{a}.html").write_text(page(f"Style group {a}", "\n".join(parts), "../", f"{m['n_verses']:,} verses · {_pct(m['share'])} of the corpus"), encoding="utf-8")
 
     # ---- per-work pages --------------------------------------------------------------------------
     for w in work_order:
@@ -254,18 +260,19 @@ def build_site(out_dir: str | Path) -> Path:
         title = vs[0]["ref"].rsplit(" ", 1)[0]
         counts = work_counts[w]
         parts = [f'<div class="tiles"><div class="tile"><div class="v">{n:,}</div><div class="l">verses</div></div>'
-                 f'<div class="tile"><div class="v">{chip(majority[w], "../")}</div><div class="l">main hand ({counts[majority[w]] / n:.0%})</div></div>'
-                 f'<div class="tile"><div class="v">{len(counts)}</div><div class="l">hands present</div></div></div>']
+                 f'<div class="tile"><div class="v">{chip(majority[w], "../")}</div><div class="l">main group ({counts[majority[w]] / n:.0%})</div></div>'
+                 f'<div class="tile"><div class="v">{len(counts)}</div><div class="l">style groups present</div></div></div>']
+        parts.append('<p class="sub">Exploratory style groups, not identified authors. Genre, topic and witnesses may explain differences.</p>')
         parts.append(legend([a for a in authors if counts.get(a)]) + stack_bar(counts, n, authors, w))
-        parts.append("<table><thead><tr><th>hand</th><th class=\"num\">verses</th><th class=\"num\">share</th></tr></thead><tbody>" + "".join(
+        parts.append("<table><thead><tr><th>group</th><th class=\"num\">verses</th><th class=\"num\">share</th></tr></thead><tbody>" + "".join(
             f'<tr><td>{chip(a, "../")}</td><td class="num">{c}</td><td class="num">{_pct(c / n)}</td></tr>' for a, c in counts.most_common()) + "</tbody></table>")
-        parts.append("<h2>Verse by verse</h2><p class=\"sub\">Coloured rule = assigned hand. ⚑ marks a verse whose own style is far from its hand's centre (possible interpolation or noise).</p>")
+        parts.append("<h2>Verse by verse</h2><p class=\"sub\">Coloured rule = assigned group. ⚑ marks a verse whose own style is far from its group's centre (an exploratory outlier).</p>")
         for r in vs:
             a = r["author"]
             flag = " flag" if float(r["outlier_z"]) > 2.5 else ""
             parts.append(f'<div class="verse{flag}" id="{h.escape(r["id"])}" style="border-left-color:{color_var(a)}"><span class="ref">{h.escape(r["ref"])}</span>'
                          f'<span>{chip(a, "../")}</span><span class="{gk}" dir="auto">{h.escape(r["text"])}</span></div>')
-        (site / "works" / f"{w}.html").write_text(page(title, "\n".join(parts), "../", f"{h.escape(work_group[w])} · main hand {majority[w]}"), encoding="utf-8")
+        (site / "works" / f"{w}.html").write_text(page(title, "\n".join(parts), "../", f"{h.escape(work_group[w])} · main group {majority[w]}"), encoding="utf-8")
     return site
 
 
@@ -282,16 +289,16 @@ def build_root_index(output_dir: str | Path) -> Path | None:
         lang = s.get("language", lang_dir.name)
         cards.append(
             f'<div class="tile"><div class="v"><a href="{lang_dir.name}/site/index.html">{names.get(lang, lang)}</a></div>'
-            f'<div class="l">{s["n_verses"]:,} verses · {s["n_works"]} works · {s["k_used"]} hands · '
+            f'<div class="l">{s["n_verses"]:,} verses · {s["n_works"]} works · {s["k_used"]} style groups · '
             f'{"AI + lexical" if s.get("used_ai_profiles") else "lexical only"}</div></div>'
         )
     if not cards:
         return None
-    body = '<div class="tiles">' + "".join(cards) + "</div><p class=\"sub\">Each language is analysed on its own; stylometric features never cross languages.</p>"
+    body = '<div class="tiles">' + "".join(cards) + "</div><p class=\"sub\">Each language is analysed on its own. These are exploratory style groups, not identified authors.</p>"
     nav = '<a href="index.html">All languages</a>'
     if (output_dir / "models" / "index.html").exists():
-        body += '<p><a href="models/index.html">Which model should profile the verses?</a> - accuracy, stability and cost of every model tried.</p>'
+        body += '<p><a href="models/index.html">Which model should profile the verses?</a> - agreement, repeatability and cost of every model tried.</p>'
         nav += '<a href="models/index.html">Models</a>'
     path = output_dir / "index.html"
-    path.write_text(page("Who wrote what", body, "", "Verse-level author discovery across Greek, Hebrew and Arabic scripture", nav=nav), encoding="utf-8")
+    path.write_text(page("Style groups", body, "", "Exploratory style analysis across Greek, Hebrew and Arabic scripture", nav=nav), encoding="utf-8")
     return path

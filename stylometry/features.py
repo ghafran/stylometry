@@ -29,6 +29,10 @@ MISC_NAMES = [
 
 
 def lexical_features(verses: list[dict], svd_dims: int = 40, seed: int = 0) -> tuple[np.ndarray, list[str]]:
+    if not verses:
+        raise ValueError("lexical features need at least one verse")
+    if not isinstance(svd_dims, (int, np.integer)) or svd_dims < 0:
+        raise ValueError("svd_dims must be a nonnegative integer")
     langs = {v.get("language", "grc") for v in verses}
     if len(langs) != 1:
         raise ValueError(f"lexical features need a single language, got {sorted(langs)}")
@@ -36,6 +40,10 @@ def lexical_features(verses: list[dict], svd_dims: int = 40, seed: int = 0) -> t
     fw_list, sfx_list, conn = function_words(lang), suffixes(lang), INITIAL_CONNECTIVES[lang]
 
     texts = [v["text_bare"] for v in verses]
+    if any(not isinstance(t, str) for t in texts):
+        raise ValueError("text_bare must be a string for every verse")
+    if not any(t.strip() for t in texts):
+        raise ValueError("lexical features need nonempty text")
     toks = [t.split() for t in texts]
     n = np.array([max(len(t), 1) for t in toks], dtype=np.float32)
 
@@ -66,10 +74,31 @@ def lexical_features(verses: list[dict], svd_dims: int = 40, seed: int = 0) -> t
         ]
     names += MISC_NAMES
 
-    tfidf = TfidfVectorizer(analyzer="char_wb", ngram_range=(2, 4), min_df=5, max_features=30000, sublinear_tf=True)
-    cng = tfidf.fit_transform(texts)
-    k = max(2, min(svd_dims, cng.shape[1] - 1, len(verses) - 1))
-    proj = TruncatedSVD(n_components=k, random_state=seed).fit_transform(cng).astype(np.float32)
-    names += [f"cng:svd{i:02d}" for i in range(k)]
+    proj = np.empty((len(verses), 0), dtype=np.float32)
+    if svd_dims:
+        # The usual five-document cutoff is impossible on tiny corpora and
+        # can remove every n-gram in disjoint samples. Retain rare n-grams if
+        # necessary instead of failing or fabricating a feature column.
+        min_df = 5 if len(texts) >= 5 else 1
+        cng = None
+        for cutoff in dict.fromkeys((min_df, 1)):
+            tfidf = TfidfVectorizer(analyzer="char_wb", ngram_range=(2, 4), min_df=cutoff,
+                                   max_features=30000, sublinear_tf=True)
+            try:
+                cng = tfidf.fit_transform(texts)
+                break
+            except ValueError as exc:
+                if "empty vocabulary" not in str(exc) and "After pruning, no terms remain" not in str(exc):
+                    raise
+        if cng is not None and cng.shape[1]:
+            k = min(svd_dims, cng.shape[1], max(1, len(verses) - 1))
+            if cng.shape[1] == 1:
+                proj = cng.toarray().astype(np.float32)
+            else:
+                # Constant corpora have undefined explained-variance ratios;
+                # those diagnostics are unused and the projection is finite.
+                with np.errstate(invalid="ignore", divide="ignore"):
+                    proj = TruncatedSVD(n_components=k, random_state=seed).fit_transform(cng).astype(np.float32)
+            names += [f"cng:svd{i:02d}" for i in range(proj.shape[1])]
 
     return np.hstack([fw, sfx, misc, proj]).astype(np.float32), names

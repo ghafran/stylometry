@@ -119,21 +119,23 @@ def test_schema_and_validation():
     schema = output_schema()
     assert schema["properties"]["profiles"]["items"]["required"][0] == "id"
     verses = _fake_verses(2, "AAA")
-    data = {"profiles": [{"id": verses[0]["id"], "register": 0.2}, {"id": "[bogus]", "register": 0.9}]}
+    data = {"profiles": [
+        {"id": f"unit_{i:04d}", **{d: .2 for d in NUMERIC_DIMS},
+         **{d: values[0] for d, values in CATEGORICAL_DIMS.items()},
+         "style_tags": ["short_clauses"], "distinctive_phrases": [], "signature": "Short clauses."}
+        for i in range(1, 3)
+    ]}
     recs = _validate(verses, data, "m", "b")
-    assert [r["id"] for r in recs] == [verses[0]["id"]] and recs[0]["model"] == "m"
+    assert [r["id"] for r in recs] == [v["id"] for v in verses]
+    assert recs[0]["model"] == "m"
+    assert recs[0]["provenance"]["request_group"] == recs[1]["provenance"]["request_group"]
 
 
 def test_coerce_profile_and_json_prompt():
     from stylometry.ai_profile import coerce_profile, json_mode_system_prompt, system_prompt
 
-    p = coerce_profile({"id": "[X.1.1]", "register": "1.7", "hypotaxis": None, "discourse_mode": "Narrative ",
-                        "narrative_tense": "aorist", "connective_style": "kai_parataxis", "voice": "jesus",
-                        "style_tags": ["Genitive Absolute", 3], "distinctive_phrases": "no"})
-    assert p["id"] == "X.1.1" and p["register"] == 1.0 and p["hypotaxis"] == 0.5
-    assert p["discourse_mode"] == "narrative" and p["quotation"] == "none"
-    assert p["narrative_tense"] == "past_narrative" and p["connective_style"] == "parataxis" and p["voice"] == "protagonist"
-    assert p["style_tags"] == ["genitive_absolute", "3"] and p["distinctive_phrases"] == []
+    # Missing measurements must not be replaced with plausible-looking values.
+    assert coerce_profile({"id": "unit_0001", "register": "1.7", "hypotaxis": None}) is None
     assert coerce_profile("junk") is None
     prompt = json_mode_system_prompt("hbo")
     assert "json" in prompt and '"profiles"' in prompt and "wayyiqtol" in prompt
@@ -159,7 +161,7 @@ def test_cluster_end_to_end(tmp_path: Path):
             "id": v["id"], **{d: (0.2 if v["work"] == "AAA" else 0.8) for d in NUMERIC_DIMS},
             **{d: vals[0] for d, vals in CATEGORICAL_DIMS.items()},
             "style_tags": ["idou", "asyndeton"] if v["work"] == "AAA" else ["hina_clause", "men_de", "long_period"],
-            "distinctive_phrases": [], "signature": "",
+            "distinctive_phrases": [], "signature": "Synthetic style control.",
         }
         for v in verses
     }
