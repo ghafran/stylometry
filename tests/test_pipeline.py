@@ -223,3 +223,19 @@ def test_compare_models_metrics():
     assert pareto(rows) == {"big", "cheap"}
     rec = recommend(rows)
     assert rec["best"] == "big" and rec["value"] == "cheap" and rec["cheapest"] == "cheap"
+
+
+def test_divine_name_crosstab():
+    import numpy as np
+    from stylometry.cluster import divine_name_crosstab
+
+    verses = [
+        {"text_bare": "בראשית ברא אלהים את השמים"},           # Elohim
+        {"text_bare": "וייצר יהוה אלהים את האדם"},             # both
+        {"text_bare": "ויאמר יהוה אל אברם לך לך"},             # YHWH
+        {"text_bare": "וילך אברם כאשר דבר אליו"},              # neither
+        {"text_bare": "ויברך אלהים את יום השביעי"},            # Elohim
+    ]
+    ct = divine_name_crosstab(verses, np.array(["A1", "A1", "A2", "A2", "A1"]))
+    assert ct["A1"] == {"Elohim": 2, "both": 1}
+    assert ct["A2"] == {"YHWH": 1, "neither": 1}

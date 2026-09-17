@@ -155,13 +155,29 @@ def build_site(out_dir: str | Path) -> Path:
 
     # ---- dashboard -----------------------------------------------------------------------------
     val = summary["validation"]
-    tiles = [
-        (f"{total:,}", "verse units"),
-        (str(len(work_order)), "works"),
-        (str(len(authors)), "distinct hands"),
-        (f"{val['ari_vs_group']:.2f}", "ARI vs. traditional groups"),
-        (f"{val['mean_purity']:.0%}", "mean purity per work"),
-    ]
+    single_work = len(work_order) == 1
+    by_chapter: dict[str, list[dict]] = defaultdict(list)
+    for r in rows:
+        by_chapter[r["chapter"]].append(r)
+    chapter_order = sorted(by_chapter, key=lambda c: int(c) if c.isdigit() else 0)
+    if single_work:  # one book: ARI and purity against work boundaries are degenerate
+        biggest = authors_meta[authors[0]]
+        biggest = max((authors_meta[a] for a in authors), key=lambda m: m["n_verses"])
+        tiles = [
+            (f"{total:,}", "verse units"),
+            (str(len(chapter_order)), "chapters"),
+            (str(len(authors)), "distinct hands"),
+            (f"{biggest['share']:.0%}", "largest hand"),
+            (str(sum(1 for c in chapter_order if len(set(r["author"] for r in by_chapter[c])) > 1)), "mixed chapters"),
+        ]
+    else:
+        tiles = [
+            (f"{total:,}", "verse units"),
+            (str(len(work_order)), "works"),
+            (str(len(authors)), "distinct hands"),
+            (f"{val['ari_vs_group']:.2f}", "ARI vs. traditional groups"),
+            (f"{val['mean_purity']:.0%}", "mean purity per work"),
+        ]
     tiles_html = "".join(f'<div class="tile"><div class="v">{v}</div><div class="l">{l}</div></div>' for v, l in tiles)
 
     author_rows = []
@@ -200,6 +216,24 @@ def build_site(out_dir: str | Path) -> Path:
         f'<tbody>{"".join(work_rows)}</tbody></table>'
     )
 
+    if single_work:  # the informative breakdown of one book is by chapter
+        w0 = work_order[0]
+        chapter_rows = []
+        for ch in chapter_order:
+            rs = by_chapter[ch]
+            cnt = Counter(r["author"] for r in rs)
+            maj, majn = cnt.most_common(1)[0]
+            chapter_rows.append(
+                f'<tr><td><a href="works/{w0}.html#{h.escape(rs[0]["id"])}">{h.escape(rs[0]["ref"].rsplit(":", 1)[0])}</a></td>'
+                f'<td class="num">{len(rs)}</td><td style="width:40%">{stack_bar(cnt, len(rs), authors, ch)}</td>'
+                f'<td>{chip(maj)}</td><td class="num">{majn / len(rs):.0%}</td></tr>'
+            )
+        works_table = (
+            '<table><thead><tr><th>chapter</th><th class="num">verses</th><th>composition</th><th>main hand</th>'
+            '<th class="num">purity</th></tr></thead>'
+            f'<tbody>{"".join(chapter_rows)}</tbody></table>'
+        )
+
     k_note = (
         f"{summary['k_used']} hands were used"
         + (f" (chosen by {summary.get('k_criterion', 'silhouette')})" if summary["k_used"] == summary["k_selected_by_silhouette"] else " (forced with --k)")
@@ -208,7 +242,7 @@ def build_site(out_dir: str | Path) -> Path:
     body = (
         f'<div class="tiles">{tiles_html}</div><p class="sub">{k_note}</p>'
         f'<h2 id="authors">Authors</h2>{legend(authors)}{authors_table}'
-        f'<h2 id="works">Works</h2>{legend(authors)}{works_table}'
+        f'<h2 id="works">{"Chapters" if single_work else "Works"}</h2>{legend(authors)}{works_table}'
     )
     (site / "index.html").write_text(page(f"Who wrote what · {lang_name}", body, "", f"Verse-level author discovery in the {lang_name} corpus · <a href=\"../../index.html\">all languages</a>"), encoding="utf-8")
 
@@ -280,8 +314,11 @@ def build_root_index(output_dir: str | Path) -> Path | None:
             continue
         s = json.loads(summary_path.read_text())
         lang = s.get("language", lang_dir.name)
+        label = names.get(lang, lang)
+        if lang_dir.name != lang:  # e.g. output/hbo-genesis: a run over part of one language
+            label += " · " + lang_dir.name.removeprefix(lang).lstrip("-_").replace("-", " ").title()
         cards.append(
-            f'<div class="tile"><div class="v"><a href="{lang_dir.name}/site/index.html">{names.get(lang, lang)}</a></div>'
+            f'<div class="tile"><div class="v"><a href="{lang_dir.name}/site/index.html">{label}</a></div>'
             f'<div class="l">{s["n_verses"]:,} verses · {s["n_works"]} works · {s["k_used"]} hands · '
             f'{"AI + lexical" if s.get("used_ai_profiles") else "lexical only"}</div></div>'
         )

@@ -171,6 +171,11 @@ reasoning tokens per verse; the backend switches it off unless `--thinking` is g
 per hand under `authors/` and one page per work under `works/`. `output/index.html` links the languages
 and `output/models/` holds the model comparison.
 
+A run can cover one book: `--works GEN --out output/hbo-genesis` profiles and clusters Genesis on its
+own. With a single work the cross-work statistics (ARI, purity per work) are degenerate, so the report
+and the dashboard switch to a chapter breakdown, and for Hebrew the report adds a YHWH / Elohim table
+per hand: the divine names are never clustering features, so any skew there is independent evidence.
+
 ## Reading the results honestly
 
 - Clusters are stylistic hands, not identified persons. Genre is the loudest stylistic signal, so the top

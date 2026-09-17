@@ -95,6 +95,23 @@ def render(out_dir: str | Path) -> str:
             md.append(f"- {r['ref']}: {r['text']}")
         md.append("")
 
+    single_work = summary["n_works"] == 1
+    if single_work:
+        assigns = _read_csv(out_dir / "verse_assignments.csv")
+        md.append("\n## Chapters × authors\n")
+        md.append("One work only, so the informative breakdown is by chapter. Each row is a chapter; columns count "
+                  "how many of its verses each hand received.\n")
+        by_chapter: dict[str, Counter] = {}
+        for r in assigns:
+            by_chapter.setdefault(r["chapter"], Counter())[r["author"]] += 1
+        rows = []
+        for ch, c in sorted(by_chapter.items(), key=lambda kv: int(kv[0]) if kv[0].isdigit() else 0):
+            tot = sum(c.values())
+            maj, majn = c.most_common(1)[0]
+            rows.append([ch, tot] + [c.get(a, "") for a in author_ids] + [maj, f"{majn / tot:.0%}"])
+        md.append(_table(["chapter", "n"] + author_ids + ["majority", "purity"], rows))
+        md.append("")
+
     md.append("\n## Works × authors\n")
     md.append("Each row is a work; columns count how many of its verses each author received. "
               "`purity` is the share held by the work's majority author.\n")
@@ -102,24 +119,45 @@ def render(out_dir: str | Path) -> str:
     md.append(_table(headers, [[r["work"], r["group"], r["n"]] + [r[a] for a in author_ids] + [r["majority"], r["purity"]] for r in crosstab]))
 
     md.append("\n\n## Agreement with traditional attributions\n")
-    md.append(f"- Adjusted Rand index of authors vs. work: **{val['ari_vs_work']}**; vs. traditional author group: **{val['ari_vs_group']}** "
-              "(1 = identical partition, 0 = chance).")
-    md.append(f"- Mean purity across works: **{val['mean_purity']}**.")
+    if single_work:
+        md.append("Only one work is in this run, so the adjusted Rand index against work boundaries and the purity figure "
+                  "are degenerate and are omitted. Compare the chapter table above with whatever source division you want to test.")
+    else:
+        md.append(f"- Adjusted Rand index of authors vs. work: **{val['ari_vs_work']}**; vs. traditional author group: **{val['ari_vs_group']}** "
+                  "(1 = identical partition, 0 = chance).")
+        md.append(f"- Mean purity across works: **{val['mean_purity']}**.")
     group_ct: dict[str, Counter] = {}
-    for r in crosstab:
+    for r in ([] if single_work else crosstab):
         c = group_ct.setdefault(r["group"], Counter())
         for a in author_ids:
             c[a] += int(r[a])
-    rows = []
-    for g, c in sorted(group_ct.items(), key=lambda kv: -sum(kv[1].values())):
-        tot = sum(c.values())
-        rows.append([g, tot] + [f"{c[a] / tot:.0%}" if c[a] else "" for a in author_ids])
-    md.append("\n" + _table(["traditional group", "n"] + author_ids, rows))
+    if group_ct:
+        rows = []
+        for g, c in sorted(group_ct.items(), key=lambda kv: -sum(kv[1].values())):
+            tot = sum(c.values())
+            rows.append([g, tot] + [f"{c[a] / tot:.0%}" if c[a] else "" for a in author_ids])
+        md.append("\n" + _table(["traditional group", "n"] + author_ids, rows))
     if val.get("author_by_scribe"):
         md.append("\n\nSinaiticus was copied by three scribes (A, B, D). If the discovered authors tracked the *scribes* rather than the *composers*, "
                   "the table below would be block-diagonal; a mixed table means the signal is not scribal.\n")
         scribes = sorted({s for c in val["author_by_scribe"].values() for s in c})
         md.append(_table(["author"] + scribes, [[a] + [val["author_by_scribe"].get(a, {}).get(s, 0) for s in scribes] for a in author_ids]))
+
+    dn = val.get("author_by_divine_name")
+    if dn:
+        md.append("\n\n## Divine names by hand\n")
+        md.append("The alternation of יהוה (YHWH) and אלהים (Elohim) is the oldest external marker of source division in "
+                  "the Torah. It is **not** one of the clustering features: the hands were found from style alone, so a "
+                  "lopsided table here is independent evidence that the split tracks something real. Counts are verses.\n")
+        cols = ["YHWH", "Elohim", "both", "neither"]
+        rows = []
+        for a in author_ids:
+            c = dn.get(a, {})
+            tot = sum(c.values()) or 1
+            named = sum(c.get(x, 0) for x in ("YHWH", "Elohim", "both"))
+            rows.append([a, sum(c.values())] + [c.get(x, 0) for x in cols]
+                        + [f"{c.get('YHWH', 0) / named:.0%}" if named else "—"])
+        md.append(_table(["author", "verses"] + cols + ["YHWH share of named verses"], rows))
 
     md.append("\n\n## Passages that break from their work's main hand\n")
     md.append("Runs of at least three consecutive verses assigned to an author other than the work's majority author. "

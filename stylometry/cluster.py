@@ -248,6 +248,22 @@ def segments(verses: list[dict], authors: np.ndarray) -> tuple[list[dict], dict[
     return rows, majority
 
 
+# Bare-consonant forms of the two divine names whose alternation is the classical marker of source
+# division in the Torah.  Prefixed particles (ו, ה, ל, ב, כ, מ) attach to the word, so substrings match.
+DIVINE_NAMES = {"YHWH": ("יהוה",), "Elohim": ("אלהים", "אלהי")}
+
+
+def divine_name_crosstab(verses: list[dict], authors: np.ndarray) -> dict[str, dict[str, int]]:
+    """Hebrew only: hands × which divine name the verse uses (an external check, not a feature)."""
+    out: dict[str, Counter] = defaultdict(Counter)
+    for v, a in zip(verses, authors):
+        text = v.get("text_bare", "")
+        has = {name for name, forms in DIVINE_NAMES.items() if any(f in text for f in forms)}
+        key = "both" if len(has) == 2 else (has.pop() if has else "neither")
+        out[a][key] += 1
+    return {a: dict(c) for a, c in out.items()}
+
+
 def validation(verses: list[dict], authors: np.ndarray, majority: dict[str, str]) -> dict:
     works = [v["work"] for v in verses]
     groups = [v["group"] for v in verses]
@@ -259,13 +275,16 @@ def validation(verses: list[dict], authors: np.ndarray, majority: dict[str, str]
     for v, a in zip(verses, authors):
         if v["copyist"]:
             scribe[a][v["copyist"]] += 1
-    return {
+    out = {
         "ari_vs_work": round(float(adjusted_rand_score(works, authors)), 4),
         "ari_vs_group": round(float(adjusted_rand_score(groups, authors)), 4),
         "purity_by_work": purity,
         "mean_purity": round(float(np.mean(list(purity.values()))), 3),
         "author_by_scribe": {a: dict(c) for a, c in scribe.items()},
     }
+    if verses and verses[0].get("language") == "hbo":
+        out["author_by_divine_name"] = divine_name_crosstab(verses, authors)
+    return out
 
 
 def _write_csv(path: Path, rows: list[dict]) -> None:
