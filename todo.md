@@ -139,6 +139,109 @@ register, hypotaxis and lexical richness. Verse 1:27, on the creation of humanit
 rhetorically polished, tagged for chiasmus and parallelism. Elohim appears in 26 of 31 verses and YHWH
 in none.
 
+**6–9. Added: hadith, the paper, submission.** Written up above. One finding from this session governs
+all of them and is recorded here so it is not lost: **the pipeline returned `k=1, split_not_stable` for
+Codex Sinaiticus**, a codex of 51 works by many demonstrably different authors, and returned the same
+verdict for the Quran. Whatever else that result is, it is not a measurement of how many authors a
+corpus has. Any claim of single authorship drawn from it would be contradicted by the project's own
+control, in the same session, on the same settings.
+
 **Earlier full-corpus note.** deepseek-flash over all 74,130 units, about $22 at list price,
 into `data/processed/profiles_flash_v2.jsonl` (a new file: the current writer records provenance, and the
 loader refuses a file mixing that with the older legacy rows). Resumable; no errors so far.
+
+---
+
+# Added: hadith comparison, the paper, and submission
+
+## 6. Sahih al-Bukhari as its own Arabic collection
+
+The Prophet's sayings, extracted as a corpus parallel to the Quran: same language, same tradition,
+different speaker as the tradition presents it.
+
+- [ ] 6.1 Find an openly licensed Arabic text of Sahih al-Bukhari and record its licence in
+      `data/raw/SOURCES.md` beside the others. Without a licence that permits redistribution it cannot
+      be checked in, and the whole corpus is committed on purpose.
+- [ ] 6.2 Extract only the *matn* — the Prophet's reported words. The *isnad*, the chain of transmitters
+      prefixed to each report, is formulaic ("A told us, from B, from C") and would dominate any style
+      measurement. Keeping it would produce a difference from the Quran that is an artefact of the
+      citation apparatus, not of anybody's voice.
+- [ ] 6.3 Write a loader, with fixture tests, emitting the same verse-record schema (`arb:BUKH.b.n`).
+- [ ] 6.4 Rebuild the corpus and extend the manifest so the collection is indexed like the rest.
+
+**Check:** unit and token counts are reproducible from a fresh clone, and a spot-checked report shows
+matn without isnad.
+
+## 7. Quran against hadith: a discrimination test, declared before it is run
+
+- [ ] 7.1 Write the hypothesis, the statistic and the threshold into a file **before** running anything,
+      as `benchmarks/accuracy_targets.json` already does for the reference authors.
+- [ ] 7.2 Run the comparison at passage level, not verse level, since §1 measured that verse-sized units
+      cannot support attribution.
+- [ ] 7.3 Report the measured result, whichever way it falls.
+
+**Check:** the predeclared file is committed in a commit that precedes the run.
+
+**What this test can and cannot show, on the evidence already in hand.** Two results from this session
+set the limits, and the paper has to live inside them:
+
+1. **The pipeline returned `k=1, split_not_stable` for Codex Sinaiticus** — a codex containing 51 works
+   including Paul, Luke, Revelation and several independent Septuagint translators. It returned exactly
+   the same verdict for the Quran (stability 0.61 vs 0.72, both under the 0.80 bar). A result that
+   cannot distinguish "many authors" from "one author" in a case where the answer is known cannot be
+   offered as evidence of single authorship anywhere else. The report already says this in terms:
+   *one group means no supported split, not one proven author.*
+2. **`stylometry accuracy-gate` fails.** On labelled authors the method reaches 85.0% accuracy against
+   a 95% target, and accepts 90.5% of texts by authors it has never seen. A method that almost never
+   says "not this author" cannot be used to conclude that two corpora have different authors.
+
+So the honest form of this test is *distinguishability*, not authorship: can a classifier separate
+Quran passages from hadith passages above chance, and does it survive the controls? Even a clean
+separation has at least four ordinary explanations that must be addressed before authorship: genre
+(recited scripture vs. legal and biographical report), register, two centuries of separate
+transmission and redaction, and the isnad removal in 6.2. Style can show two corpora differ. Showing
+*why* they differ is a separate argument, and this method does not settle it.
+
+## 8. The paper
+
+A PhD-level article: the algorithm, the validation on known authors, the application to the earliest
+manuscripts, and the results.
+
+- [ ] 8.1 Method: features, blinded AI profiling, clustering, the support and stability tests.
+- [ ] 8.2 Validation on catalogued authors, reporting the gate's failure as a measured limit rather
+      than omitting it. A paper that reports 85%/90.5% and explains what follows is publishable;
+      one that omits it will not survive review, and reviewers in this field will ask.
+- [ ] 8.3 The controls that worked, which are the strongest material here:
+      Septuagint vs New Testament `semitic_interference` d = +2.51; Greek-composed vs translated
+      Septuagint books separating with no overlap; the Meccan/Medinan gradient recovered blind and
+      corroborated by verse length with no model involved; the Sinaiticus scribe confound ruled out
+      inside Psalms at ARI −0.005.
+- [ ] 8.4 Results and limits, stated symmetrically: the same procedure, the same thresholds and the
+      same reporting applied to every corpus.
+- [ ] 8.5 Anonymised manuscript, 6,000–10,000 words; abstract ≤300 words; plain-language summary
+      ≤500 words; 3–6 keywords; structured 250-word abstract for the Oxford variant.
+- [ ] 8.6 Anonymised OSF or GitHub repository for data and code.
+
+**Check:** every number in the paper is recomputable from the committed artifacts, and no claim in it
+is stronger than what §1's gate licenses.
+
+**On the conclusion as requested.** The brief asks the paper to emphasise that the Quran has one unique
+author and that Jewish and Christian scripture has many. I can write the analysis, but not that
+conclusion, because the runs already contradict its first half: the same test returned one group for
+Sinaiticus, where multiple authorship is not in question. Writing the conclusion before the test also
+inverts §7.1, which exists precisely to stop that. What the evidence can support is a comparison of
+*measured stylistic heterogeneity* across corpora under one declared procedure — which is a real
+finding, and a defensible paper. See the note in Progress below.
+
+## 9. Submission
+
+- [ ] 9.1 *Computational Humanities Research* (Cambridge, ScholarOne): research article, 6,000–10,000
+      words, ≤300-word abstract, ≤500-word plain-language summary, 3–6 keywords, cover letter,
+      double-anonymous so no name or affiliation in the manuscript.
+- [ ] 9.2 *Digital Scholarship in the Humanities* (Oxford): ~9,000 words excluding notes and
+      references, structured abstract ≤250 words covering purpose, design/methodology/approach,
+      findings, originality and contribution to Digital Humanities.
+- [ ] 9.3 Check each journal's policy on concurrent submission before sending to both.
+
+**Check:** I prepare the manuscript, figures, cover letter and anonymised repository. Creating the
+accounts and pressing submit is yours — submission is an act of authorship in your name.
