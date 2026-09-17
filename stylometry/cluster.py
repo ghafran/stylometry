@@ -158,6 +158,17 @@ def select_k(
     return (pick(supported, key=lambda r: r[column])["k"] if supported else 1), rows
 
 
+def supported_k_order(ktable: list[dict], criterion: str = "silhouette") -> list[int]:
+    """Every BIC-supported k, best first by the selection criterion.
+
+    ``select_k`` returns only its single favourite. Stability then has to be able to fall back to the
+    next candidate rather than all the way to one group, so it needs the whole ordered list.
+    """
+    column, pick = CRITERIA[criterion]
+    supported = [r for r in ktable if r.get("split_supported") and r.get(column) is not None]
+    return [r["k"] for r in sorted(supported, key=lambda r: r[column], reverse=pick is max)]
+
+
 def partition_stability(X: np.ndarray, labels: np.ndarray, verses: list[dict], k: int,
                         window: int = 5, seed: int = 0, repeats: int = 5) -> dict:
     """Perturb fitted partitions by omitting whole passages, with a fixed feature map.
@@ -415,16 +426,47 @@ def run(
 
     chosen, ktable = select_k(Xred, kmin, kmax, seed=seed, criterion=criterion, X_eval=Xown)
     forced = k is not None
-    k = chosen if k is None else k
-    authors, conf, centers = cluster(Xred, k, seed=seed)
-    stability = {"tested_k": k, **partition_stability(Xred, authors, verses, k, window=window, seed=seed)}
     bic_candidate = chosen
-    if not forced and k > 1 and (not stability["available"] or stability["min_ari"] < 0.8):
-        chosen = k = 1
+    rejected: list[dict] = []
+
+    if forced:
         authors, conf, centers = cluster(Xred, k, seed=seed)
-        selection_status = "split_not_stable" if stability["available"] else "insufficient_passages"
+        stability = {"tested_k": k, **partition_stability(Xred, authors, verses, k, window=window, seed=seed)}
+        selection_status = "forced"
     else:
-        selection_status = "forced" if forced else ("supported_style_partition" if k > 1 else "no_supported_split")
+        # Stability decides *which* supported partition to report, not merely whether to report the
+        # single favourite. Testing only the criterion's first choice and collapsing to one group on
+        # failure discards stable partitions that are sitting in the candidate list: Codex Sinaiticus
+        # preferred k=13, which is unstable, while k=5 resamples at 0.87 and agrees with the
+        # scholarly groupings at ARI 0.34. Candidates are tried best-first and the first stable one
+        # is taken; the ones passed over are recorded so the choice can be audited.
+        k, authors, conf, centers, stability = 1, None, None, None, None
+        for candidate in supported_k_order(ktable, criterion):
+            cand_authors, cand_conf, cand_centers = cluster(Xred, candidate, seed=seed)
+            cand_stability = {"tested_k": candidate,
+                              **partition_stability(Xred, cand_authors, verses, candidate,
+                                                    window=window, seed=seed)}
+            if cand_stability.get("available") and cand_stability["min_ari"] >= 0.8:
+                k, authors, conf, centers, stability = (
+                    candidate, cand_authors, cand_conf, cand_centers, cand_stability)
+                break
+            rejected.append({"k": candidate,
+                             "reason": ("unstable" if cand_stability.get("available")
+                                        else cand_stability.get("reason", "unavailable")),
+                             "min_ari": cand_stability.get("min_ari"),
+                             "mean_ari": cand_stability.get("mean_ari")})
+            if stability is None:
+                stability = cand_stability
+        if authors is None:
+            authors, conf, centers = cluster(Xred, 1, seed=seed)
+            if stability is None:
+                stability = {"tested_k": 1, **partition_stability(Xred, authors, verses, 1,
+                                                                  window=window, seed=seed)}
+            selection_status = ("split_not_stable" if any(r["reason"] == "unstable" for r in rejected)
+                                else "insufficient_passages" if rejected else "no_supported_split")
+        else:
+            selection_status = "supported_style_partition"
+        chosen = k
 
     # Outliers: verses whose OWN (unsmoothed) style is far from their author's centroid.
     dist_own = np.linalg.norm(Xown - centers[[author_key(a) - 1 for a in authors]], axis=1)
@@ -496,6 +538,7 @@ def run(
         "selection_status": selection_status,
         "selection_thresholds": {"min_bic_gain": 10.0, "min_resample_ari": 0.8},
         "stability": stability,
+        "stability_rejected_k": rejected,
         "seed": seed,
         "interpretation": "Exploratory style groups, not identified authors. One group means no supported split, not one proven author.",
         "confidence_definition": "centroid distance margin, not a probability; zero for one group",

@@ -119,3 +119,76 @@ def test_legacy_report_does_not_claim_new_validation(tmp_path):
     report = render(tmp_path)
     assert 'checks were not recorded' in report
     assert 'Automatic splits must improve BIC' not in report
+
+
+# --- stability chooses among candidates rather than vetoing one ------------------------------------
+
+def test_supported_k_order_lists_every_candidate_best_first():
+    """select_k returns only its favourite; the search needs the rest of the ranking."""
+    table = [{'k': 1, 'silhouette': None, 'split_supported': False},
+             {'k': 2, 'silhouette': 0.30, 'split_supported': True},
+             {'k': 3, 'silhouette': 0.50, 'split_supported': True},
+             {'k': 4, 'silhouette': 0.90, 'split_supported': False},
+             {'k': 5, 'silhouette': 0.40, 'split_supported': True}]
+    assert cl.supported_k_order(table, 'silhouette') == [3, 5, 2]
+    assert cl.supported_k_order(table, 'davies_bouldin') == []
+
+
+def _structured_verses(n_per: int = 30) -> list[dict]:
+    """Three genuinely distinct habits, so several k are BIC-supported and there is a list to search."""
+    habits = ["και ο θεος ειπεν και ο θεος ειπεν",
+              "δε αυτου εν τω λογω δε αυτου εν τω",
+              "εγενετο μεν ουν γαρ εγενετο μεν ουν γαρ"]
+    out, order = [], 0
+    for h, text in enumerate(habits, start=1):
+        for i in range(n_per):
+            order += 1
+            out.append({
+                "id": f"grc:W{h}.1.{i + 1}", "source": "x", "language": "grc", "witness": "T",
+                "work": f"W{h}", "work_title": f"W{h}", "collection": "NT", "canon": "NT",
+                "group": f"W{h}", "chapter": "1", "verse": str(i + 1), "ref": f"W{h} 1:{i + 1}",
+                "text": text, "text_bare": text, "n_tokens": len(text.split()), "copyist": None,
+                "supplied_frac": 0.0, "has_gap": False, "duplicate_of": None, "order": order,
+            })
+    return out
+
+
+def test_an_unstable_favourite_falls_back_to_a_stable_k_not_to_one_group(tmp_path, monkeypatch):
+    """The defect this covers: the criterion's first choice was tested alone and, failing, collapsed
+    the whole run to one group - discarding stable partitions sitting further down the candidate list.
+    Codex Sinaiticus reported one style group for 51 works by many authors because of it.
+    """
+    verses = _structured_verses()
+    real = cl.partition_stability
+
+    def only_k2_is_stable(X, labels, vs, k, **kwargs):
+        out = dict(real(X, labels, vs, k, **kwargs))
+        if out.get('available'):
+            out.update(mean_ari=0.95, min_ari=0.9, ari=[0.9] * 5) if k == 2 else \
+                out.update(mean_ari=0.5, min_ari=0.4, ari=[0.4] * 5)
+        return out
+
+    monkeypatch.setattr(cl, 'partition_stability', only_k2_is_stable)
+    summary = cl.run(verses, None, tmp_path, kmin=2, kmax=6)
+    assert summary['k_used'] == 2, 'a stable candidate must be preferred over collapsing to one group'
+    assert summary['selection_status'] == 'supported_style_partition'
+    assert summary['stability']['tested_k'] == 2
+    passed_over = {r['k'] for r in summary['stability_rejected_k']}
+    assert passed_over and 2 not in passed_over, 'the chosen k is not among those rejected'
+    assert all(r['reason'] == 'unstable' for r in summary['stability_rejected_k'])
+
+
+def test_one_group_is_still_reported_when_no_candidate_is_stable(tmp_path, monkeypatch):
+    verses = _structured_verses()
+    real = cl.partition_stability
+
+    def nothing_is_stable(X, labels, vs, k, **kwargs):
+        out = dict(real(X, labels, vs, k, **kwargs))
+        if out.get('available'):
+            out.update(mean_ari=0.3, min_ari=0.2, ari=[0.2] * 5)
+        return out
+
+    monkeypatch.setattr(cl, 'partition_stability', nothing_is_stable)
+    summary = cl.run(verses, None, tmp_path, kmin=2, kmax=5)
+    assert summary['k_used'] == 1 and summary['selection_status'] == 'split_not_stable'
+    assert len(summary['stability_rejected_k']) >= 1
