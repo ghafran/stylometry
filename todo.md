@@ -432,3 +432,43 @@ to test.
 - [ ] 11.5 Give the verification threshold its own holdout before the false-acceptance figure is quoted.
 - [ ] 11.6 Widen the change-point baseline beyond 13 Greek works, and add Hebrew and Arabic references.
 - [ ] 11.7 Narrow the seam locations with a smaller step once the baseline is re-measured at that step.
+
+### 11.8 Run across all three scriptures — done
+
+`stylometry analyse` over each language, 1,000-token passages, whole-work holdout.
+
+| | Greek (LXX + NT + fathers) | Hebrew (Tanakh) | Arabic (Qur'an) |
+|---|---:|---:|---:|
+| passages / works | 531 / 66 | 210 / 26 | 40 / 25 |
+| majority baseline | 23.2% | 37.1% | 50.0% |
+| Delta cosine 2000 MFW | 57.6% | 60.5% | 95.0% |
+| **SVM** | **69.1%** | 65.2% | **97.5%** |
+| Random Forest | 66.9% | **65.7%** | 95.0% |
+| SVM, function words only | 58.6% | 53.8% | 82.5% |
+| verification: false acceptance | 17% | **30%** | 0% |
+
+Hebrew verification is the weak point at 30% false acceptance, against 17% for Greek. Hebrew also has
+the fewest passages per work, so it is the corpus least able to support a verification claim.
+
+**Change points.** Greek flags 14 of 33 works, Hebrew 11 of 16, Arabic none — because Arabic has no
+reference and now correctly receives no verdict.
+
+The Greek result discriminates in a way that supports it: the lowest separations are **1 Corinthians
+1.60, Romans 1.66** — Pauline letters of undisputed single authorship — and Job 1.71. The highest are
+the Septuagint Torah, Prophets and Histories, which were translated from Hebrew by different
+translators working book by book. That is a real finding, but it is a claim about **translators**, not
+about the authors of the Hebrew originals.
+
+**The Hebrew change-point result should not be quoted.** Proverbs, which announces its own composite
+structure in its headings (Solomon, the sayings of the wise, Agur, Lemuel), scores 1.81 and is *not*
+flagged, while books score above it. An ordering that puts a self-declared anthology below the
+threshold is not tracking composite authorship. Two causes, pushing the same way: the reference is
+modern Hebrew prose, far more internally uniform than biblical books that mix law, narrative and
+poetry in one scroll; and 210 passages over 26 works is thin. Recorded as measured, not as evidence.
+
+- [x] 11.8.1 Per-language calibration, with Arabic recorded as having none.
+- [x] 11.8.2 Run all three and report.
+- [ ] 11.8.3 Replace the Hebrew reference with single-author Hebrew closer in period and genre before
+      any Hebrew seam is quoted.
+- [ ] 11.8.4 Separate the Greek run into Septuagint and New Testament: the Septuagint result is about
+      translators and should not sit in the same table as the New Testament one.
