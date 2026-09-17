@@ -147,6 +147,33 @@ def cmd_cluster(args) -> None:
     print(f"outputs in {out}")
 
 
+def cmd_cluster_passages(args) -> None:
+    from .continuity import annotate_continuity
+    from .passages import build_passages
+    from .cluster import run
+    from .report import render
+    from .corpus.build import load_corpus
+
+    args.language = args.language or 'grc'
+    source = load_corpus(args.corpus) if getattr(args, 'corpus', None) else _load_corpus()
+    verses = _select(args, annotate_continuity(source))
+    result = build_passages(verses, tokens=args.tokens)
+    out = Path(args.out) if args.out else OUTPUT / 'passages' / args.language
+    out.mkdir(parents=True, exist_ok=True)
+    (out / 'passages.json').write_text(json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False) + '\n')
+    if len(result['passages']) < 3:
+        raise SystemExit(f"fewer than three complete passages; exclusions and source mapping saved to {out / 'passages.json'}")
+    summary = run(result['passages'], None, out, k=args.k, kmin=1, kmax=args.kmax,
+                  window=0, alpha=0, weights={'lex': 1.0}, seed=args.seed,
+                  criterion=args.k_criterion)
+    summary.update(input_unit='pooled_token_passage', passage_tokens=args.tokens,
+                   source_mapping_file='passages.json', input_verses=len(verses))
+    (out / 'summary.json').write_text(json.dumps(summary, ensure_ascii=False, indent=2, allow_nan=False) + '\n')
+    render(out)
+    print(f"Analyzed {len(result['passages'])} complete {args.tokens}-token passages. Style groups remain exploratory.")
+    print(f"Report: {out / 'report.md'}; source spans and exclusions: {out / 'passages.json'}")
+
+
 def cmd_report(args) -> None:
     from .report import render
 
@@ -226,6 +253,75 @@ def cmd_all(args) -> None:
         cmd_witnesses(args)
 
 
+def cmd_benchmark(args) -> None:
+    from .benchmark_suite import run_suite
+
+    try:
+        result = run_suite(args.manifest, args.cache, args.out, download=args.download,
+                           language=args.language, controls=not args.no_controls)
+    except (ValueError, FileNotFoundError) as exc:
+        raise SystemExit(str(exc)) from exc
+    print(f"Empirical acceptance: {result['status']}; scripture attribution remains unvalidated.")
+    print(f"Report: {Path(args.out) / 'report.md'}")
+    if args.check and result['status'] != 'passed':
+        raise SystemExit(1)
+
+
+def cmd_benchmark_rejection(args) -> None:
+    from .benchmark_data import load_benchmark, read_manifest
+    from .benchmark_suite import DEFAULT_MANIFESTS
+    from .rejection_experiment import run_experiment
+
+    try:
+        works = []
+        for manifest in args.manifest or DEFAULT_MANIFESTS:
+            if args.language and not any(w['language'] == args.language for w in read_manifest(manifest)['works']):
+                continue
+            works.extend(w for w in load_benchmark(manifest, args.cache, download=args.download)
+                         if not args.language or w['language'] == args.language)
+        if not works:
+            raise ValueError('no selected reference corpus; this language remains unvalidated')
+        run_experiment(works, args.out, progress=lambda message: print(message, flush=True))
+    except (ValueError, FileNotFoundError) as exc:
+        raise SystemExit(str(exc)) from exc
+    print('Development experiment only; authorship remains unvalidated.')
+    print(f"Report: {Path(args.out) / 'report.md'}")
+
+
+def cmd_author_study(args) -> None:
+    from .author_study import develop, seal, evaluate
+    from .benchmark_data import load_benchmark, read_manifest
+    from .benchmark_suite import DEFAULT_MANIFESTS
+    try:
+        if args.stage == 'develop':
+            works = []
+            for manifest in args.manifest or DEFAULT_MANIFESTS:
+                if args.language and not any(w['language'] == args.language for w in read_manifest(manifest)['works']):
+                    continue
+                works.extend(w for w in load_benchmark(manifest, args.cache, download=args.download)
+                             if not args.language or w['language'] == args.language)
+            if not works:
+                raise ValueError('no selected development reference texts')
+            develop(works, args.out, progress=lambda s: print(s, flush=True))
+            print(f"Development results and model lock saved in {args.out}")
+        elif args.stage == 'seal':
+            if not args.model_lock or not args.manifest:
+                raise ValueError('seal requires --model-lock and one or more fresh --manifest paths')
+            seal(args.model_lock, args.manifest, args.out)
+            print(f"Locked model and reserved source manifests: {Path(args.out) / 'evaluation_lock.json'}")
+        else:
+            if not args.evaluation_lock:
+                raise ValueError('evaluate requires --evaluation-lock')
+            result = evaluate(args.evaluation_lock, args.cache, args.out, download=args.download,
+                              progress=lambda s: print(s, flush=True))
+            print(f"Fresh evaluation: {result['status']}; scripture attribution remains unvalidated.")
+            print(f"Report: {Path(args.out) / 'fresh_evaluation.md'}")
+            if args.check and result['status'] != 'passed':
+                raise SystemExit(1)
+    except (ValueError, FileNotFoundError) as exc:
+        raise SystemExit(str(exc)) from exc
+
+
 def _load_dotenv(path: Path = ROOT / ".env") -> None:
     """Minimal .env loader: KEY=VALUE lines, no expansion; existing environment wins."""
     import os
@@ -298,6 +394,17 @@ def main(argv: list[str] | None = None) -> None:
                    help="rank supported style partitions; single-group and stability checks still apply")
     c.set_defaults(func=cmd_cluster)
 
+    cp = sub.add_parser('cluster-passages', help='pool raw tokens before exploratory lexical style analysis')
+    _add_scope(cp)
+    cp.add_argument('--tokens', type=int, choices=[500, 1000, 2000], default=1000)
+    cp.add_argument('--corpus', help='source verse JSONL (defaults to the built project corpus)')
+    cp.add_argument('--out', default=None)
+    cp.add_argument('--k', type=int)
+    cp.add_argument('--kmax', type=int, default=20)
+    cp.add_argument('--seed', type=int, default=42)
+    cp.add_argument('--k-criterion', choices=['silhouette', 'bic', 'davies_bouldin', 'calinski'], default='silhouette')
+    cp.set_defaults(func=cmd_cluster_passages)
+
     r = sub.add_parser("report", help="render output/<language>/report.md")
     r.add_argument("--language", choices=LANGS, default="grc")
     r.add_argument("--out", default=None)
@@ -354,6 +461,36 @@ def main(argv: list[str] | None = None) -> None:
     a.add_argument("--seed", type=int, default=0)
     a.add_argument("--k-criterion", default="silhouette", choices=["silhouette", "bic", "davies_bouldin", "calinski"])
     a.set_defaults(func=cmd_all)
+
+    bm = sub.add_parser("benchmark", help="run real-text author controls with whole-work holdouts")
+    bm.add_argument("--manifest", action="append", help="source manifest JSON (repeatable; defaults to bundled Greek and Hebrew manifests)")
+    bm.add_argument("--cache", default=str(RAW / "benchmarks"))
+    bm.add_argument("--out", default=str(OUTPUT / "benchmark"))
+    bm.add_argument("--download", action="store_true", help="download missing checksum-pinned source files")
+    bm.add_argument("--language", choices=LANGS, help="evaluate one reference language")
+    bm.add_argument("--no-controls", action="store_true", help="run held-out attribution only; skip production clustering and perturbation controls")
+    bm.add_argument("--check", action="store_true", help="exit unsuccessfully unless all predeclared empirical gates pass")
+    bm.set_defaults(func=cmd_benchmark)
+
+    br = sub.add_parser('benchmark-rejection', help='development-only calibration against separate unfamiliar authors')
+    br.add_argument('--manifest', action='append', help='reference manifest JSON (repeatable)')
+    br.add_argument('--cache', default=str(RAW / 'benchmarks'))
+    br.add_argument('--out', default=str(OUTPUT / 'rejection-development'))
+    br.add_argument('--download', action='store_true', help='download missing checksum-pinned reference texts')
+    br.add_argument('--language', choices=LANGS)
+    br.set_defaults(func=cmd_benchmark_rejection)
+
+    study = sub.add_parser('author-study', help='develop models, seal a design, then evaluate reserved authors')
+    study.add_argument('stage', choices=['develop', 'seal', 'evaluate'])
+    study.add_argument('--manifest', action='append')
+    study.add_argument('--model-lock')
+    study.add_argument('--evaluation-lock')
+    study.add_argument('--cache', default=str(RAW / 'benchmarks'))
+    study.add_argument('--out', default=str(OUTPUT / 'author-study'))
+    study.add_argument('--download', action='store_true')
+    study.add_argument('--language', choices=LANGS, help='development-language selection')
+    study.add_argument('--check', action='store_true', help='fail if fresh evaluation is failed or inconclusive')
+    study.set_defaults(func=cmd_author_study)
 
     args = p.parse_args(argv)
     args.func(args)

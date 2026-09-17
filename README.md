@@ -19,6 +19,47 @@ or corpus downloads are required. Tests cover:
   responses must fail without creating invented measurements.
 - Resume must preserve the original request context and reject changed text or generation settings.
 - Constant and tiny feature matrices and a forced single group must produce usable outputs.
+- Held-out feature extraction must preserve its training vocabulary, IDF, projection and scaling.
+- Reference texts must match pinned source and normalized-text checksums; alternate editions must
+  not become independent works in training and test partitions.
+
+The [real-text benchmark](benchmarks/README.md) downloads 18 Greek works by six catalogued authors,
+16 modern Hebrew works by four authors, and two editions of one additional Greek work. It tests
+separate training, calibration and test works, entirely unseen authors, 100/500/1,000-word passages,
+feature choices, genre/topic subsets, the actual clustering pipeline and text perturbations.
+
+```bash
+uv run --frozen stylometry benchmark --download          # writes output/benchmark/report.md
+uv run --frozen stylometry benchmark --check             # nonzero unless empirical gates pass
+uv run --frozen pytest -q --run-empirical tests/test_empirical_acceptance.py
+```
+
+**The current empirical benchmark fails.** See [measured results](benchmarks/RESULTS.md).
+Passing software tests does not establish reliable author identification. The opt-in empirical
+acceptance test deliberately fails when the measured reliability requirements are unmet; it is
+separate from the fast regression suite. No paid model calls are made by this benchmark.
+Modern Hebrew does not validate Biblical Hebrew or Aramaic, and Arabic has no reference corpus
+in this first pilot. Scripture attribution and AI profiles remain unvalidated.
+
+The [improvement plan](benchmarks/IMPROVEMENT_PLAN.md) separates rejection calibration, passage
+representation and genre confounding. `uv run --frozen stylometry benchmark-rejection` runs the
+first corrective experiment with a separate unfamiliar calibration author and an outer unknown
+test author. It is development only and does not replace the failed benchmark. In the current
+corpus, none of 30 scenarios meets both calibration targets; the revised rule abstains from all
+texts. See the [development results](benchmarks/REJECTION_DEVELOPMENT.md).
+
+The next [passage/model study](benchmarks/study_v1/README.md) is implemented and has been run on
+58 additional works by 16 new catalogue authors, with model choices locked before evaluation.
+It compares 500/1,000/2,000-token passages, three feature/model families, matched genres/topics,
+and rejection using two separate unfamiliar calibration authors. It refits models during
+uncertainty checks. [Fresh results](benchmarks/study_v1/RESULTS.md) show useful known-candidate
+discrimination but still fail safe, useful unknown-author attribution.
+
+`uv run --frozen stylometry cluster-passages --language grc --tokens 1000` pools normalized
+source words before feature extraction, without additional smoothing or AI calls. It preserves
+chapter, witness and gap boundaries and records source-token mappings and excluded text in
+`output/passages/grc/passages.json`. Use `--corpus PATH` for a separate source JSONL, and `--out`
+to choose the output directory. Passage groups remain exploratory.
 
 Automatic clustering always includes a one-group baseline. Candidate partitions are fitted on smoothed
 features and scored on unsmoothed features; PCA is fitted on unsmoothed features. A split must improve
@@ -32,9 +73,9 @@ always considered, even when `--kmin` is 2 or larger.
 These thresholds are exploratory diagnostics, not calibrated authorship tests. Passage subsampling
 keeps the feature map fixed and measures partition sensitivity; it does not validate the entire
 pipeline on unseen data. Margins are centroid-distance measures, not probabilities. Full validation
-still needs known-author texts with genre, topic, witness and length controls, repeated blind model
-runs, and sensitivity checks across feature choices and token-based sample sizes. The repository does
-not bundle that benchmark or reproduce the historical pilot results below.
+still needs substantially broader reference corpora, matched genre/topic/editor controls, manuscript
+and translation comparisons, and repeated blind model runs. The bundled lexical pilot measures
+some of these failure modes and does not reproduce or validate the historical model results below.
 
 **Existing profiles:** generate a new `--profiles` file for the blinded workflow. Complete legacy
 profiles remain readable with a warning for exploration, but cannot be resumed into a new run and do

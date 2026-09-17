@@ -1,8 +1,8 @@
 """Static HTML site rendered from the clustering outputs.
 
-    output/site/index.html          dashboard: every author, share of the corpus, how many works
-    output/site/authors/A1.html     everything attributed to one author, in reading order
-    output/site/works/MARK.html     one work, verse by verse, with the author of each verse
+    output/site/index.html          dashboard: every style group, corpus share, and work counts
+    output/site/authors/A1.html     verses assigned to one style group, in reading order
+    output/site/works/MARK.html     one work, verse by verse, with each assigned style group
 
 No external assets: one inline stylesheet, a few lines of JavaScript for tooltips.
 """
@@ -13,6 +13,7 @@ import html as h
 import json
 from collections import Counter, defaultdict
 from pathlib import Path
+from urllib.parse import quote
 
 from .cluster import author_key
 
@@ -54,6 +55,7 @@ td.num, th.num { text-align:right; font-variant-numeric: tabular-nums; }
 .legend { display:flex; flex-wrap:wrap; gap:6px 16px; font-size:13px; color:var(--text-2); margin:8px 0 12px; }
 .verse { display:grid; grid-template-columns:110px 56px 1fr; gap:8px; padding:5px 0 5px 10px; border-left:4px solid transparent; }
 .verse .ref { color:var(--text-2); font-size:12px; white-space:nowrap; } .verse .ref a { color:inherit; text-decoration:none; }
+.verse.passage .ref { white-space:normal; overflow-wrap:anywhere; }
 .verse .gk { font-family:"SBL Greek","Gentium Plus","Palatino Linotype",Palatino,Georgia,serif; font-size:16px; }
 .verse .gk.rtl { font-family:"SBL Hebrew","Ezra SIL","Noto Serif Hebrew","Amiri","Scheherazade New","Noto Naskh Arabic",serif; font-size:18px; direction:rtl; text-align:right; }
 .verse.flag .gk::after { content:" ⚑"; color:var(--muted); }
@@ -113,14 +115,14 @@ def _pct(x: float) -> str:
     return f"{100 * x:.1f}%"
 
 
-def stack_bar(counts: Counter, total: int, authors: list[str], label: str) -> str:
+def stack_bar(counts: Counter, total: int, authors: list[str], label: str, units: str = "verses") -> str:
     segs = []
     for a in authors:
         n = counts.get(a, 0)
         if n:
             segs.append(
                 f'<span style="width:{100 * n / total:.2f}%;background:{color_var(a)}" '
-                f'data-tip="{h.escape(label)} · {a}: {n} verses ({_pct(n / total)})"></span>'
+                f'data-tip="{h.escape(label)} · {a}: {n} {units} ({_pct(n / total)})"></span>'
             )
     return f'<div class="stack">{"".join(segs)}</div>'
 
@@ -144,6 +146,17 @@ def build_site(out_dir: str | Path) -> Path:
     lang = summary.get("language", "grc")
     lang_name = {"grc": "Greek", "hbo": "Hebrew", "arb": "Arabic"}.get(lang, lang)
     gk = "gk rtl" if lang in ("hbo", "arb") else "gk"
+    passage_mode = summary.get("input_unit") == "pooled_token_passage"
+    unit, units = ("passage", "passages") if passage_mode else ("verse", "verses")
+    unit_class = "verse passage" if passage_mode else "verse"
+
+    def mapping_note(rel):
+        if not passage_mode:
+            return ""
+        filename = quote(Path(summary.get('source_mapping_file', 'passages.json')).name)
+        return (f'<p class="sub"><a href="{rel}{filename}">Source mappings and exclusions</a>: original verse IDs, '
+                'normalized token offsets, and excluded material. Labels describe whole passages, '
+                'not the authorship of individual source verses.</p>')
 
     by_work: dict[str, list[dict]] = defaultdict(list)
     for r in rows:
@@ -156,7 +169,7 @@ def build_site(out_dir: str | Path) -> Path:
     # ---- dashboard -----------------------------------------------------------------------------
     val = summary["validation"]
     tiles = [
-        (f"{total:,}", "verse units"),
+        (f"{total:,}", f"{summary['passage_tokens']}-token passages" if passage_mode else "verse units"),
         (str(len(work_order)), "works"),
         (str(len(authors)), "style groups"),
         (f"{val['ari_vs_group']:.2f}", "ARI vs. traditional groups"),
@@ -174,16 +187,16 @@ def build_site(out_dir: str | Path) -> Path:
         author_rows.append(
             f"<tr><td>{chip(a)}</td>"
             f'<td class="num">{m["n_verses"]:,}</td>'
-            f'<td><div class="bar" data-tip="{a}: {_pct(m["share"])} of all verses"><span style="width:{100 * m["share"]:.2f}%;background:{color_var(a)}"></span></div></td>'
+            f'<td><div class="bar" data-tip="{a}: {_pct(m["share"])} of all {units}"><span style="width:{100 * m["share"]:.2f}%;background:{color_var(a)}"></span></div></td>'
             f'<td class="num">{_pct(m["share"])}</td>'
             f'<td class="num">{len(main_hand)}</td><td class="num">{len(substantial)}</td><td class="num">{len(touched)}</td>'
             f"<td>{top}</td></tr>"
         )
     authors_table = (
-        '<table><thead><tr><th>author</th><th class="num">verses</th><th style="width:22%">share</th><th class="num">%</th>'
+        f'<table><thead><tr><th>style group</th><th class="num">{units}</th><th style="width:22%">share</th><th class="num">%</th>'
         '<th class="num">main group of</th><th class="num">≥10% of</th><th class="num">appears in</th><th>largest contributions</th></tr></thead>'
         f'<tbody>{"".join(author_rows)}</tbody></table>'
-        '<p class="sub">"main group of" counts works where this author holds the most verses; "≥10% of" counts works where it holds at least a tenth; "appears in" counts any verse at all.</p>'
+        f'<p class="sub">"main group of" counts works where this style group contains the most {units}; "≥10% of" counts works where it contains at least a tenth; "appears in" counts any assigned {unit}.</p>'
     )
 
     work_rows = []
@@ -192,11 +205,11 @@ def build_site(out_dir: str | Path) -> Path:
         purity = work_counts[w][majority[w]] / n
         work_rows.append(
             f'<tr><td><a href="works/{w}.html">{h.escape(w)}</a><br><span class="sub" style="font-size:12px">{h.escape(work_group[w])}</span></td>'
-            f'<td class="num">{n:,}</td><td style="width:40%">{stack_bar(work_counts[w], n, authors, w)}</td>'
+            f'<td class="num">{n:,}</td><td style="width:40%">{stack_bar(work_counts[w], n, authors, w, units)}</td>'
             f'<td>{chip(majority[w])}</td><td class="num">{purity:.0%}</td></tr>'
         )
     works_table = (
-        '<table><thead><tr><th>work</th><th class="num">verses</th><th>composition</th><th>main group</th><th class="num">purity</th></tr></thead>'
+        f'<table><thead><tr><th>work</th><th class="num">{units}</th><th>composition</th><th>main group</th><th class="num">purity</th></tr></thead>'
         f'<tbody>{"".join(work_rows)}</tbody></table>'
     )
 
@@ -210,22 +223,28 @@ def build_site(out_dir: str | Path) -> Path:
     )
     if summary.get("profile_metadata", {}).get("unverified_profiles"):
         k_note += " Legacy/unverified AI profiles: regenerate for validation."
+    if passage_mode:
+        k_note += (f" Raw tokens were pooled into non-overlapping {summary['passage_tokens']}-token passages before feature extraction. "
+                   + ("No additional smoothing was applied." if not summary['alpha'] or not summary['window'] else
+                      f"Additional smoothing used a ±{summary['window']}-passage window (α={summary['alpha']})."))
     body = (
         f'<div class="tiles">{tiles_html}</div><p class="sub">{k_note}</p>'
+        f'{mapping_note("../")}'
         f'<h2 id="authors">Style groups</h2>{legend(authors)}{authors_table}'
         f'<h2 id="works">Works</h2>{legend(authors)}{works_table}'
     )
-    (site / "index.html").write_text(page(f"Style groups · {lang_name}", body, "", f"Exploratory style analysis in the {lang_name} corpus · <a href=\"../../index.html\">all languages</a>"), encoding="utf-8")
+    title = f"Passage-level style groups · {lang_name}" if passage_mode else f"Style groups · {lang_name}"
+    (site / "index.html").write_text(page(title, body, "", f"Exploratory style analysis in the {lang_name} corpus · <a href=\"../../index.html\">all languages</a>"), encoding="utf-8")
 
     # ---- per-author pages ------------------------------------------------------------------------
     for a in authors:
         m = authors_meta[a]
         mine = [r for r in rows if r["author"] == a]
         works_here = Counter(r["work"] for r in mine)
-        parts = [f'<div class="tiles"><div class="tile"><div class="v">{m["n_verses"]:,}</div><div class="l">verses ({_pct(m["share"])})</div></div>'
+        parts = [f'<div class="tiles"><div class="tile"><div class="v">{m["n_verses"]:,}</div><div class="l">{units} ({_pct(m["share"])})</div></div>'
                  f'<div class="tile"><div class="v">{len(works_here)}</div><div class="l">works</div></div>'
                  f'<div class="tile"><div class="v">{m["mean_confidence"]:.2f}</div><div class="l">mean assignment margin</div></div></div>']
-        parts.append("<h2>Style markers</h2><p class=\"sub\">Features whose average inside this hand differs most from the corpus average (standard deviations).</p>")
+        parts.append("<h2>Style markers</h2><p class=\"sub\">Features whose average inside this style group differs most from the corpus average (standard deviations).</p>")
         parts.append('<div class="markers">' + "".join(f"<code>{h.escape(n)} {x:+.2f}σ</code>" for n, x in m["markers_high"][:12]) + "</div>")
         parts.append('<p class="sub">Under-represented:</p><div class="markers">' + "".join(f"<code>{h.escape(n)} {x:+.2f}σ</code>" for n, x in m["markers_low"][:8]) + "</div>")
         if m.get("ai_profile_means"):
@@ -237,40 +256,43 @@ def build_site(out_dir: str | Path) -> Path:
             parts.append("<h3>Characteristic devices</h3><div class=\"markers\">" + "".join(f"<code>{h.escape(t)} ×{l}</code>" for t, l, _ in m["tag_lift"][:12]) + "</div>")
         if m.get("phrases"):
             parts.append("<h3>Diagnostic phrases</h3><div class=\"markers\">" + "".join(f"<code>{h.escape(p)} ({c})</code>" for p, c in m["phrases"][:12]) + "</div>")
-        parts.append("<h2>Works</h2>" + legend([a]) + "<table><thead><tr><th>work</th><th class=\"num\">verses by this hand</th><th>share of the work</th></tr></thead><tbody>" + "".join(
+        parts.append("<h2>Works</h2>" + legend([a]) + f"<table><thead><tr><th>work</th><th class=\"num\">{units} in this style group</th><th>share of the work</th></tr></thead><tbody>" + "".join(
             f'<tr><td><a href="../works/{w}.html">{h.escape(w)}</a></td><td class="num">{n}</td><td style="width:40%"><div class="bar"><span style="width:{100 * n / len(by_work[w]):.1f}%;background:{color_var(a)}"></span></div> {_pct(n / len(by_work[w]))}</td></tr>'
             for w, n in works_here.most_common()) + "</tbody></table>")
         parts.append('<p class="sub">Exploratory style group, not an identified author.</p>')
-        parts.append("<h2>Verses assigned to this style group</h2><p class=\"sub\">In reading order; the margin is relative centroid separation, not a probability of authorship. Zero denotes a tie or a single-group run.</p>")
+        parts.append(mapping_note("../../"))
+        parts.append(f"<h2>{units.capitalize()} assigned to this style group</h2><p class=\"sub\">In reading order; the margin is relative centroid separation, not a probability of authorship. Zero denotes a tie or a single-group run.</p>")
         for w in work_order:
             vs = [r for r in mine if r["work"] == w]
             if not vs:
                 continue
-            parts.append(f'<h3 class="work-head"><a href="../works/{w}.html">{h.escape(vs[0]["ref"].rsplit(" ", 1)[0])}</a> · {len(vs)} of {len(by_work[w])} verses</h3>')
+            work_label = w if passage_mode else vs[0]["ref"].rsplit(" ", 1)[0]
+            parts.append(f'<h3 class="work-head"><a href="../works/{w}.html">{h.escape(work_label)}</a> · {len(vs)} of {len(by_work[w])} {units}</h3>')
             for r in vs:
                 flag = " flag" if float(r["outlier_z"]) > 2.5 else ""
-                parts.append(f'<div class="verse{flag}" style="border-left-color:{color_var(a)}"><span class="ref"><a href="../works/{w}.html#{h.escape(r["id"])}">{h.escape(r["ref"])}</a></span>'
+                parts.append(f'<div class="{unit_class}{flag}" style="border-left-color:{color_var(a)}"><span class="ref"><a href="../works/{w}.html#{h.escape(r["id"])}">{h.escape(r["ref"])}</a></span>'
                              f'<span class="conf">{float(r["confidence"]):.2f}</span><span class="{gk}" dir="auto">{h.escape(r["text"])}</span></div>')
-        (site / "authors" / f"{a}.html").write_text(page(f"Style group {a}", "\n".join(parts), "../", f"{m['n_verses']:,} verses · {_pct(m['share'])} of the corpus"), encoding="utf-8")
+        (site / "authors" / f"{a}.html").write_text(page(f"Style group {a}", "\n".join(parts), "../", f"{m['n_verses']:,} {units} · {_pct(m['share'])} of the corpus"), encoding="utf-8")
 
     # ---- per-work pages --------------------------------------------------------------------------
     for w in work_order:
         vs = by_work[w]
         n = len(vs)
-        title = vs[0]["ref"].rsplit(" ", 1)[0]
+        title = w if passage_mode else vs[0]["ref"].rsplit(" ", 1)[0]
         counts = work_counts[w]
-        parts = [f'<div class="tiles"><div class="tile"><div class="v">{n:,}</div><div class="l">verses</div></div>'
+        parts = [f'<div class="tiles"><div class="tile"><div class="v">{n:,}</div><div class="l">{units}</div></div>'
                  f'<div class="tile"><div class="v">{chip(majority[w], "../")}</div><div class="l">main group ({counts[majority[w]] / n:.0%})</div></div>'
                  f'<div class="tile"><div class="v">{len(counts)}</div><div class="l">style groups present</div></div></div>']
         parts.append('<p class="sub">Exploratory style groups, not identified authors. Genre, topic and witnesses may explain differences.</p>')
-        parts.append(legend([a for a in authors if counts.get(a)]) + stack_bar(counts, n, authors, w))
-        parts.append("<table><thead><tr><th>group</th><th class=\"num\">verses</th><th class=\"num\">share</th></tr></thead><tbody>" + "".join(
+        parts.append(mapping_note("../../"))
+        parts.append(legend([a for a in authors if counts.get(a)]) + stack_bar(counts, n, authors, w, units))
+        parts.append(f"<table><thead><tr><th>group</th><th class=\"num\">{units}</th><th class=\"num\">share</th></tr></thead><tbody>" + "".join(
             f'<tr><td>{chip(a, "../")}</td><td class="num">{c}</td><td class="num">{_pct(c / n)}</td></tr>' for a, c in counts.most_common()) + "</tbody></table>")
-        parts.append("<h2>Verse by verse</h2><p class=\"sub\">Coloured rule = assigned group. ⚑ marks a verse whose own style is far from its group's centre (an exploratory outlier).</p>")
+        parts.append(f"<h2>{unit.capitalize()} by {unit}</h2><p class=\"sub\">Coloured rule = assigned group. ⚑ marks a {unit} whose own style is far from its group's centre (an exploratory outlier).</p>")
         for r in vs:
             a = r["author"]
             flag = " flag" if float(r["outlier_z"]) > 2.5 else ""
-            parts.append(f'<div class="verse{flag}" id="{h.escape(r["id"])}" style="border-left-color:{color_var(a)}"><span class="ref">{h.escape(r["ref"])}</span>'
+            parts.append(f'<div class="{unit_class}{flag}" id="{h.escape(r["id"])}" style="border-left-color:{color_var(a)}"><span class="ref">{h.escape(r["ref"])}</span>'
                          f'<span>{chip(a, "../")}</span><span class="{gk}" dir="auto">{h.escape(r["text"])}</span></div>')
         (site / "works" / f"{w}.html").write_text(page(title, "\n".join(parts), "../", f"{h.escape(work_group[w])} · main group {majority[w]}"), encoding="utf-8")
     return site
@@ -281,15 +303,18 @@ def build_root_index(output_dir: str | Path) -> Path | None:
     output_dir = Path(output_dir)
     names = {"grc": "Greek", "hbo": "Hebrew", "arb": "Arabic"}
     cards = []
+    has_passages = False
     for lang_dir in sorted(output_dir.glob("*/")):
         summary_path = lang_dir / "summary.json"
         if not summary_path.exists() or not (lang_dir / "site" / "index.html").exists():
             continue
         s = json.loads(summary_path.read_text())
         lang = s.get("language", lang_dir.name)
+        units = "passages" if s.get("input_unit") == "pooled_token_passage" else "verses"
+        has_passages = has_passages or units == "passages"
         cards.append(
             f'<div class="tile"><div class="v"><a href="{lang_dir.name}/site/index.html">{names.get(lang, lang)}</a></div>'
-            f'<div class="l">{s["n_verses"]:,} verses · {s["n_works"]} works · {s["k_used"]} style groups · '
+            f'<div class="l">{s["n_verses"]:,} {units} · {s["n_works"]} works · {s["k_used"]} style groups · '
             f'{"AI + lexical" if s.get("used_ai_profiles") else "lexical only"}</div></div>'
         )
     if not cards:
@@ -300,5 +325,6 @@ def build_root_index(output_dir: str | Path) -> Path | None:
         body += '<p><a href="models/index.html">Which model should profile the verses?</a> - agreement, repeatability and cost of every model tried.</p>'
         nav += '<a href="models/index.html">Models</a>'
     path = output_dir / "index.html"
-    path.write_text(page("Style groups", body, "", "Exploratory style analysis across Greek, Hebrew and Arabic scripture", nav=nav), encoding="utf-8")
+    subtitle = "Exploratory style analysis across languages" if has_passages else "Exploratory style analysis across Greek, Hebrew and Arabic scripture"
+    path.write_text(page("Style groups", body, "", subtitle, nav=nav), encoding="utf-8")
     return path

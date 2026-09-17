@@ -5,6 +5,7 @@ import csv
 import json
 from collections import Counter
 from pathlib import Path
+from urllib.parse import quote
 
 from .cluster import author_key
 
@@ -37,15 +38,31 @@ def render(out_dir: str | Path) -> str:
     outliers = _read_csv(out_dir / "outliers.csv")
     author_ids = sorted(authors, key=author_key)
     val = summary["validation"]
+    passage_mode = summary.get("input_unit") == "pooled_token_passage"
+    unit, units = ("passage", "passages") if passage_mode else ("verse", "verses")
 
     md: list[str] = []
-    md.append("# Exploratory verse-level style analysis\n")
-    md.append(
-        f"{summary['n_verses']} verse units from {summary['n_works']} works were profiled with "
-        f"{'lexical statistics plus AI style profiles' if summary['used_ai_profiles'] else 'lexical statistics only (no AI profiles found)'}, "
-        f"smoothed over a ±{summary['window']}-verse window (α={summary['alpha']}), reduced to {summary['pca_dims']} principal components "
-        f"({summary['pca_explained_variance']:.0%} of variance) and clustered with k-means.\n"
-    )
+    md.append(f"# Exploratory {unit}-level style analysis\n")
+    if passage_mode:
+        smoothing = ("without additional smoothing" if not summary['alpha'] or not summary['window'] else
+                     f"with smoothing over a ±{summary['window']}-passage window (α={summary['alpha']})")
+        feature_description = "lexical statistics plus AI style profiles" if summary['used_ai_profiles'] else "lexical statistics only"
+        md.append(f"{summary['n_verses']} non-overlapping {summary['passage_tokens']}-token passages from "
+                  f"{summary['n_works']} works were pooled before feature extraction, measured with {feature_description} "
+                  "and analysed "
+                  f"{smoothing}, reduced to {summary['pca_dims']} principal components "
+                  f"({summary['pca_explained_variance']:.0%} of variance) and clustered with k-means.\n")
+        mapping_file = quote(Path(summary.get('source_mapping_file', 'passages.json')).name)
+        md.append(f"[Source mappings and exclusions]({mapping_file}) record the original verse IDs, "
+                  "normalized token offsets, and excluded material. Labels describe whole passages, "
+                  "not the authorship of individual source verses.\n")
+    else:
+        md.append(
+            f"{summary['n_verses']} verse units from {summary['n_works']} works were profiled with "
+            f"{'lexical statistics plus AI style profiles' if summary['used_ai_profiles'] else 'lexical statistics only (no AI profiles found)'}, "
+            f"smoothed over a ±{summary['window']}-verse window (α={summary['alpha']}), reduced to {summary['pca_dims']} principal components "
+            f"({summary['pca_explained_variance']:.0%} of variance) and clustered with k-means.\n"
+        )
     selected = summary.get("k_selected", summary.get("k_selected_by_silhouette"))
     md.append(f"**Result: {summary['k_used']} exploratory style groups (A1–A{summary['k_used']}).** "
               f"Selection criterion: {summary.get('k_criterion', 'silhouette')}; preferred k={selected}. "
@@ -60,15 +77,18 @@ def render(out_dir: str | Path) -> str:
     if summary.get("profile_metadata", {}).get("unverified_profiles"):
         md.append("**Legacy/unverified AI profiles:** blinding and input provenance are not verified; regenerate profiles before using these results for validation.")
     if summary.get("n_missing_profiles"):
-        md.append(f"{summary['n_missing_profiles']} input verses had no profile and were excluded; missing passages break continuity.")
+        md.append(f"{summary['n_missing_profiles']} input {units} had no profile and were excluded; missing passages break continuity.")
     md.append("Assignment margins measure distance to cluster centers, not probabilities of authorship; single-group margins are zero.")
     hdb = summary.get("hdbscan", {})
     if hdb.get("available"):
-        md.append(f"Density clustering (HDBSCAN, min cluster {hdb['min_cluster_size']}) found {hdb['n_clusters']} dense groups with {hdb['noise_fraction']:.0%} of verses unassigned, as a second opinion.\n")
+        md.append(f"Density clustering (HDBSCAN, min cluster {hdb['min_cluster_size']}) found {hdb['n_clusters']} dense groups with {hdb['noise_fraction']:.0%} of {units} unassigned, as a second opinion.\n")
 
     md.append("\n## How many style groups? (k selection)\n")
     if "selection_thresholds" in summary:
-        md.append("For each k the partition is fitted on smoothed vectors and scored on unsmoothed vectors. "
+        fit_description = ("For each k the partition is fitted and scored on unsmoothed passage vectors. "
+                           if passage_mode and (not summary['alpha'] or not summary['window']) else
+                           "For each k the partition is fitted on smoothed vectors and scored on unsmoothed vectors. ")
+        md.append(fit_description +
                   "Higher silhouette / Calinski-Harabasz and lower Davies-Bouldin / BIC are better. "
                   "Automatic splits must improve BIC over a single Gaussian by at least 10 on a fixed sample of unsmoothed vectors, "
                   "have positive raw silhouette, and retain ARI of at least 0.8 in all five passage subsamples. "
@@ -88,15 +108,15 @@ def render(out_dir: str | Path) -> str:
         ai_s = (f"reg {ai['register']:.2f} · sem {ai['semitic_interference']:.2f} · hyp {ai['hypotaxis']:.2f} · "
                 f"lex {ai['lexical_richness']:.2f} · rhet {ai['rhetorical_polish']:.2f}") if ai else "—"
         rows.append([a, e["n_verses"], f"{e['share']:.1%}", f"{e['mean_confidence']:.2f}", top_works, ai_s])
-    md.append(_table(["author", "verses", "share", "mean margin", "main works", "AI style means"], rows))
+    md.append(_table(["style group", units, "share", "mean margin", "main works", "AI style means"], rows))
 
     md.append("\n\n## Style-group markers\n")
     md.append("Markers are the features whose mean inside the cluster differs most from the corpus mean (in standard deviations). "
-              "`fw:` closed-class word rate, `sfx:` word-ending rate, `misc:` length/connective habits, `cng:` character n-gram axis, "
+              "`fw:` predefined function/common-word rate, `sfx:` word-ending rate, `misc:` length/connective habits, `cng:` character n-gram axis, "
               "`ai:` model-rated style scale, `cat:` model-assigned category, `tag:` model-assigned device tag.\n")
     for a in author_ids:
         e = authors[a]
-        md.append(f"\n### {a} — {e['n_verses']} verses ({e['share']:.1%})\n")
+        md.append(f"\n### {a} — {e['n_verses']} {units} ({e['share']:.1%})\n")
         md.append("**Works:** " + ", ".join(f"{w} {n}" for w, n in e["works"].items()) + "\n")
         if e.get("copyists"):
             md.append("**Sinaiticus scribes:** " + ", ".join(f"{s} {n}" for s, n in sorted(e["copyists"].items())) + "\n")
@@ -114,13 +134,13 @@ def render(out_dir: str | Path) -> str:
         md.append("")
 
     md.append("\n## Works × style groups\n")
-    md.append("Each row is a work; columns count how many of its verses each author received. "
-              "`purity` is the share held by the work's majority author.\n")
-    headers = ["work", "group", "n"] + author_ids + ["majority", "purity"]
+    md.append(f"Each row is a work; columns count how many of its {units} were assigned to each style group. "
+              "`purity` is the share assigned to the work's main style group.\n")
+    headers = ["work", "traditional group", "n"] + author_ids + ["main style group", "purity"]
     md.append(_table(headers, [[r["work"], r["group"], r["n"]] + [r[a] for a in author_ids] + [r["majority"], r["purity"]] for r in crosstab]))
 
     md.append("\n\n## Agreement with traditional attributions\n")
-    md.append(f"- Adjusted Rand index of authors vs. work: **{val['ari_vs_work']}**; vs. traditional author group: **{val['ari_vs_group']}** "
+    md.append(f"- Adjusted Rand index of style groups vs. work: **{val['ari_vs_work']}**; vs. traditional attribution groups: **{val['ari_vs_group']}** "
               "(1 = identical partition, 0 = chance).")
     md.append(f"- Mean purity across works: **{val['mean_purity']}**.")
     group_ct: dict[str, Counter] = {}
@@ -134,31 +154,39 @@ def render(out_dir: str | Path) -> str:
         rows.append([g, tot] + [f"{c[a] / tot:.0%}" if c[a] else "" for a in author_ids])
     md.append("\n" + _table(["traditional group", "n"] + author_ids, rows))
     if val.get("author_by_scribe"):
-        md.append("\n\nSinaiticus was copied by three scribes (A, B, D). If the discovered authors tracked the *scribes* rather than the *composers*, "
-                  "the table below would be block-diagonal; a mixed table alone cannot rule out scribal or edition effects.\n")
+        md.append("\n\nThe table below compares style groups with recorded Sinaiticus scribes. "
+                  "Alignment may indicate scribal effects; a mixed table alone cannot rule out scribal or edition effects.\n")
         scribes = sorted({s for c in val["author_by_scribe"].values() for s in c})
-        md.append(_table(["author"] + scribes, [[a] + [val["author_by_scribe"].get(a, {}).get(s, 0) for s in scribes] for a in author_ids]))
+        md.append(_table(["style group"] + scribes, [[a] + [val["author_by_scribe"].get(a, {}).get(s, 0) for s in scribes] for a in author_ids]))
 
     md.append("\n\n## Passages that break from their work's main style group\n")
-    md.append("Runs of at least three consecutive verses assigned to an author other than the work's majority author. "
-              "These are the candidates for interpolation, embedded sources, or a change of style worth reading closely.\n")
+    md.append(f"Runs of at least three consecutive {units} assigned to a style group other than the work's main style group. "
+              "These warrant close reading but do not by themselves establish interpolation, embedded sources, or a change of author.\n")
     minority = [s for s in segs if s["is_majority"] == "False" and int(s["n"]) >= 3]
     minority.sort(key=lambda s: -int(s["n"]))
-    md.append(_table(["work", "from", "to", "verses", "author"], [[s["work"], s["start"], s["end"], s["n"], s["author"]] for s in minority[:60]]))
+    md.append(_table(["work", "from", "to", units, "style group"], [[s["work"], s["start"], s["end"], s["n"], s["author"]] for s in minority[:60]]))
     if len(minority) > 60:
         md.append(f"\n… {len(minority) - 60} more in `segments.csv`.")
 
-    md.append("\n\n## Individual outlier verses\n")
-    md.append("Verses whose own (unsmoothed) style is more than 2.5 SD from their assigned author's centre.\n")
-    md.append(_table(["ref", "author", "z", "text"], [[o["ref"], o["author"], o["z"], o["text"][:90]] for o in outliers[:40]]))
+    md.append(f"\n\n## Individual outlier {units}\n")
+    md.append(f"{units.capitalize()} whose own (unsmoothed) style is more than 2.5 SD from their assigned style group's centre.\n")
+    md.append(_table(["ref", "style group", "z", "text"], [[o["ref"], o["author"], o["z"], o["text"][:90]] for o in outliers[:40]]))
 
     md.append("\n\n## Caveats\n")
-    md.append("- Unsupervised clusters are exploratory style groups, not proven persons. Genre (narrative vs. letter vs. vision) is the strongest stylistic signal in any corpus and will shape the top-level split; read the works×authors table with that in mind.")
-    md.append("- The number of authors depends on the selection criterion; the k-selection table shows how sharp (or flat) the optimum is.")
-    md.append("- Single verses are short; per-verse labels inherit their neighbourhood through smoothing. Treat minority runs as hypotheses for further study; smoothing itself induces runs, and quotations or genre shifts can explain them.")
+    md.append("- Unsupervised clusters are exploratory style groups, not proven persons. Genre and topic may explain the groups; the works × style groups table does not distinguish those effects from authorship.")
+    md.append("- The number of style groups depends on the selection criterion; the k-selection table shows how sharp (or flat) the optimum is.")
+    if passage_mode:
+        md.append("- Fixed token windows can cross a change of style within an uninterrupted source passage. "
+                  "A group label applies to the pooled text; locating a change more precisely requires separate analysis. "
+                  "Quotations, topic, and genre shifts can explain minority runs.")
+    else:
+        md.append("- Single verses are short; per-verse labels inherit their neighbourhood through smoothing. Treat minority runs as hypotheses for further study; smoothing itself induces runs, and quotations or genre shifts can explain them.")
     lang = summary.get("language", "grc")
-    if lang == "grc":
-        md.append("- Manuscript texts (Sinaiticus, Vaticanus) are the first hand of one copy; LXX books are translations, so their 'authors' are translators.")
+    if passage_mode:
+        md.append("- Results apply to the supplied texts. Language labels alone do not establish comparable periods, "
+                  "genres, translations, or manuscript traditions; reference-text results do not establish scripture authorship.")
+    elif lang == "grc":
+        md.append("- Greek manuscript and translated texts can reflect translators, editors, scribes, and transmission history as well as composition. A style group in an LXX translation cannot by itself identify its translator or the author of the underlying work.")
     elif lang == "hbo":
         md.append("- The Masoretic text is the primary witness; Qumran and Samaritan copies are witnesses of the same works unless the corpus was built with duplicates. Non-biblical scrolls are fragmentary and partly reconstructed; units that are mostly reconstruction were dropped.")
     elif lang == "arb":
