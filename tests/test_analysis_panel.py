@@ -389,3 +389,40 @@ def test_the_explorer_writes_an_overview_and_one_page_per_book(tmp_path):
         assert s["name"] in overview, s["key"]
     assert "back to chapters" in book and "back to collections" in overview
     assert "strategyBar" in book, "the strategy can be changed on a book page too"
+
+
+def test_the_front_page_offers_the_strategy_before_anything_else(tmp_path):
+    """The picker has to be on the page people land on.
+
+    It worked on the language and book pages, but the two pages above them had none, so the control
+    was two clicks from the entry point and read as absent. The front page now names every strategy
+    and says which language is missing one, rather than falling back in silence.
+    """
+    from stylometry.cli import _write_explorer_index
+    from stylometry.explorer import build
+
+    greek = build(_explorer_verses(), "grc", progress=lambda m: None)
+    hebrew = build(_explorer_verses(), "hbo", progress=lambda m: None)
+    _write_explorer_index(tmp_path, [("grc", greek), ("hbo", hebrew)])
+    page = (tmp_path / "index.html").read_text(encoding="utf-8")
+
+    assert "strategyBar" in page and 'id="bar"' in page
+    union = {s["key"] for s in greek["strategies"]} | {s["key"] for s in hebrew["strategies"]}
+    for key in union:
+        assert f'"{key}"' in page, key
+    # The chosen strategy travels with the link, so picking one here is not thrown away on arrival.
+    assert "?s=${encodeURIComponent(strategy)}" in page
+    if union - {s["key"] for s in greek["strategies"]}:
+        assert "no ${strategy} data here" in page
+
+
+def test_a_strategy_missing_for_a_language_is_said_out_loud(tmp_path):
+    """Arriving with ?s=pos at a language without it must not look like the choice was honoured."""
+    from stylometry.explorer import build
+    from stylometry.explorer_html import write
+
+    data = build(_explorer_verses(), "grc", progress=lambda m: None)
+    out = write(data, tmp_path / "grc")
+    overview = (out / "index.html").read_text(encoding="utf-8")
+    assert "const unavailable" in overview
+    assert "opened on the first strategy instead" in overview

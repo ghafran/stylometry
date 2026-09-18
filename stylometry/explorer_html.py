@@ -33,6 +33,9 @@ border-radius:10px;padding:12px 14px;margin-bottom:16px;position:sticky;top:0;z-
 .bar label{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);font-family:'IBM Plex Mono',monospace}
 select{font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);max-width:100%}
 .measures{font-size:13px;color:var(--muted);flex-basis:100%;margin-top:2px}
+.bar .count{font-size:12.5px;color:var(--faint)}
+.bar .miss{flex-basis:100%;font-size:12.5px;color:var(--clay);border-left:2px solid var(--clay);padding-left:9px}
+.bar select{font-weight:600;border-color:var(--clay)}
 .note{font-size:12.5px;color:var(--faint);flex-basis:100%;border-left:2px solid var(--line);padding-left:9px}
 .cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,440px);gap:20px}
 @media (max-width:900px){.cols{grid-template-columns:1fr}}
@@ -56,7 +59,8 @@ h2{font-family:'Spectral',Georgia,serif;font-size:19px;margin:0 0 8px;font-weigh
 JS_COMMON = """
 const qs = new URLSearchParams(location.search);
 let strategy = qs.get('s') || localStorage.getItem('styl.strategy') || DATA.keys[0];
-if (!DATA.keys.includes(strategy)) strategy = DATA.keys[0];
+const unavailable = DATA.keys.includes(strategy) ? null : strategy;
+if (unavailable) strategy = DATA.keys[0];
 const idx = () => DATA.keys.indexOf(strategy);
 const xyOf = o => { const i = idx() * 2; return [o.xy[i], o.xy[i + 1]]; };
 const vxyOf = v => { const i = idx() * 2; return [v[3][i], v[3][i + 1]]; };
@@ -67,7 +71,9 @@ function strategyBar(onChange) {
   bar.innerHTML = `<label for="sel">Strategy</label>
     <select id="sel">${DATA.strategies.map(s =>
       `<option value="${s.key}"${s.key === strategy ? ' selected' : ''}>${s.name} — ${s.status}</option>`).join('')}</select>
-    <div class="measures" id="ms"></div><div class="note" id="nt"></div>`;
+    <span class="count">${DATA.strategies.length} to choose from — everything below re-plots</span>
+    <div class="measures" id="ms"></div><div class="note" id="nt"></div>
+    ${unavailable ? `<div class="miss">There is no <b>${unavailable}</b> data for this selection, so it opened on the first strategy instead.</div>` : ''}`;
   const paint = () => {
     document.getElementById('ms').textContent = meta().measures || '';
     const n = document.getElementById('nt');

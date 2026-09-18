@@ -531,32 +531,58 @@ def cmd_explore(args) -> None:
 
 
 def _write_explorer_index(out: Path, built: list) -> None:
-    from .explorer_html import CSS, LANGUAGE_NAMES
+    """The front page: pick a strategy here, pick a language, and carry the choice through."""
+    import json as _json
 
-    cards = "".join(
-        f'<a class="row" href="{lang}/index.html"><span class="t">{LANGUAGE_NAMES.get(lang, lang)}</span>'
-        f'<span class="n">{data["n_verses"]:,} verses</span>'
-        f'<span class="s">{sum(len(c["children"]) for c in data["tree"])} books · '
-        f'{len(data["strategies"])} strategies'
-        + (f' · no data for {", ".join(data["unavailable"])}' if data["unavailable"] else "")
-        + "</span></a>"
-        for lang, data in built)
+    from .explorer_html import CSS, JS_COMMON, LANGUAGE_NAMES
+
+    # The union, in first-seen order. Hebrew has part-of-speech tags and the others do not, so a
+    # strategy offered here is not offered everywhere; the page says which language is missing it
+    # rather than quietly dropping the choice.
+    strategies: dict = {}
+    for _, data in built:
+        for s in data["strategies"]:
+            strategies.setdefault(s["key"], s)
+    payload = {
+        "keys": list(strategies),
+        "strategies": list(strategies.values()),
+        "languages": [{"code": lang, "label": LANGUAGE_NAMES.get(lang, lang),
+                       "verses": data["n_verses"],
+                       "books": sum(len(c["children"]) for c in data["tree"]),
+                       "keys": [s["key"] for s in data["strategies"]]}
+                      for lang, data in built],
+    }
     (out / "index.html").write_text(
         '<!doctype html><html lang="en"><head><meta charset="utf-8">'
         '<meta name="viewport" content="width=device-width, initial-scale=1">'
         "<title>Style explorer</title>"
         '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;600&'
         'family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">'
-        f"<style>{CSS}.row{{text-decoration:none;display:grid}}</style></head><body><div class=\"wrap\">"
+        f"<style>{CSS}.row{{text-decoration:none;display:grid}}"
+        ".row.dim{opacity:.55}.row .w{grid-column:1;font-size:12.5px;color:var(--clay)}"
+        "</style></head><body><div class=\"wrap\">"
         "<h1>Style explorer</h1>"
-        "<p class=\"small\">Choose a language, then a strategy, then drill from collection to book to "
-        "chapter to verse. The strategy can be changed at any level and everything re-plots — a grouping "
+        "<p class=\"small\">Pick a strategy, then a language, then drill from collection to book to "
+        "chapter to verse. The strategy can be changed on every page and everything re-plots — a grouping "
         "that survives the change means something, one that rearranges itself does not.</p>"
-        f"<div style=\"margin-top:18px\">{cards}</div>"
+        "<div class=\"bar\" id=\"bar\"></div><div id=\"list\"></div>"
         "<p class=\"small\" style=\"margin-top:22px\">Positions are the first two principal components of "
         "the chosen strategy's standardised features, fitted over every verse of that language. They are "
         "comparable within a strategy, never between strategies. No model is involved at any point.</p>"
-        "</div></body></html>", encoding="utf-8")
+        "<script>const DATA = " + _json.dumps(payload, ensure_ascii=False) + ";\n" + JS_COMMON + """
+function render() {
+  document.getElementById('list').innerHTML = DATA.languages.map(l => {
+    const has = l.keys.includes(strategy);
+    return `<a class="row${has ? '' : ' dim'}" href="${l.code}/index.html?s=${encodeURIComponent(strategy)}">
+      <span class="t">${l.label}</span>
+      <span class="n">${l.verses.toLocaleString()} verses</span>
+      <span class="s">${l.books} books · ${l.keys.length} strategies</span>
+      ${has ? '' : `<span class="w">no ${strategy} data here — opens on ${l.keys[0]}</span>`}
+    </a>`;
+  }).join('');
+}
+strategyBar(render); render();
+</script></div></body></html>""", encoding="utf-8")
 
 
 def cmd_manifest(args) -> None:
