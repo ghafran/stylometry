@@ -221,6 +221,33 @@ reports show matn without isnad.
 
 **Check:** the predeclared file is committed in a commit that precedes the run.
 
+**An exploratory observation that constrains the design, recorded before 7.1 is written.** Building
+the explorer over the rebuilt corpus put both Arabic collections in one space: 211 books, 114 suras
+and 97 kutub, grouped book by book under each of the fourteen strategies. The grouping does **not**
+track the collection. Adjusted Rand index against the Quran/Bukhari label:
+
+| clause | clause 5 groups | 0.16 |
+|---|---|---|
+| word_frequency, hapax, topics | 2 groups each | 0.13 – 0.15 |
+| the other ten strategies | 1 – 5 groups | 0.00 – 0.02 |
+
+Nothing reaches 0.2. Unsupervised grouping of these 211 books finds structure that has nothing to do
+with whether a book is a sura or a kitab — the same result this project keeps getting, that clustering
+is dominated by genre, length and subject rather than by who wrote the text.
+
+This does **not** say the two corpora are indistinguishable, and it must not be quoted as if it did.
+It says clustering is the wrong instrument, which is what 7.2 already assumes: the declared test is a
+*supervised* discrimination test at passage level, and a classifier is very likely to separate these
+two corpora easily. What this observation adds is that it will be doing so on something that is not
+the dominant axis of variation in the corpus, which makes the controls in 7.3 the whole substance of
+the test rather than a formality. The confounds to beat, in order of how cheap they are to exploit:
+
+1. `qāla rasūlu llāh` and the other report-opening formulae, in thousands of hadith and in the Quran
+   never. Must be removed as a control; §6 kept them deliberately and flagged it.
+2. Unit length — Quran verses run 10 tokens, hadith reports 31. Passage pooling addresses this only
+   if passages are built to the same token budget from both.
+3. Genre and register, two centuries of separate transmission, and the isnad removal itself.
+
 **What this test can and cannot show, on the evidence already in hand.** Two results from this session
 set the limits, and the paper has to live inside them:
 
