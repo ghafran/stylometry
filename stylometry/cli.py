@@ -503,6 +503,62 @@ def cmd_strategies(args) -> None:
     print(f"wrote {out / 'strategies.html'}")
 
 
+def cmd_explore(args) -> None:
+    """Build the drill-down explorer: language, collections, books, chapters, verses."""
+    from .explorer import build
+    from .explorer_html import write
+
+    corpus = _corpus_for(args)
+    languages = [args.language] if args.language else ["grc", "hbo", "arb"]
+    out = Path(args.out) if args.out else OUTPUT / "explorer"
+    built = []
+    for language in languages:
+        verses = _select(argparse.Namespace(scope=args.scope, language=language, works=args.works,
+                                            chapters=None), corpus)
+        if len(verses) < 10:
+            print(f"  {language}: {len(verses)} verses, skipped")
+            continue
+        print(f"{language}: {len(verses):,} verses")
+        data = build(verses, language, seed=args.seed, progress=lambda m: None)
+        write(data, out / language)
+        built.append((language, data))
+        print(f"  wrote {out / language / 'index.html'} "
+              f"({len(data['strategies'])} strategies, {sum(len(c['children']) for c in data['tree'])} books)")
+    if not built:
+        sys.exit("no language had enough text to explore")
+    _write_explorer_index(out, built)
+    print(f"start at {out / 'index.html'}")
+
+
+def _write_explorer_index(out: Path, built: list) -> None:
+    from .explorer_html import CSS, LANGUAGE_NAMES
+
+    cards = "".join(
+        f'<a class="row" href="{lang}/index.html"><span class="t">{LANGUAGE_NAMES.get(lang, lang)}</span>'
+        f'<span class="n">{data["n_verses"]:,} verses</span>'
+        f'<span class="s">{sum(len(c["children"]) for c in data["tree"])} books · '
+        f'{len(data["strategies"])} strategies'
+        + (f' · no data for {", ".join(data["unavailable"])}' if data["unavailable"] else "")
+        + "</span></a>"
+        for lang, data in built)
+    (out / "index.html").write_text(
+        '<!doctype html><html lang="en"><head><meta charset="utf-8">'
+        '<meta name="viewport" content="width=device-width, initial-scale=1">'
+        "<title>Style explorer</title>"
+        '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;600&'
+        'family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">'
+        f"<style>{CSS}.row{{text-decoration:none;display:grid}}</style></head><body><div class=\"wrap\">"
+        "<h1>Style explorer</h1>"
+        "<p class=\"small\">Choose a language, then a strategy, then drill from collection to book to "
+        "chapter to verse. The strategy can be changed at any level and everything re-plots — a grouping "
+        "that survives the change means something, one that rearranges itself does not.</p>"
+        f"<div style=\"margin-top:18px\">{cards}</div>"
+        "<p class=\"small\" style=\"margin-top:22px\">Positions are the first two principal components of "
+        "the chosen strategy's standardised features, fitted over every verse of that language. They are "
+        "comparable within a strategy, never between strategies. No model is involved at any point.</p>"
+        "</div></body></html>", encoding="utf-8")
+
+
 def cmd_manifest(args) -> None:
     """Write or verify the checked-in record of which manuscripts the corpus contains."""
     import json as _json
@@ -869,6 +925,19 @@ def main(argv: list[str] | None = None) -> None:
     st.add_argument('--seed', type=int, default=0)
     st.add_argument('--out', default=None)
     st.set_defaults(func=cmd_strategies)
+
+    ex = sub.add_parser('explore', help='drill from a language through collections, books, chapters '
+                                        'and verses, under any strategy')
+    ex.add_argument('--scope', default='all',
+                    choices=["all", "sinaiticus", "lxx", "nt", "christian", "noncanonical", "greek",
+                             "hebrew", "arabic", "tanakh", "quran"])
+    ex.add_argument('--language', choices=LANGS, help='one language; default builds all three')
+    ex.add_argument('--works', nargs='*')
+    ex.add_argument('--witnesses', action='store_true',
+                    help="explore every manuscript's text rather than one witness per work")
+    ex.add_argument('--seed', type=int, default=0)
+    ex.add_argument('--out', default=None)
+    ex.set_defaults(func=cmd_explore)
 
     r = sub.add_parser("report", help="render output/<language>/report.md")
     r.add_argument("--language", choices=LANGS, default="grc")

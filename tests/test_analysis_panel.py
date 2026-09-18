@@ -311,3 +311,81 @@ def test_the_explorer_page_carries_its_data_and_every_explanation():
     assert "const DATA" in html and '"solo"' in html
     for s in result["strategies"]:
         assert s["name"] in html and s["measures"] in html, s["key"]
+
+
+# --- the drill-down explorer -------------------------------------------------------------------------
+
+def _explorer_verses(n_works=3, n_chapters=2, per_chapter=6):
+    habits = ["και ο θεοσ ειπεν ουτωσ", "δε γαρ μεν ουν τε", "αλλα ωστε τοινυν ειτα"]
+    out, order = [], 0
+    for w in range(n_works):
+        for c in range(1, n_chapters + 1):
+            for v in range(1, per_chapter + 1):
+                order += 1
+                text = (habits[w % len(habits)] + " ") * 6
+                out.append({
+                    "id": f"grc:W{w}.{c}.{v}", "language": "grc", "work": f"W{w}",
+                    "work_title": f"Work {w}", "collection": "NT" if w else "LXX", "canon": "NT",
+                    "group": f"W{w}", "source": "x", "witness": "S", "copyist": None,
+                    "chapter": str(c), "verse": str(v), "order": order, "ref": f"W{w} {c}:{v}",
+                    "text": text.strip(), "text_bare": text.strip(),
+                    "n_tokens": len(text.split()), "has_gap": False, "supplied_frac": 0.0,
+                    "duplicate_of": None,
+                })
+    return out
+
+
+def test_the_explorer_places_every_level_under_every_available_strategy():
+    from stylometry.explorer import build
+
+    data = build(_explorer_verses(), "grc", progress=lambda m: None)
+    assert data["keys"] and data["strategies"]
+    assert {c["label"] for c in data["tree"]} == {"LXX", "NT"}
+    for collection in data["tree"]:
+        assert len(collection["xy"]) == 2 * len(data["keys"]), "one xy pair per strategy, packed in order"
+        for work in collection["children"]:
+            assert len(work["xy"]) == 2 * len(data["keys"])
+            for chapter in work["children"]:
+                assert len(chapter["xy"]) == 2 * len(data["keys"])
+                for verse in chapter["v"]:
+                    ref, text, tokens, xy = verse
+                    assert text and tokens > 0
+                    assert len(xy) == 2 * len(data["keys"]), "a verse is placed under every strategy"
+
+
+def test_a_strategy_without_data_is_absent_from_the_explorer_rather_than_flat():
+    """Greek carries no part-of-speech tags. An all-zero block would plot every verse on one spot and
+    read as a finding of perfect uniformity."""
+    from stylometry.explorer import build
+
+    data = build(_explorer_verses(), "grc", progress=lambda m: None)
+    assert "pos" not in data["keys"]
+    assert "pos" in data["unavailable"]
+
+
+def test_verse_counts_add_up_through_the_hierarchy():
+    from stylometry.explorer import build
+
+    data = build(_explorer_verses(), "grc", progress=lambda m: None)
+    assert sum(c["n_verses"] for c in data["tree"]) == data["n_verses"]
+    for collection in data["tree"]:
+        assert sum(w["n_verses"] for w in collection["children"]) == collection["n_verses"]
+        for work in collection["children"]:
+            assert sum(len(ch["v"]) for ch in work["children"]) == work["n_verses"]
+
+
+def test_the_explorer_writes_an_overview_and_one_page_per_book(tmp_path):
+    from stylometry.explorer import build
+    from stylometry.explorer_html import write
+
+    data = build(_explorer_verses(), "grc", progress=lambda m: None)
+    out = write(data, tmp_path / "grc")
+    overview = (out / "index.html").read_text(encoding="utf-8")
+    assert "const DATA" in overview and "Koine Greek" in overview
+    pages = sorted((out / "works").glob("*.html"))
+    assert len(pages) == 3, "one page per book"
+    book = pages[0].read_text(encoding="utf-8")
+    for s in data["strategies"]:
+        assert s["name"] in overview, s["key"]
+    assert "back to chapters" in book and "back to collections" in overview
+    assert "strategyBar" in book, "the strategy can be changed on a book page too"
