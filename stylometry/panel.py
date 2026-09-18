@@ -187,3 +187,150 @@ def punctuation_features(text: str) -> tuple[np.ndarray, list[str]]:
 def richness_features(tokens: list[str]) -> tuple[np.ndarray, list[str]]:
     """Strategies: vocabulary richness and hapax legomena."""
     return repetition.features(tokens), list(repetition.NAMES)
+
+
+# --- the families that were missing ----------------------------------------------------------------
+
+def pos_features(pos: list[str]) -> tuple[np.ndarray, list[str]]:
+    """Strategies: syntax and grammar preference, from real tags where the corpus carries them.
+
+    The Open Scriptures Hebrew Bible tags every morpheme, so Hebrew has genuine parts of speech rather
+    than the closed-class approximation used elsewhere. Rates of each tag, and of each ordered pair,
+    which is where grammatical habit shows: how often a conjunction is followed by a verb rather than
+    a noun separates narrative chaining from nominal style without touching a single content word.
+
+    Greek and Arabic carry no tags here, so this returns zeros for them, and the coverage table says
+    so rather than letting an empty block look like a measurement.
+    """
+    tags = [t for t in (pos or []) if isinstance(t, str)]
+    names = [f"pos:{name}" for name in POS_TAGS] + [f"posbi:{a}>{b}" for a, b in POS_BIGRAMS]
+    if not tags:
+        return np.zeros(len(names)), names
+    n = len(tags)
+    counts = Counter(tags)
+    bigrams = Counter(zip(tags, tags[1:]))
+    values = [counts[t] / n * 100 for t in POS_TAGS]
+    total_bigrams = max(sum(bigrams.values()), 1)
+    values += [bigrams[pair] / total_bigrams * 100 for pair in POS_BIGRAMS]
+    return np.array(values), names
+
+
+POS_TAGS = ["noun", "verb", "adjective", "adverb", "pronoun", "preposition", "conjunction",
+            "particle", "suffix"]
+POS_BIGRAMS = [("conjunction", "verb"), ("conjunction", "noun"), ("preposition", "noun"),
+               ("verb", "noun"), ("noun", "verb"), ("noun", "noun"), ("particle", "noun"),
+               ("verb", "preposition"), ("noun", "adjective"), ("verb", "verb")]
+
+
+# Pairs that mean the same thing, where an author's choice between them is habit rather than content.
+# This is the feature Dershowitz and Koppel used for biblical source criticism. The Hebrew first
+# person is the classic case: anoki and ani are the same word, and the Priestly source prefers ani.
+SYNONYM_PAIRS = {
+    "hbo": [
+        ("first_person", ["אנכי"], ["אני"]),
+        ("relative", ["אשר"], ["ש"]),
+        ("assembly", ["עדה"], ["קהל"]),
+        ("maidservant", ["אמה"], ["שפחה"]),
+        ("beget", ["הוליד"], ["ילד"]),
+    ],
+    "grc": [
+        ("say_aorist", ["ειπεν"], ["εφη"]),
+        ("but", ["δε"], ["αλλα"]),
+        ("therefore", ["ουν"], ["διο"]),
+        ("boy", ["παιδιον"], ["παισ"]),
+        ("see", ["ιδου"], ["ιδε"]),
+    ],
+    "arb": [
+        ("say", ["قال"], ["قل"]),
+        ("indeed", ["ان"], ["انما"]),
+        ("people", ["الناس"], ["القوم"]),
+    ],
+}
+
+
+def synonym_features(tokens: list[str], language: str) -> tuple[np.ndarray, list[str]]:
+    """Strategy: lexical preference - which of two words meaning the same thing an author reaches for.
+
+    Reported as a share, ``a / (a + b)``, so it is a preference and not a frequency: a passage that
+    uses neither returns the neutral 0.5, and one that uses both returns where it sits between them.
+    A rate would confound preference with how often the idea comes up at all.
+    """
+    pairs = SYNONYM_PAIRS.get(language, [])
+    names, values = [], []
+    for label, first, second in pairs:
+        a = sum(1 for t in tokens if t in first)
+        b = sum(1 for t in tokens if t in second)
+        names.append(f"syn:{label}")
+        values.append(a / (a + b) if (a + b) else 0.5)
+        names.append(f"syn:{label}_attested")
+        values.append(float(min(a + b, 10)))
+    return np.array(values) if values else np.zeros(0), names
+
+
+def topic_features(docs: list[list[str]], n_topics: int = 12, seed: int = 0
+                   ) -> tuple[np.ndarray, list[str]]:
+    """Strategy: semantic patterns - how a passage's vocabulary distributes over latent topics.
+
+    Latent Dirichlet Allocation over content words, fitted on the corpus being analysed. This is the
+    one family here that deliberately measures *subject matter* rather than style, and it earns its
+    place by being the control: if a style result and the topic block agree closely, the style result
+    is probably reading content. It should never be quoted as evidence of authorship.
+
+    Function words are excluded, since a topic model built on them would model nothing.
+    """
+    from sklearn.decomposition import LatentDirichletAllocation
+    from sklearn.feature_extraction.text import CountVectorizer
+
+    names = [f"topic:{i + 1}" for i in range(n_topics)]
+    if len(docs) < max(3, n_topics):
+        return np.zeros((len(docs), n_topics)), names
+    texts = [" ".join(d) for d in docs]
+    counts = CountVectorizer(analyzer=str.split, min_df=3, max_df=0.5).fit_transform(texts)
+    if counts.shape[1] < n_topics:
+        return np.zeros((len(docs), n_topics)), names
+    lda = LatentDirichletAllocation(n_components=n_topics, random_state=seed,
+                                    learning_method="batch", max_iter=20)
+    return lda.fit_transform(counts), names
+
+
+def embedding_features(docs: list[list[str]], dims: int = 50, window: int = 4, seed: int = 0
+                       ) -> tuple[np.ndarray, list[str]]:
+    """Strategy: learned representations - vectors fitted to this corpus, not a pretrained model.
+
+    Words are embedded by factorising their co-occurrence counts, and a passage is the mean of its
+    words' vectors. This is the distributional-semantics idea behind word2vec, reduced to the linear
+    case, and it is what "neural embeddings" can honestly mean here.
+
+    It is **not** a pretrained authorship embedding. Those - LUAR and its relatives - are trained
+    contrastively on hundreds of thousands of labelled author pairs to be topic-invariant, and no such
+    model exists for Koine Greek, Biblical Hebrew or Quranic Arabic. Fitted on the corpus under study,
+    these vectors carry topic as readily as style, so they are reported beside the topic block and
+    read the same way.
+    """
+    from sklearn.decomposition import TruncatedSVD
+    from sklearn.feature_extraction.text import CountVectorizer
+
+    names = [f"emb:{i + 1}" for i in range(dims)]
+    if len(docs) < 3:
+        return np.zeros((len(docs), dims)), names
+    vocabulary = [w for w, c in Counter(t for d in docs for t in d).items() if c >= 5]
+    if len(vocabulary) < dims + 1:
+        return np.zeros((len(docs), dims)), names
+    index = {w: i for i, w in enumerate(vocabulary)}
+    co = np.zeros((len(vocabulary), len(vocabulary)), dtype=np.float32)
+    for doc in docs:
+        ids = [(i, index[t]) for i, t in enumerate(doc) if t in index]
+        for a, (pos_a, col_a) in enumerate(ids):
+            for pos_b, col_b in ids[a + 1:]:
+                if pos_b - pos_a > window:
+                    break
+                co[col_a, col_b] += 1.0
+                co[col_b, col_a] += 1.0
+    k = min(dims, min(co.shape) - 1)
+    vectors = TruncatedSVD(n_components=k, random_state=seed).fit_transform(np.log1p(co))
+    out = np.zeros((len(docs), dims), dtype=np.float64)
+    for row, doc in enumerate(docs):
+        present = [index[t] for t in doc if t in index]
+        if present:
+            out[row, :k] = vectors[present].mean(axis=0)
+    return out, names

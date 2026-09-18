@@ -233,3 +233,81 @@ def test_copies_of_one_text_are_held_out_together_whatever_manuscript_they_are_i
         {"work": "LUKE", "duplicate_of": None},
     ]
     assert _holdout_works(passages) == ["JOHN", "JOHN", "JOHN", "MARK", "LUKE"]
+
+
+# --- the strategy registry --------------------------------------------------------------------------
+
+def test_every_strategy_states_what_it_measures_and_where_it_stands():
+    """A strategy nobody can interpret is worse than one that is missing."""
+    from stylometry.strategies import REGISTRY, MEASURED, APPROXIMATED, PARTIAL, NOT_AUTHORIAL
+
+    keys = [s.key for s in REGISTRY]
+    assert len(keys) == len(set(keys)), "strategy keys must be unique"
+    valid = {MEASURED, APPROXIMATED, PARTIAL, NOT_AUTHORIAL, "unavailable"}
+    for s in REGISTRY:
+        assert s.name.strip() and s.measures.strip(), s.key
+        assert s.status in valid, f"{s.key} has status {s.status!r}"
+        assert s.build is not None, s.key
+    # Anything that is not a plain measurement of style must say why, in its own note.
+    for s in REGISTRY:
+        if s.status != MEASURED:
+            assert s.note.strip(), f"{s.key} is {s.status} and must explain itself"
+
+
+def test_a_strategy_without_data_for_a_language_is_marked_not_silently_empty():
+    """Part-of-speech tags exist for Hebrew and nowhere else. A zero-width block must not read as a
+    measurement of zero."""
+    from stylometry.strategies import BY_KEY, describe
+
+    assert BY_KEY["pos"].available_for("hbo") is True
+    assert BY_KEY["pos"].available_for("grc") is False
+    greek = {s["key"]: s for s in describe("grc")}
+    assert greek["pos"]["available"] is False
+    assert "Hebrew only" in BY_KEY["pos"].note
+
+
+def test_choosing_strategies_returns_only_those_columns():
+    from stylometry.strategies import build_matrix
+
+    docs = [("και ο θεοσ ειπεν " * 30).split() for _ in range(4)]
+    texts = [" ".join(d) for d in docs]
+    one, names_one, spans = build_matrix(["function_words"], docs, texts, "grc")
+    two, names_two, _ = build_matrix(["function_words", "richness"], docs, texts, "grc")
+    assert all(n.startswith("fw:") for n in names_one)
+    assert two.shape[1] > one.shape[1]
+    assert spans["function_words"] == (0, one.shape[1])
+
+
+def test_an_unknown_strategy_is_refused_rather_than_ignored():
+    from stylometry.strategies import build_matrix
+
+    docs = [["και"] * 40 for _ in range(4)]
+    with pytest.raises(ValueError, match="unknown strategies"):
+        build_matrix(["function_words", "telepathy"], docs, [" "] * 4, "grc")
+
+
+def test_the_sweep_reports_each_strategy_alone_and_the_cost_of_removing_it():
+    from stylometry.strategy_report import sweep
+
+    a = [("και ο θεοσ ειπεν και εγενετο ουτωσ " * 20).split() for _ in range(6)]
+    b = [("δε γαρ μεν ουν τε αλλα ωστε τοινυν " * 20).split() for _ in range(6)]
+    docs = a + b
+    result = sweep(docs, [" ".join(d) for d in docs], ["A"] * 6 + ["B"] * 6,
+                   [f"w{i}" for i in range(12)], language="grc")
+    assert result["combined"]["accuracy"] is not None
+    assert result["solo"], "every available strategy is scored on its own"
+    for key, row in result["leave_one_out"].items():
+        assert "cost_of_removing" in row, key
+    assert "pos" in result["unavailable"], "Greek has no tags, and the sweep must say so"
+
+
+def test_the_explorer_page_carries_its_data_and_every_explanation():
+    from stylometry.strategy_report import render_html, sweep
+
+    docs = [("και ο θεοσ " * 40).split() for _ in range(6)]
+    result = sweep(docs, [" ".join(d) for d in docs], ["A", "A", "A", "B", "B", "B"],
+                   [f"w{i}" for i in range(6)], language="grc")
+    html = render_html(result, "Explorer")
+    assert "const DATA" in html and '"solo"' in html
+    for s in result["strategies"]:
+        assert s["name"] in html and s["measures"] in html, s["key"]

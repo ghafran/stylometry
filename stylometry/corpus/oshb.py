@@ -45,6 +45,45 @@ def _verse_text(verse: etree._Element) -> str:
     return " ".join(parts)
 
 
+# OSHB morphology codes: a leading language letter, then one part-of-speech letter per morpheme,
+# morphemes separated by "/". HTd/Ncmsa is a definite article plus a common noun; HVqp3ms is a qal
+# perfect 3rd masculine singular verb. Only the part-of-speech letter is kept: it is the one piece
+# that is comparable across the whole corpus, and the finer parsing differs by school.
+POS_NAMES = {
+    "A": "adjective", "C": "conjunction", "D": "adverb", "N": "noun", "P": "pronoun",
+    "R": "preposition", "S": "suffix", "T": "particle", "V": "verb",
+}
+
+
+def parse_morph(code: str | None) -> list[str]:
+    """Part-of-speech letters, one per morpheme, from an OSHB morph attribute.
+
+    ``HC/Vqw3ms`` yields ["conjunction", "verb"] - the waw and the verb it is prefixed to are two
+    morphemes in one written word, which is exactly the distinction a part-of-speech count needs.
+    Anything unrecognised is dropped rather than guessed at.
+    """
+    if not code or not isinstance(code, str):
+        return []
+    body = code[1:] if code[:1].isalpha() and code[:1].isupper() and len(code) > 1 else code
+    out = []
+    for morpheme in body.split("/"):
+        letter = morpheme[:1]
+        if letter in POS_NAMES:
+            out.append(POS_NAMES[letter])
+    return out
+
+
+def _verse_pos(verse: etree._Element) -> list[str]:
+    """The part-of-speech sequence of a verse, in word order."""
+    tags: list[str] = []
+    for el in verse.iter():
+        if el.tag in SKIP:
+            continue
+        if el.tag == f"{OSIS}w":
+            tags += parse_morph(el.get("morph"))
+    return tags
+
+
 def load(dir_path: str | Path, witness: str = "L", source: str = "oshb") -> list[dict]:
     dir_path = Path(dir_path)
     out: list[dict] = []
@@ -65,6 +104,7 @@ def load(dir_path: str | Path, witness: str = "L", source: str = "oshb") -> list
             if not toks:
                 continue
             title, collection, canon, group = book_meta(code, "hbo")
+            pos = _verse_pos(verse)
             order += 1
             out.append(
                 {
@@ -76,6 +116,7 @@ def load(dir_path: str | Path, witness: str = "L", source: str = "oshb") -> list
                     "collection": collection,
                     "canon": canon,
                     "group": group,
+                    "pos": pos,
                     "chapter": chapter,
                     "verse": vnum,
                     "ref": f"{title} {chapter}:{vnum}",

@@ -456,6 +456,53 @@ def cmd_analyse(args) -> None:
     print(f"wrote {out / 'analysis.md'} and analysis.json")
 
 
+def cmd_strategies(args) -> None:
+    """Run every strategy alone, together, and all-but-one; write the explorer."""
+    from .continuity import annotate_continuity
+    from .passages import build_passages
+    from .strategy_report import save, sweep
+
+    verses = _select(args, annotate_continuity(_corpus_for(args), bridge_chapters=args.bridge_chapters))
+    if not verses:
+        sys.exit(f"no verses for language={args.language} scope={args.scope} works={args.works}")
+    language = args.language or "grc"
+    passages = build_passages(verses, tokens=args.tokens,
+                              bridge_chapters=args.bridge_chapters)["passages"]
+    if len(passages) < 4:
+        sys.exit(f"only {len(passages)} complete {args.tokens}-token passages; try --tokens 500")
+
+    by_id = {v["id"]: v for v in verses}
+    sources = [[by_id[i] for i in p["source_verse_ids"] if i in by_id] for p in passages]
+    texts = [" ".join(v["text"] for v in group) for group in sources]
+    # Part-of-speech tags travel with the verse, so a passage's tags are its verses' tags in order.
+    pos = [[tag for v in group for tag in (v.get("pos") or [])] for group in sources]
+    docs = [p["text_bare"].split() for p in passages]
+    labels = [str(p.get(args.label) or "?") for p in passages]
+    works = _holdout_works(passages)
+
+    keep, unattributable = _attributable(labels, works)
+    if len(keep) < 4:
+        sys.exit("too few units remain once labels carried by a single work are set aside")
+    if unattributable:
+        print(f"{len(unattributable)} {args.label} values come from a single work and cannot be "
+              f"attributed once it is held out; {len(docs) - len(keep)} units set aside")
+    docs, texts, labels, works, pos = ([x[i] for i in keep] for x in (docs, texts, labels, works, pos))
+
+    result = sweep(docs, texts, labels, works, language=language, pos=pos, seed=args.seed)
+    out = Path(args.out) if args.out else OUTPUT / f"{language}-strategies"
+    save(result, out, title=args.title or f"Strategies — {language}")
+    print(f"{result['n_units']} passages, {result['n_works']} works, "
+          f"majority baseline {result['majority_baseline']:.1%}")
+    print(f"  all strategies together: {result['combined']['accuracy']:.1%} "
+          f"({result['combined']['n_features']} features)")
+    ranked = sorted(((v.get("accuracy") or 0, k) for k, v in result["solo"].items()), reverse=True)
+    for accuracy, key in ranked[:5]:
+        print(f"  {key:<22}{accuracy:>8.1%}")
+    if result["unavailable"]:
+        print(f"  unavailable for {language}: {', '.join(result['unavailable'])}")
+    print(f"wrote {out / 'strategies.html'}")
+
+
 def cmd_manifest(args) -> None:
     """Write or verify the checked-in record of which manuscripts the corpus contains."""
     import json as _json
@@ -809,6 +856,19 @@ def main(argv: list[str] | None = None) -> None:
     an.add_argument('--seed', type=int, default=0)
     an.add_argument('--out', default=None)
     an.set_defaults(func=cmd_analyse)
+
+    st = sub.add_parser('strategies', help='run each strategy alone, together and all-but-one; '
+                                           'write an explorer you can steer')
+    _add_scope(st)
+    st.add_argument('--tokens', type=int, choices=[500, 1000, 2000], default=1000)
+    st.add_argument('--label', default='group', help='which corpus field to score against')
+    st.add_argument('--bridge-chapters', action='store_true')
+    st.add_argument('--witnesses', action='store_true',
+                    help="analyse every manuscript's text rather than one primary witness per work")
+    st.add_argument('--title', default=None)
+    st.add_argument('--seed', type=int, default=0)
+    st.add_argument('--out', default=None)
+    st.set_defaults(func=cmd_strategies)
 
     r = sub.add_parser("report", help="render output/<language>/report.md")
     r.add_argument("--language", choices=LANGS, default="grc")
