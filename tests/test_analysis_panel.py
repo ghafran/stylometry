@@ -215,3 +215,21 @@ def test_a_language_without_a_reference_gets_no_verdict_from_another_language(tm
             "Arabic has no single-author reference; no row may carry a verdict borrowed from Greek")
     assert "No single-author reference exists for this language" in __import__(
         "stylometry.analysis", fromlist=["render"]).render(result)
+
+
+def test_copies_of_one_text_are_held_out_together_whatever_manuscript_they_are_in():
+    """With --witnesses the same chapter appears once per manuscript, under JOHN, JOHN@P66, JOHN@P75.
+
+    Holding out by that code would leave P66's John to be judged by Sinaiticus's John - nearly the
+    same words - and every method would score superbly while having learnt nothing about scribes.
+    """
+    from stylometry.cli import _holdout_works
+
+    passages = [
+        {"work": "JOHN", "duplicate_of": None},
+        {"work": "JOHN@P66", "duplicate_of": "JOHN"},
+        {"work": "JOHN@P75", "duplicate_of": "JOHN"},
+        {"work": "MARK@05", "duplicate_of": "MARK"},
+        {"work": "LUKE", "duplicate_of": None},
+    ]
+    assert _holdout_works(passages) == ["JOHN", "JOHN", "JOHN", "MARK", "LUKE"]

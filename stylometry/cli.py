@@ -34,6 +34,24 @@ def _load_corpus():
     return load_corpus(CORPUS)
 
 
+def _corpus_for(args):
+    """The analysed corpus: one primary text per work, or every manuscript that attests it.
+
+    The default corpus holds one witness per work, so an analysis of John is an analysis of whichever
+    manuscript was chosen as primary - Sinaiticus - and the other twenty-nine copies of John never
+    enter it. ``--witnesses`` reads ``witnesses.jsonl`` instead, where each manuscript's text of a work
+    is its own unit, so manuscripts can be compared with each other rather than only against a base.
+    """
+    from .corpus.build import load_corpus
+
+    if not getattr(args, "witnesses", False):
+        return _load_corpus()
+    path = CORPUS.with_name("witnesses.jsonl")
+    if not path.exists():
+        sys.exit(f"{path} not found - run `stylometry build-corpus` first")
+    return load_corpus(path)
+
+
 LANGS = ["grc", "hbo", "arb"]
 
 
@@ -255,6 +273,18 @@ def _attributable(labels: list[str], works: list[str]) -> tuple[list[int], list[
     return keep, unattributable
 
 
+def _holdout_works(passages: list[dict]) -> list[str]:
+    """What must be held out together.
+
+    With ``--witnesses`` the same chapter of John appears once per manuscript, under work codes
+    JOHN, JOHN@P66, JOHN@P75 and so on. Holding out by that code would leave P66's John to be judged
+    by Sinaiticus's John - nearly the same words - and every method would look superb while having
+    learnt nothing. Holding out by the *base* work keeps all copies of a text together, so a
+    manuscript can only be recognised from the books it is not being tested on.
+    """
+    return [str(p.get("duplicate_of") or p["work"]).split("@", 1)[0] for p in passages]
+
+
 def cmd_delta(args) -> None:
     """Burrows's Delta as a baseline: most-frequent-word rates, z-scored, nearest neighbour.
 
@@ -267,7 +297,7 @@ def cmd_delta(args) -> None:
     from .delta import attribute
     from .passages import build_passages
 
-    verses = _select(args, annotate_continuity(_load_corpus(), bridge_chapters=args.bridge_chapters))
+    verses = _select(args, annotate_continuity(_corpus_for(args), bridge_chapters=args.bridge_chapters))
     if not verses:
         sys.exit(f"no verses for language={args.language} scope={args.scope} works={args.works}")
     passages = build_passages(verses, tokens=args.tokens, bridge_chapters=args.bridge_chapters)["passages"]
@@ -276,7 +306,7 @@ def cmd_delta(args) -> None:
                  f"try --tokens 500 or --bridge-chapters")
     docs = [p["text_bare"].split() for p in passages]
     labels = [str(p.get(args.label) or "?") for p in passages]
-    works = [p["work"] for p in passages]
+    works = _holdout_works(passages)
     keep, unattributable = _attributable(labels, works)
     if len(keep) < 2:
         sys.exit("every label is carried by a single work, so nothing can be attributed")
@@ -316,23 +346,24 @@ def cmd_wan(args) -> None:
     from .continuity import annotate_continuity
     from .wan import attribute_pooled
 
-    verses = _select(args, annotate_continuity(_load_corpus(), bridge_chapters=args.bridge_chapters))
+    verses = _select(args, annotate_continuity(_corpus_for(args), bridge_chapters=args.bridge_chapters))
     if not verses:
         sys.exit(f"no verses for language={args.language} scope={args.scope} works={args.works}")
     language = args.language or "grc"
     if args.whole_works:
         pooled: dict = defaultdict(list)
-        for v in verses:
-            pooled[(v["work"], str(v.get(args.label) or "?"))].append(v["text_bare"])
+        for v, base in zip(verses, _holdout_works(verses)):
+            pooled[(base, str(v.get(args.label) or "?"))].append(v["text_bare"])
         units = [{"tokens": " ".join(t).split(), "work": w, "label": g} for (w, g), t in pooled.items()]
         units = [u for u in units if len(u["tokens"]) >= 2000]
     else:
         from .passages import build_passages
 
-        units = [{"tokens": p["text_bare"].split(), "work": p["work"],
+        built = build_passages(verses, tokens=args.tokens,
+                               bridge_chapters=args.bridge_chapters)["passages"]
+        units = [{"tokens": p["text_bare"].split(), "work": w,
                   "label": str(p.get(args.label) or "?")}
-                 for p in build_passages(verses, tokens=args.tokens,
-                                         bridge_chapters=args.bridge_chapters)["passages"]]
+                 for p, w in zip(built, _holdout_works(built))]
     if len(units) < 2:
         sys.exit(f"only {len(units)} units; try --tokens 500, --bridge-chapters, or --whole-works")
 
@@ -375,7 +406,7 @@ def cmd_analyse(args) -> None:
     from .continuity import annotate_continuity
     from .passages import build_passages
 
-    verses = _select(args, annotate_continuity(_load_corpus(), bridge_chapters=args.bridge_chapters))
+    verses = _select(args, annotate_continuity(_corpus_for(args), bridge_chapters=args.bridge_chapters))
     if not verses:
         sys.exit(f"no verses for language={args.language} scope={args.scope} works={args.works}")
     language = args.language or "grc"
@@ -391,7 +422,7 @@ def cmd_analyse(args) -> None:
     texts = [" ".join(by_id[i]["text"] for i in p["source_verse_ids"] if i in by_id) for p in passages]
     docs = [p["text_bare"].split() for p in passages]
     labels = [str(p.get(args.label) or "?") for p in passages]
-    works = [p["work"] for p in passages]
+    works = _holdout_works(passages)
 
     keep, unattributable = _attributable(labels, works)
     if len(keep) < 4:
@@ -721,6 +752,11 @@ def main(argv: list[str] | None = None) -> None:
                     help='which corpus field to score against, e.g. group, work, collection')
     dl.add_argument('--bridge-chapters', action='store_true',
                     help='treat chapter divisions as continuous text (see cluster-passages)')
+    dl.add_argument('--witnesses', action='store_true',
+                    help="analyse every manuscript's text rather than one primary witness per work. "
+                         "The default corpus holds one witness per work, so John is analysed only as "
+                         "Sinaiticus reads it; this reads witnesses.jsonl, where each manuscript is "
+                         "its own unit.")
     dl.set_defaults(func=cmd_delta)
 
     wn = sub.add_parser('wan', help='word adjacency networks: how an author arranges function words')
@@ -734,6 +770,11 @@ def main(argv: list[str] | None = None) -> None:
     wn.add_argument('--decay', choices=['inverse', 'uniform'], default='inverse')
     wn.add_argument('--label', default='group', help='which corpus field to score against')
     wn.add_argument('--bridge-chapters', action='store_true')
+    wn.add_argument('--witnesses', action='store_true',
+                    help="analyse every manuscript's text rather than one primary witness per work. "
+                         "The default corpus holds one witness per work, so John is analysed only as "
+                         "Sinaiticus reads it; this reads witnesses.jsonl, where each manuscript is "
+                         "its own unit.")
     wn.add_argument('--whole-works', action='store_true',
                     help='one document per work rather than fixed-length passages. The method needs '
                          'the text: it measures far better on whole works here.')
@@ -745,6 +786,11 @@ def main(argv: list[str] | None = None) -> None:
     an.add_argument('--tokens', type=int, choices=[500, 1000, 2000], default=1000)
     an.add_argument('--label', default='group', help='which corpus field to score against')
     an.add_argument('--bridge-chapters', action='store_true')
+    an.add_argument('--witnesses', action='store_true',
+                    help="analyse every manuscript's text rather than one primary witness per work. "
+                         "The default corpus holds one witness per work, so John is analysed only as "
+                         "Sinaiticus reads it; this reads witnesses.jsonl, where each manuscript is "
+                         "its own unit.")
     an.add_argument('--permutations', type=int, default=500,
                     help='permutations for the change-point test')
     an.add_argument('--seed', type=int, default=0)

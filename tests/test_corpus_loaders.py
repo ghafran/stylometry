@@ -290,3 +290,21 @@ def test_build_reports_a_failing_loader(tmp_path: Path, monkeypatch, capsys) -> 
     assert report["n_failed"] == 1
     assert any(s["source"] == "good" and s["n_units"] == 1 for s in report["sources"])
     assert "broken" in capsys.readouterr().out
+
+
+def test_a_reference_a_manuscript_reads_twice_keeps_both_with_distinct_ids():
+    """Codex Sinaiticus carries a double text of 1 Chronicles 17-18 and Vaticanus two readings at
+    Romans 4:4-5. Both copies belong in a witness corpus, and duplicate ids break passage building,
+    so the later occurrence is suffixed rather than dropped or silently overwriting the first."""
+    from stylometry.corpus.build import _disambiguate_repeated_references
+
+    verses = [
+        {"id": "grc:1CHR@S.17.14", "witness": "S", "ref": "1 Chronicles 17:14", "text_bare": "first"},
+        {"id": "grc:1CHR@S.17.14", "witness": "S", "ref": "1 Chronicles 17:14", "text_bare": "second"},
+        {"id": "grc:JOHN.1.1", "witness": "S", "ref": "John 1:1", "text_bare": "only"},
+    ]
+    _disambiguate_repeated_references(verses)
+    assert [v["id"] for v in verses] == ["grc:1CHR@S.17.14", "grc:1CHR@S.17.14#2", "grc:JOHN.1.1"]
+    assert verses[1]["repeated_reference"] == 2
+    assert "repeated_reference" not in verses[0] and "repeated_reference" not in verses[2]
+    assert verses[0]["text_bare"] == "first" and verses[1]["text_bare"] == "second", "neither is lost"

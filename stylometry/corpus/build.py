@@ -67,6 +67,35 @@ def resolve_witnesses(verses: list[dict]) -> list[dict]:
     return verses
 
 
+def _disambiguate_repeated_references(verses: list[dict]) -> list[dict]:
+    """Make ids unique when one manuscript attests the same reference twice.
+
+    This is not a parsing fault. Codex Sinaiticus carries a double text of 1 Chronicles 17-18, where a
+    stretch of Chronicles was copied a second time, and Vaticanus gives two readings at Romans 4:4-5;
+    the two copies differ in wording (απεναντι against απεναντιον). Both belong in a witness corpus,
+    so neither is dropped. Later occurrences take a ``#2`` suffix, which keeps ids unique without
+    hiding that the manuscript really does read the verse twice.
+    """
+    seen: dict[str, int] = {}
+    repeated = []
+    for verse in verses:
+        ident = verse.get("id")
+        if ident is None:
+            continue
+        count = seen.get(ident, 0) + 1
+        seen[ident] = count
+        if count > 1:
+            repeated.append({"id": ident, "witness": verse.get("witness"), "ref": verse.get("ref"),
+                             "occurrence": count})
+            verse["id"] = f"{ident}#{count}"
+            verse["repeated_reference"] = count
+    if repeated:
+        print(f"  {len(repeated)} references attested more than once in their own manuscript "
+              f"(kept, ids suffixed): "
+              + ", ".join(sorted({f"{r['witness']} {str(r['ref']).rsplit(':', 1)[0]}" for r in repeated})))
+    return verses
+
+
 def build(raw_dir: str | Path, out_path: str | Path, include_duplicates: bool = False) -> list[dict]:
     raw_dir = Path(raw_dir)
     verses: list[dict] = []
@@ -96,6 +125,7 @@ def build(raw_dir: str | Path, out_path: str | Path, include_duplicates: bool = 
         v.setdefault("witness", "?")
         v.setdefault("duplicate_of", None)
     verses = resolve_witnesses(verses)
+    _disambiguate_repeated_references(verses)
 
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
