@@ -90,10 +90,10 @@ def group_units(P: np.ndarray, seed: int = 0) -> dict:
     """
     n = len(P)
     if n < GROUP_MIN_UNITS:
-        return {"k": 1, "labels": [1] * n, "reason": "too_few_units", "n_units": n}
+        return {"k": 1, "labels": [1] * n, "reason": "too_few_units", "n_units": n, "sizes": [n]}
     Z = _standardise(np.asarray(P, dtype=float))
     if Z.shape[1] == 0 or np.allclose(Z, 0) or not np.isfinite(Z).all():
-        return {"k": 1, "labels": [1] * n, "reason": "no_variation", "n_units": n}
+        return {"k": 1, "labels": [1] * n, "reason": "no_variation", "n_units": n, "sizes": [n]}
     comps = min(30, Z.shape[1], n - 1)
     X = PCA(n_components=comps, random_state=seed).fit_transform(Z) if comps >= 2 else Z
     # Never ask for more groups than roughly four units each would allow; a k that leaves singleton
@@ -102,16 +102,19 @@ def group_units(P: np.ndarray, seed: int = 0) -> dict:
     _, ktable = select_k(X, 2, kmax, seed=seed)
     order = supported_k_order(ktable)
     if not order:
-        return {"k": 1, "labels": [1] * n, "reason": "no_supported_split", "n_units": n}
+        return {"k": 1, "labels": [1] * n, "reason": "no_supported_split", "n_units": n, "sizes": [n]}
     scored = {row["k"]: row for row in ktable}
     for k in order:
         labels, _, _ = cluster(X, k, seed=seed)
         stability = subsample_stability(X, labels, k, seed=seed)
         if stability.get("available") and stability["min_ari"] >= GROUP_MIN_ARI:
-            return {"k": k, "labels": [int(a[1:]) for a in labels], "reason": None, "n_units": n,
+            members = [int(a[1:]) for a in labels]
+            return {"k": k, "labels": members, "reason": None, "n_units": n,
+                    # `cluster` ranks by size, so A1 is always the largest group.
+                    "sizes": [members.count(g) for g in range(1, k + 1)],
                     "min_ari": round(stability["min_ari"], 3),
                     "silhouette": round(float(scored[k]["silhouette"]), 3)}
-    return {"k": 1, "labels": [1] * n, "reason": "unstable", "n_units": n,
+    return {"k": 1, "labels": [1] * n, "reason": "unstable", "n_units": n, "sizes": [n],
             "rejected": [int(k) for k in order]}
 
 
@@ -194,6 +197,7 @@ def _pack(parts: list[dict]) -> dict:
     return {"gk": [p["k"] for p in parts],
             "gr": [p.get("reason") for p in parts],
             "gari": [p.get("min_ari") for p in parts],
+            "gsz": [p.get("sizes") or [p["n_units"]] for p in parts],
             "gn": parts[0]["n_units"] if parts else 0,
             "gtok": parts[0].get("tokens", 0) if parts else 0}
 

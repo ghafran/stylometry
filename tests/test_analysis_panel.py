@@ -528,8 +528,8 @@ def test_the_pages_show_the_group_counts_and_never_colour_alone(tmp_path):
 
     for page in (overview, book):
         assert "groupSummary" in page and "style group" in page
-        # The lighter hues fall below 3:1 against the page, so the group number is always written out.
-        assert "Group ${groupOf(child)}" in page or "Group ${vGroupOf(v)}" in page
+        # The lighter hues fall below 3:1 against the page, so the group name is always written out.
+        assert "${A(groupOf(child))}" in page or "${A(vGroupOf(v))}" in page
     assert "book_groups" in overview and "collection_groups" in overview
     assert '"gk"' in overview and '"g"' in overview
     assert "group_reasons" in overview, "the page can explain a count of one"
@@ -560,3 +560,56 @@ def test_a_split_of_units_too_short_to_attribute_says_so(tmp_path):
     assert "shortUnitWarning" in page
     assert "cannot support attribution" in page
     assert "reliable_tokens" in page
+
+
+def test_groups_are_named_and_sized_the_way_the_rest_of_the_project_names_them(tmp_path):
+    """A1, A2 ... largest first, with the split shown as a bar chart at every level.
+
+    The names match what `cluster` produces and what the style-group dashboards print, so a group
+    means the same thing in both views. The sizes matter as much as the count: "5 style groups" reads
+    very differently once you can see that four of them hold one unit each.
+    """
+    from stylometry.explorer import build
+    from stylometry.explorer_html import write
+
+    data = build(_explorer_verses(n_works=12, n_chapters=3, per_chapter=10),
+                 "grc", progress=lambda m: None, workers=1)
+
+    for packed in (data["book_groups"], data["collection_groups"]):
+        for k, sizes in zip(packed["gk"], packed["gsz"]):
+            assert len(sizes) == k, "one size per group"
+            assert sum(sizes) == packed["gn"], "every unit is in exactly one group"
+            assert sizes == sorted(sizes, reverse=True), "A1 is the largest group"
+
+    for collection in data["tree"]:
+        for i, sizes in enumerate(collection["gsz"]):
+            assert sum(sizes) == len(collection["children"])
+        for work in collection["children"]:
+            for i, sizes in enumerate(work["gsz"]):
+                assert sum(sizes) == len(work["children"])
+            for chapter in work["children"]:
+                for i, sizes in enumerate(chapter["gsz"]):
+                    assert sum(sizes) == len(chapter["v"])
+
+    out = write(data, tmp_path / "grc")
+    overview = (out / "index.html").read_text(encoding="utf-8")
+    book = sorted((out / "works").glob("*.html"))[0].read_text(encoding="utf-8")
+    for page in (overview, book):
+        assert "groupBars" in page, "a bar chart of the group sizes"
+        assert "const A = i => 'A' + i" in page, "groups are named A1, A2 ..."
+        assert '"gsz"' in page
+    # The verse list carries the label on the text itself, not only in a side panel.
+    assert "A(vGroupOf(v))" in book
+    assert "groupEdge" in book and "groupEdge" in overview
+
+
+def test_the_front_page_shows_how_each_language_divides(tmp_path):
+    from stylometry.cli import _write_explorer_index
+    from stylometry.explorer import build
+
+    greek = build(_explorer_verses(n_works=12, n_chapters=2, per_chapter=9),
+                  "grc", progress=lambda m: None, workers=1)
+    _write_explorer_index(tmp_path, [("grc", greek)])
+    page = (tmp_path / "index.html").read_text(encoding="utf-8")
+    assert '"sizes"' in page and 'class="stack"' in page
+    assert "A${i + 1}" in page

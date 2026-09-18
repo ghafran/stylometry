@@ -548,8 +548,8 @@ def _write_explorer_index(out: Path, built: list) -> None:
     def by_strategy(data: dict) -> dict:
         """Keyed by name, not packed by position: this page's key order is the union, not a language's."""
         packed = data["book_groups"]
-        return {key: {"k": packed["gk"][i], "reason": packed["gr"][i],
-                      "ari": packed["gari"][i], "n": packed["gn"]}
+        return {key: {"k": packed["gk"][i], "reason": packed["gr"][i], "ari": packed["gari"][i],
+                      "n": packed["gn"], "sizes": packed["gsz"][i]}
                 for i, key in enumerate(data["keys"])}
 
     payload = {
@@ -573,6 +573,7 @@ def _write_explorer_index(out: Path, built: list) -> None:
         ".row.dim{opacity:.55}.row .w{grid-column:1;font-size:12.5px;color:var(--clay)}"
         ".row .k{grid-row:2;grid-column:2;font-family:'IBM Plex Mono',monospace;font-size:11.5px;"
         "color:var(--muted);white-space:nowrap;align-self:end}"
+        ".row .bk{grid-column:1/-1;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--faint)}"
         "</style></head><body><div class=\"wrap\">"
         "<h1>Style explorer</h1>"
         "<p class=\"small\">Pick a strategy, then a language, then drill from collection to book to "
@@ -593,13 +594,17 @@ function render() {
     const count = !has ? '' : g.k > 1
       ? `<span class="k">${g.k} style groups</span>`
       : `<span class="k">1 style group</span>`;
+    const stack = (!has || g.k < 2) ? '' :
+      `<span class="bk">${g.sizes.map((c, i) => `A${i + 1}&nbsp;${c}`).join(' · ')}` +
+      `<span class="stack">${g.sizes.map((c, i) =>
+        `<span style="flex:${c};background:var(--g${i + 1})" title="A${i + 1}: ${c}"></span>`).join('')}</span></span>`;
     const why = (!has || g.k > 1) ? '' :
       `<span class="w">${(DATA.group_reasons || {})[g.reason] || 'no split is supported'}</span>`;
     return `<a class="row${has ? '' : ' dim'}" href="${l.code}/index.html?s=${encodeURIComponent(strategy)}">
       <span class="t">${l.label}</span>
       <span class="n">${l.verses.toLocaleString()} verses</span>
       <span class="s">${l.books} books · ${l.keys.length} strategies</span>
-      ${count}${why}
+      ${count}${why}${stack}
       ${has ? '' : `<span class="w">no ${strategy} data here — opens on ${l.keys[0]}</span>`}
     </a>`;
   }).join('');
