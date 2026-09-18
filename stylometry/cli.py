@@ -531,37 +531,51 @@ def cmd_explore(args) -> None:
     print(f"start at {out / 'index.html'}")
 
 
+LANGUAGE_ORDER = ["grc", "hbo", "arb"]
+
+
 def _write_explorer_index(out: Path, built: list) -> None:
-    """The front page: pick a strategy here, pick a language, and carry the choice through."""
+    """The front page: pick a strategy here, pick a language, and carry the choice through.
+
+    The page is shared by every language, so it is assembled from what is on disk rather than only
+    from what this run built. Rebuilding one language used to rewrite this page with that language
+    alone, silently dropping the other two from the only route into them.
+    """
     import json as _json
 
-    from .explorer_html import CSS, JS_COMMON, LANGUAGE_NAMES
+    from .explorer_html import CSS, JS_COMMON
 
-    # The union, in first-seen order. Hebrew has part-of-speech tags and the others do not, so a
-    # strategy offered here is not offered everywhere; the page says which language is missing it
-    # rather than quietly dropping the choice.
+    cards: dict[str, dict] = {}
+    for card in sorted(out.glob("*/card.json")):
+        try:
+            entry = _json.loads(card.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        cards[entry["code"]] = entry
+    if not cards:
+        sys.exit("no language pages found to index")
+    order = [c for c in LANGUAGE_ORDER if c in cards] + sorted(set(cards) - set(LANGUAGE_ORDER))
+    languages = [cards[c] for c in order]
+    rebuilt = {lang for lang, _ in built}
+    kept = [c for c in order if c not in rebuilt]
+    if kept:
+        print(f"  front page also lists {', '.join(kept)} from the previous build")
+
+    # The union of strategies, in first-seen order. Hebrew has part-of-speech tags and the others do
+    # not, so a strategy offered here is not offered everywhere; the page says which language is
+    # missing one rather than quietly dropping the choice.
     strategies: dict = {}
-    for _, data in built:
-        for s in data["strategies"]:
+    for entry in languages:
+        for s in entry["strategies"]:
             strategies.setdefault(s["key"], s)
-
-    def by_strategy(data: dict) -> dict:
-        """Keyed by name, not packed by position: this page's key order is the union, not a language's."""
-        packed = data["book_groups"]
-        return {key: {"k": packed["gk"][i], "reason": packed["gr"][i], "ari": packed["gari"][i],
-                      "n": packed["gn"], "sizes": packed["gsz"][i]}
-                for i, key in enumerate(data["keys"])}
 
     payload = {
         "keys": list(strategies),
         "strategies": list(strategies.values()),
-        "group_reasons": built[0][1]["group_reasons"],
-        "languages": [{"code": lang, "label": LANGUAGE_NAMES.get(lang, lang),
-                       "verses": data["n_verses"],
-                       "books": sum(len(c["children"]) for c in data["tree"]),
-                       "keys": [s["key"] for s in data["strategies"]],
-                       "groups": by_strategy(data)}
-                      for lang, data in built],
+        "group_reasons": languages[0]["group_reasons"],
+        "languages": [{"code": e["code"], "label": e["label"], "verses": e["verses"],
+                       "books": e["books"], "keys": e["keys"], "groups": e["groups"]}
+                      for e in languages],
     }
     (out / "index.html").write_text(
         '<!doctype html><html lang="en"><head><meta charset="utf-8">'
@@ -596,12 +610,12 @@ function render() {
     const count = !has ? '' : g.k > 1
       ? `<span class="k">${g.k} style groups</span>`
       : `<span class="k">1 style group</span>`;
+    const why = (!has || g.k > 1) ? '' :
+      `<span class="w">${(DATA.group_reasons || {})[g.reason] || 'no split is supported'}</span>`;
     const stack = (!has || g.k < 2) ? '' :
       `<span class="bk">${g.sizes.map((c, i) => `A${i + 1}&nbsp;${c}`).join(' · ')}` +
       `<span class="stack">${g.sizes.map((c, i) =>
         `<span style="flex:${c};background:var(--g${i + 1})" title="A${i + 1}: ${c}"></span>`).join('')}</span></span>`;
-    const why = (!has || g.k > 1) ? '' :
-      `<span class="w">${(DATA.group_reasons || {})[g.reason] || 'no split is supported'}</span>`;
     return `<a class="row${has ? '' : ' dim'}" href="${l.code}/index.html?s=${encodeURIComponent(strategy)}">
       <span class="t">${l.label}</span>
       <span class="n">${l.verses.toLocaleString()} verses</span>

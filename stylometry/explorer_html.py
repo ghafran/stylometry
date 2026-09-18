@@ -519,4 +519,21 @@ function render() {{
 strategyBar(render); render();
 </script></div></body></html>"""
             (out / "works" / f"{_slug(work['code'])}.html").write_text(body, encoding="utf-8")
+
+    # What the front page needs to list this language, written beside the page itself. The front page
+    # is shared, and rebuilding one language must not drop the others from it; reading this back is
+    # how a language that was not rebuilt keeps its place.
+    (out / "card.json").write_text(json.dumps({
+        "code": language,
+        "label": name,
+        "verses": data["n_verses"],
+        "books": sum(len(c["children"]) for c in data["tree"]),
+        "keys": [s["key"] for s in data["strategies"]],
+        "groups": {key: {"k": data["book_groups"]["gk"][i], "reason": data["book_groups"]["gr"][i],
+                         "ari": data["book_groups"]["gari"][i], "n": data["book_groups"]["gn"],
+                         "sizes": data["book_groups"]["gsz"][i]}
+                   for i, key in enumerate(data["keys"])},
+        "strategies": data["strategies"],
+        "group_reasons": data["group_reasons"],
+    }, ensure_ascii=False), encoding="utf-8")
     return out

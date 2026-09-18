@@ -392,6 +392,15 @@ def test_the_explorer_writes_an_overview_and_one_page_per_book(tmp_path):
     assert "strategyBar" in book, "the strategy can be changed on a book page too"
 
 
+def _cards(tmp_path, built):
+    """The front page is assembled from what each language wrote beside its own page."""
+    from stylometry.explorer_html import write
+
+    for lang, data in built:
+        write(data, tmp_path / lang)
+    return built
+
+
 def test_the_front_page_offers_the_strategy_before_anything_else(tmp_path):
     """The picker has to be on the page people land on.
 
@@ -404,7 +413,7 @@ def test_the_front_page_offers_the_strategy_before_anything_else(tmp_path):
 
     greek = build(_explorer_verses(), "grc", progress=lambda m: None)
     hebrew = build(_explorer_verses(), "hbo", progress=lambda m: None)
-    _write_explorer_index(tmp_path, [("grc", greek), ("hbo", hebrew)])
+    _write_explorer_index(tmp_path, _cards(tmp_path, [("grc", greek), ("hbo", hebrew)]))
     page = (tmp_path / "index.html").read_text(encoding="utf-8")
 
     assert "strategyBar" in page and 'id="bar"' in page
@@ -609,7 +618,7 @@ def test_the_front_page_shows_how_each_language_divides(tmp_path):
 
     greek = build(_explorer_verses(n_works=12, n_chapters=2, per_chapter=9),
                   "grc", progress=lambda m: None, workers=1)
-    _write_explorer_index(tmp_path, [("grc", greek)])
+    _write_explorer_index(tmp_path, _cards(tmp_path, [("grc", greek)]))
     page = (tmp_path / "index.html").read_text(encoding="utf-8")
     assert '"sizes"' in page and 'class="stack"' in page
     assert "A${i + 1}" in page
@@ -738,3 +747,35 @@ def test_the_placement_line_does_not_invent_a_group_where_there_is_none(tmp_path
     book = sorted((write(data, tmp_path / "grc") / "works").glob("*.html"))[0].read_text(encoding="utf-8")
     assert "do not divide under this strategy" in book
     assert "do not divide among themselves" in book
+
+
+def test_rebuilding_one_language_does_not_drop_the_others_from_the_front_page(tmp_path):
+    """The front page is shared, and it is the only route into any language.
+
+    Rebuilding a single language used to rewrite it with that language alone, so the other two
+    vanished from the site although their pages were still on disk and perfectly good.
+    """
+    from stylometry.cli import _write_explorer_index
+    from stylometry.explorer import build
+
+    greek = build(_explorer_verses(), "grc", progress=lambda m: None, workers=1)
+    hebrew = build(_explorer_verses(), "hbo", progress=lambda m: None, workers=1)
+    _write_explorer_index(tmp_path, _cards(tmp_path, [("grc", greek), ("hbo", hebrew)]))
+    assert "Koine Greek" in (tmp_path / "index.html").read_text(encoding="utf-8")
+
+    # Now rebuild Greek alone, exactly as `explore --language grc` does.
+    _write_explorer_index(tmp_path, _cards(tmp_path, [("grc", greek)]))
+    page = (tmp_path / "index.html").read_text(encoding="utf-8")
+    assert "Koine Greek" in page
+    assert "Biblical Hebrew" in page, "the language that was not rebuilt keeps its place"
+
+
+def test_the_front_page_keeps_a_stable_language_order(tmp_path):
+    from stylometry.cli import _write_explorer_index
+    from stylometry.explorer import build
+
+    built = [("arb", build(_explorer_verses(), "arb", progress=lambda m: None, workers=1)),
+             ("grc", build(_explorer_verses(), "grc", progress=lambda m: None, workers=1))]
+    _write_explorer_index(tmp_path, _cards(tmp_path, built))
+    page = (tmp_path / "index.html").read_text(encoding="utf-8")
+    assert page.index("Koine Greek") < page.index("Quranic Arabic"), "Greek, Hebrew, Arabic"
