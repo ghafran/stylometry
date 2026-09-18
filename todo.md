@@ -154,23 +154,62 @@ loader refuses a file mixing that with the older legacy rows). Resumable; no err
 
 # Added: hadith comparison, the paper, and submission
 
-## 6. Sahih al-Bukhari as its own Arabic collection
+## 6. Sahih al-Bukhari as its own Arabic collection — done
 
 The Prophet's sayings, extracted as a corpus parallel to the Quran: same language, same tradition,
 different speaker as the tradition presents it.
 
-- [ ] 6.1 Find an openly licensed Arabic text of Sahih al-Bukhari and record its licence in
-      `data/raw/SOURCES.md` beside the others. Without a licence that permits redistribution it cannot
-      be checked in, and the whole corpus is committed on purpose.
-- [ ] 6.2 Extract only the *matn* — the Prophet's reported words. The *isnad*, the chain of transmitters
-      prefixed to each report, is formulaic ("A told us, from B, from C") and would dominate any style
-      measurement. Keeping it would produce a difference from the Quran that is an artefact of the
-      citation apparatus, not of anybody's voice.
-- [ ] 6.3 Write a loader, with fixture tests, emitting the same verse-record schema (`arb:BUKH.b.n`).
-- [ ] 6.4 Rebuild the corpus and extend the manifest so the collection is indexed like the rest.
+- [x] 6.1 Openly licensed Arabic text, recorded in `data/raw/SOURCES.md`. The edition is the Arabic
+      Bukhari from **hadith-api** (Fawaz Ahmed), released under the **Unlicense** — a public-domain
+      dedication, the least restrictive licence in the corpus. It was chosen over two alternatives on
+      structure, not licence: the ODbL *Open-Hadith-Data* CSV is a flat list of 7,008 reports with no
+      book divisions, so the whole collection would have been a single work. This edition carries
+      `reference.book`, so each *kitab* becomes a work.
+- [x] 6.2 Matn extracted, isnad dropped — **27% of the text removed**, 125,424 of 464,882 words.
+- [x] 6.3 `stylometry/corpus/bukhari.py`, with eight fixture tests in the edition's own format.
+- [x] 6.4 Corpus rebuilt and manifest extended; `manifest --check` passes, Islam 2/2.
 
-**Check:** unit and token counts are reproducible from a fresh clone, and a spot-checked report shows
-matn without isnad.
+| | Quran | Bukhari |
+|---|---:|---:|
+| units | 6,236 verses | 7,274 reports |
+| works | 114 suras | 97 kutub |
+| tokens | 77,881 | 337,030 |
+| median unit | 10 tokens | 31 tokens |
+
+**How the isnad is found.** The chain is dense in transmission verbs and the report is not, so the
+rule is a density one: follow the last transmission verb seen, and stop once ten words pass without
+another. Then run past the last transmitter's name to the verb that introduces the report. Three
+things were measured rather than assumed, and each changed the code:
+
+1. **Prefixed links.** `wa-akhbarani`, `fa-haddathana` are as common as the bare forms; an unprefixed
+   list left half a chain at the head of 12 reports.
+2. **Honorifics first.** `raḍiya llāhu ʿanhu` pads a transmitter's name, and a scan that had to step
+   over it ran out of window and left the last transmitter in the report. Stripping the eulogies
+   before looking for the boundary fixed it, including for hadith 1.
+3. **The length backstop.** Capping the chain at 60% of a record stopped the scan mid-chain in 11
+   reports, because chains are routinely longer than the report they carry. At 90% that falls to 1.
+
+**Residual error: 0.15%** — 11 of 7,274 reports still open with a transmission verb. All are records
+joining two chains with the *taḥwīl* marker `ح`. Recorded, not hidden.
+
+**What is kept is the matn, not the Prophet's direct speech.** The matn is the body of the report and
+includes the narrator's framing ("the women said to the Prophet ... so he promised them a day"). The
+edition marks direct speech with quotation marks and those spans are carried in `text_quoted`, but
+they were **not** used as the boundary, because measurement ruled it out: only **56%** of quoted spans
+are preceded by the Prophet named as the speaker. The rest are dialogue quoted inside a report — the
+angel at Hira, Khadija, Companions. A boundary drawn on quotation marks would have mixed his words
+with theirs and called the result his.
+
+**Two things §7 must not forget.** `qāla rasūlu llāh` — "the Messenger of God said" — is still in the
+text. It is formulaic, it appears in thousands of reports and it appears in the Quran never, so a
+classifier can separate the two corpora on that phrase alone without touching anyone's style. It was
+kept because it is the report's own opening rather than citation apparatus, and cutting further would
+be shaping the text until the comparison came out. §7 has to run with it removed as a control. Second,
+the *kitab* is carried as `group`, so a style grouping can be tested against subject matter: a split
+that tracks the kitab is tracking genre.
+
+**Check:** ✓ counts reproduce from a fresh clone via `scripts/download_sources.sh`; ✓ spot-checked
+reports show matn without isnad.
 
 ## 7. Quran against hadith: a discrimination test, declared before it is run
 

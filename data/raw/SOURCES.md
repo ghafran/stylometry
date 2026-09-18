@@ -22,7 +22,15 @@ the people and institutions named. The only files this project generates are und
 | `dss/tf/2.0.1/` | Dead Sea Scrolls, Text-Fabric | CC BY-NC 4.0 | Abegg, Bowley and Cook; converted by Jacobs, Naaijer and Roorda (ETCBC) |
 | `inscriptions/` | Ketef Hinnom amulets, Nash Papyrus | Published readings | Editors' published readings, transcribed here |
 | `quran/` | Quran, Uthmani text and sura metadata | Tanzil terms | Tanzil.net. The terms require a verbatim copy with attribution; this copy is unmodified. |
+| `bukhari/` | Sahih al-Bukhari, Arabic, with book divisions | Unlicense (public domain dedication) | hadith-api, Fawaz Ahmed. The text itself is 9th-century and long out of copyright; the Unlicense covers the digital edition. |
 | `benchmarks/` | Reference works by catalogued authors | per-manifest, recorded with each entry | See `benchmarks/*_manifest.json` in the repository root |
+
+## What the Bukhari loader keeps
+
+`data/raw/bukhari/` holds the whole collection, chain and all, exactly as published. The loader keeps
+only the *matn*, the body of each report, and drops the *isnad*, the chain of transmitters prefixed to
+it — 28% of the text. That is a judgement made in code, in `stylometry/corpus/bukhari.py`, not an edit
+to the file on disk: the raw text stays complete so the decision can be checked or reversed.
 
 ## Non-commercial terms
 

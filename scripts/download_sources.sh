@@ -16,6 +16,7 @@
 #   inscriptions/       Nash Papyrus, Ketef Hinnom amulets (readings via Wikipedia)     CC BY-SA 4.0
 #  Arabic
 #   quran/              Quran, Tanzil Uthmani text + sura metadata                       Tanzil terms (verbatim, attribution)
+#   bukhari/            Sahih al-Bukhari, Arabic, with book divisions (hadith-api)      Unlicense (public domain)
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 RAW="$ROOT/data/raw"
@@ -72,5 +73,7 @@ fi
 # --- Arabic -----------------------------------------------------------------------------------------
 fetch "https://tanzil.net/pub/download/index.php?quranType=uthmani&outType=txt-2&agree=true" "$RAW/quran/quran-uthmani.txt"
 fetch "https://tanzil.net/res/text/metadata/quran-data.xml" "$RAW/quran/quran-data.xml"
+# Sahih al-Bukhari: the Arabic edition carries `reference.book`, so each kitab becomes a work.
+fetch "https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/ara-bukhari.json" "$RAW/bukhari/ara-bukhari.json"
 
 echo "sources ready under $RAW"

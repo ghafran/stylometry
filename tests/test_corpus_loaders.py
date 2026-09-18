@@ -308,3 +308,118 @@ def test_a_reference_a_manuscript_reads_twice_keeps_both_with_distinct_ids():
     assert verses[1]["repeated_reference"] == 2
     assert "repeated_reference" not in verses[0] and "repeated_reference" not in verses[2]
     assert verses[0]["text_bare"] == "first" and verses[1]["text_bare"] == "second", "neither is lost"
+
+
+# --- Sahih al-Bukhari: the matn, without the chain of transmitters --------------------------------
+
+# Real shapes from the edition, shortened. The first is the classic "actions are by intentions",
+# whose chain runs five links deep and ends with a Companion; the second ends "... from Abu Hurayra,
+# he said: the Messenger of God said", the commonest shape in the collection; the third is a report
+# whose body opens with its own speech verb, which must survive; the fourth is a continuation report
+# carrying no chain at all.
+BUKHARI_EDITION = {
+    "metadata": {"name": "Sahih al Bukhari", "sections": {"0": "", "1": "Revelation", "2": "Belief"}},
+    "hadiths": [
+        {"hadithnumber": 1, "arabicnumber": 1, "reference": {"book": 1, "hadith": 1}, "grades": [],
+         "text": "حَدَّثَنَا الْحُمَيْدِيُّ عَبْدُ اللَّهِ بْنُ الزُّبَيْرِ ، قَالَ : حَدَّثَنَا سُفْيَانُ ، قَالَ : "
+                 "أَخْبَرَنِي مُحَمَّدُ بْنُ إِبْرَاهِيمَ التَّيْمِيُّ ، أَنَّهُ سَمِعَ عَلْقَمَةَ بْنَ وَقَّاصٍ اللَّيْثِيَّ ، "
+                 "يَقُولُ : سَمِعْتُ عُمَرَ بْنَ الْخَطَّابِ رَضِيَ اللَّهُ عَنْهُ عَلَى الْمِنْبَرِ، قَالَ : سَمِعْتُ رَسُولَ اللَّهِ "
+                 "صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ، يَقُولُ : \" إِنَّمَا الْأَعْمَالُ بِالنِّيَّاتِ \""},
+        {"hadithnumber": 2, "arabicnumber": 2, "reference": {"book": 2, "hadith": 1}, "grades": [],
+         "text": "حَدَّثَنِي إِسْحَاقُ، أَخْبَرَنَا عَبْدُ الرَّزَّاقِ، عَنْ هَمَّامٍ، عَنْ أَبِي هُرَيْرَةَ ـ رضى الله عنه ـ "
+                 "قَالَ قَالَ رَسُولُ اللَّهِ صلى الله عليه وسلم \" كُلُّ سُلاَمَى عَلَيْهِ صَدَقَةٌ \""},
+        {"hadithnumber": 3, "arabicnumber": 3, "reference": {"book": 2, "hadith": 2}, "grades": [],
+         "text": "حَدَّثَنَا آدَمُ، قَالَ حَدَّثَنَا شُعْبَةُ، عَنْ أَبِي سَعِيدٍ الْخُدْرِيِّ، "
+                 "قَالَتِ النِّسَاءُ لِلنَّبِيِّ صلى الله عليه وسلم غَلَبَنَا عَلَيْكَ الرِّجَالُ"},
+        {"hadithnumber": 4, "arabicnumber": 4, "reference": {"book": 2, "hadith": 3}, "grades": [],
+         "text": "وَبِإِسْنَادِهِ قَالَ لاَ يَبُولَنَّ أَحَدُكُمْ فِي الْمَاءِ الدَّائِمِ"},
+        # The edition lists 311 records under book 0, 307 of them verbatim repeats of a record that
+        # does carry a book. Keeping them would count the same report twice.
+        {"hadithnumber": 5, "arabicnumber": 5, "reference": {"book": 0, "hadith": 1}, "grades": [],
+         "text": "حَدَّثَنَا آدَمُ، قَالَ حَدَّثَنَا شُعْبَةُ، عَنْ أَبِي سَعِيدٍ الْخُدْرِيِّ، "
+                 "قَالَتِ النِّسَاءُ لِلنَّبِيِّ صلى الله عليه وسلم غَلَبَنَا عَلَيْكَ الرِّجَالُ"},
+    ],
+}
+
+
+def _bukhari_dir(tmp_path: Path) -> Path:
+    d = tmp_path / "bukhari"
+    d.mkdir()
+    (d / "ara-bukhari.json").write_text(json.dumps(BUKHARI_EDITION, ensure_ascii=False), encoding="utf-8")
+    return d
+
+
+def test_bukhari_drops_the_chain_and_keeps_the_report(tmp_path: Path) -> None:
+    from stylometry.corpus import bukhari
+
+    rows = bukhari.load(_bukhari_dir(tmp_path))
+    assert len(rows) == 4
+    first = rows[0]
+    # Not one transmitter survives: the chain named five and none of them is the report.
+    for name in ("الحميدي", "سفيان", "محمد", "علقمة", "عمر"):
+        assert name not in first["text_bare"], f"{name} is a transmitter, not the report"
+    assert "الاعمال" in first["text_bare"] and "بالنيات" in first["text_bare"]
+    assert first["isnad_tokens"] > 10, "the chain was long and all of it was counted"
+
+
+def test_bukhari_keeps_a_speech_verb_that_belongs_to_the_report(tmp_path: Path) -> None:
+    """"... from Abu Sa'id: *the women said* to the Prophet" - drop that verb and the sentence
+    loses its subject. The doubled verb of "he said: the Messenger said" is the chain's and goes."""
+    from stylometry.corpus import bukhari
+
+    rows = bukhari.load(_bukhari_dir(tmp_path))
+    third = next(r for r in rows if r["verse"] == "3")
+    assert third["text_bare"].startswith("قالت النساء"), third["text_bare"]
+    second = next(r for r in rows if r["verse"] == "2")
+    assert second["text_bare"].startswith("قال رسول الله"), second["text_bare"]
+    assert not second["text_bare"].startswith("قال قال")
+
+
+def test_bukhari_strips_the_honorific_formulae(tmp_path: Path) -> None:
+    """Repeated thousands of times, and citation apparatus rather than anyone's style."""
+    from stylometry.corpus import bukhari
+
+    for row in bukhari.load(_bukhari_dir(tmp_path)):
+        assert "صلي الله عليه وسلم" not in row["text_bare"]
+        assert "رضي الله عنه" not in row["text_bare"]
+
+
+def test_bukhari_leaves_a_report_with_no_chain_alone(tmp_path: Path) -> None:
+    """"And with the same chain" carries none of its own; cutting a prefix would eat the report."""
+    from stylometry.corpus import bukhari
+
+    fourth = next(r for r in bukhari.load(_bukhari_dir(tmp_path)) if r["verse"] == "4")
+    assert "يبولن" in fourth["text_bare"] and "الماء" in fourth["text_bare"]
+    assert fourth["isnad_tokens"] <= 2
+
+
+def test_bukhari_makes_each_book_a_work_and_keeps_the_quoted_speech(tmp_path: Path) -> None:
+    """One work per kitab, so whole-work holdout has works to hold out, as the Qur'an has suras."""
+    from stylometry.corpus import bukhari
+
+    rows = bukhari.load(_bukhari_dir(tmp_path))
+    assert {r["work"] for r in rows} == {"BUKH01", "BUKH02"}
+    assert {r["collection"] for r in rows} == {"Bukhari"}
+    assert {r["language"] for r in rows} == {"arb"}
+    assert next(r for r in rows if r["work"] == "BUKH01")["group"] == "Revelation"
+    assert all(r["witness"] == "H" for r in rows)
+    # The edition's own marking of direct speech is carried, but is not what set the boundary.
+    assert "الْأَعْمَالُ" in rows[0]["text_quoted"]
+    assert rows[2]["text_quoted"] == "", "no quotation marks in that report"
+
+
+def test_bukhari_returns_nothing_without_the_edition(tmp_path: Path) -> None:
+    from stylometry.corpus import bukhari
+
+    assert bukhari.load(tmp_path / "absent") == []
+
+
+def test_bukhari_drops_the_records_the_edition_files_under_no_book(tmp_path: Path) -> None:
+    """Almost all of them repeat a report that is already there under its real book."""
+    from stylometry.corpus import bukhari
+
+    rows = bukhari.load(_bukhari_dir(tmp_path))
+    assert len(rows) == 4, "the book-0 record is not a fifth report"
+    assert "BUKH00" not in {r["work"] for r in rows}
+    bodies = [r["text_bare"] for r in rows]
+    assert len(bodies) == len(set(bodies)), "and nothing is counted twice"
