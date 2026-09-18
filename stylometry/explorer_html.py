@@ -15,11 +15,14 @@ RTL = {"hbo", "arb"}
 
 CSS = """
 :root{--paper:#FAF9F5;--ink:#141413;--muted:#56554F;--faint:#807E76;--line:#DCD9CE;--clay:#A8482A;
---card:#fff;--panel:#F3F1E9;--dot:#A8482A}
+--card:#fff;--panel:#F3F1E9;--dot:#A8482A;
+--g1:#2a78d6;--g2:#eb6834;--g3:#1baf7a;--g4:#eda100;--g5:#e87ba4;--g6:#008300;--g7:#4a3aa7;--g8:#e34948;--gx:#8a8985}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--paper:#16161A;--ink:#EDEBE4;
---muted:#B4B1A7;--faint:#93918A;--line:#33322D;--clay:#E0906F;--card:#1F1F23;--panel:#232329;--dot:#E0906F}}
+--muted:#B4B1A7;--faint:#93918A;--line:#33322D;--clay:#E0906F;--card:#1F1F23;--panel:#232329;--dot:#E0906F;
+--g1:#3987e5;--g2:#d95926;--g3:#199e70;--g4:#c98500;--g5:#d55181;--g6:#008300;--g7:#9085e9;--g8:#e66767;--gx:#8f8e88}}
 :root[data-theme="dark"]{--paper:#16161A;--ink:#EDEBE4;--muted:#B4B1A7;--faint:#93918A;--line:#33322D;
---clay:#E0906F;--card:#1F1F23;--panel:#232329;--dot:#E0906F}
+--clay:#E0906F;--card:#1F1F23;--panel:#232329;--dot:#E0906F;
+--g1:#3987e5;--g2:#d95926;--g3:#199e70;--g4:#c98500;--g5:#d55181;--g6:#008300;--g7:#9085e9;--g8:#e66767;--gx:#8f8e88}
 *{box-sizing:border-box}
 body{margin:0;background:var(--paper);color:var(--ink);font-family:'IBM Plex Sans',system-ui,sans-serif;line-height:1.5}
 .wrap{max-width:1240px;margin:0 auto;padding:32px 16px 72px}
@@ -54,6 +57,17 @@ svg{width:100%;height:auto;display:block;background:var(--panel);border-radius:8
 .vtext.rtl{direction:rtl;text-align:right;font-size:17px}
 h2{font-family:'Spectral',Georgia,serif;font-size:19px;margin:0 0 8px;font-weight:600}
 .small{font-size:12.5px;color:var(--faint)}
+.gsum{display:block;font-family:'IBM Plex Sans',system-ui,sans-serif;font-size:13px;font-weight:400;
+color:var(--muted);margin:-4px 0 9px}
+.gsum b{color:var(--ink);font-weight:600}
+.legend{display:flex;flex-wrap:wrap;gap:5px 14px;font-size:12px;color:var(--muted);margin:0 0 11px}
+.legend i,.gb i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.gb{grid-row:2;grid-column:2;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);
+white-space:nowrap;align-self:end}
+.headline{background:var(--panel);border-radius:9px;padding:11px 14px;margin:0 0 16px;font-size:13.5px;color:var(--muted)}
+.headline b{color:var(--ink)}
+.caveat{border-left:2px solid var(--clay);padding:3px 0 3px 10px;margin:0 0 11px;font-size:12.5px;color:var(--muted)}
+.caveat b{color:var(--clay)}
 """
 
 JS_COMMON = """
@@ -89,6 +103,47 @@ function strategyBar(onChange) {
   paint();
 }
 
+// A style group is a partition of whatever the level lists. `gk` is how many groups the node's
+// children fall into under each strategy, `g` is which group a child is in, both flat in `keys` order.
+const G = i => (i >= 1 && i <= 8) ? `var(--g${i})` : 'var(--gx)';
+const groupsOf = n => ({ k: n.gk ? n.gk[idx()] : 1, reason: n.gr ? n.gr[idx()] : null,
+                         ari: n.gari ? n.gari[idx()] : null, n: n.gn || 0, tokens: n.gtok || 0 });
+const groupOf = c => (c.g ? c.g[idx()] : 1);
+
+function groupSummary(node, unit) {
+  const g = groupsOf(node);
+  if (!g.n) return '';
+  const head = g.k > 1
+    ? `<span class="gsum"><b>${g.k} style groups</b> among ${g.n} ${unit}` +
+      (g.ari != null ? ` · survives resampling at ARI ${g.ari}` : '') + `</span>`
+    : `<span class="gsum"><b>1 style group</b> among ${g.n} ${unit} — ` +
+      `${(DATA.group_reasons || {})[g.reason] || 'no split is supported'}</span>`;
+  return head + shortUnitWarning(g, unit);
+}
+
+// A split of units this short can be perfectly stable and still be arithmetic: a hapax ratio over
+// eighteen tokens takes few distinct values, so it clusters cleanly. Say so where it applies.
+function shortUnitWarning(g, unit) {
+  const floor = DATA.reliable_tokens || 1000;
+  if (g.k < 2 || !g.tokens || g.tokens >= floor) return '';
+  return `<div class="caveat">These ${unit} run about <b>${g.tokens.toLocaleString()} tokens</b> each.
+    This project measured that units below ${floor.toLocaleString()} cannot support attribution, which is
+    why the analysis pools text into passages first. Read this split as a property of the measure at
+    this length, not as a hand.</div>`;
+}
+
+function groupLegend(node) {
+  const g = groupsOf(node);
+  if (g.k < 2) return '';
+  return '<div class="legend">' + Array.from({ length: g.k }, (_, i) =>
+    `<span><i style="background:${G(i + 1)}"></i>Group ${i + 1}</span>`).join('') + '</div>';
+}
+
+// The number is on every row beside the swatch: the lighter hues fall under 3:1 against the page,
+// so colour is never the only thing carrying which group a unit is in.
+const groupBadge = (node, child) =>
+  groupsOf(node).k > 1 ? `<span class="gb"><i style="background:${G(groupOf(child))}"></i>Group ${groupOf(child)}</span>` : '';
+
 function plot(points, holder, onPick) {
   const W = 420, H = 300, P = 26;
   if (!points.length) { holder.innerHTML = '<p class="small">Nothing to plot here.</p>'; return; }
@@ -101,7 +156,7 @@ function plot(points, holder, onPick) {
     <line x1="${P}" y1="${H - P}" x2="${W - P}" y2="${H - P}" stroke="var(--line)"/>
     <line x1="${P}" y1="${P}" x2="${P}" y2="${H - P}" stroke="var(--line)"/>
     ${points.map((p, i) => `<circle cx="${sx(p.xy[0]).toFixed(1)}" cy="${sy(p.xy[1]).toFixed(1)}" r="${r}"
-      fill="var(--dot)" fill-opacity="${points.length > 400 ? .45 : .8}" data-i="${i}"><title>${p.label}</title></circle>`).join('')}
+      fill="${p.g ? G(p.g) : 'var(--dot)'}" fill-opacity="${points.length > 400 ? .45 : .8}" data-i="${i}"><title>${p.label}${p.g ? ' — group ' + p.g : ''}</title></circle>`).join('')}
     <text x="${W - P}" y="${H - 8}" text-anchor="end" font-size="9" fill="var(--faint)" font-family="monospace">component 1</text>
     <text x="8" y="${P}" font-size="9" fill="var(--faint)" font-family="monospace">component 2</text>
   </svg>`;
@@ -140,16 +195,22 @@ def write(data: dict, out_dir: str | Path) -> Path:
     language = data["language"]
     name = LANGUAGE_NAMES.get(language, language)
     rtl = "rtl" if language in RTL else ""
+    shared = {"keys": data["keys"], "strategies": data["strategies"], "language": language,
+              "group_reasons": data["group_reasons"], "reliable_tokens": data["reliable_tokens"]}
 
     # --- overview: collections, their works, and the chapters of each --------------------------------
+    keep = ("gk", "gr", "gari", "gn", "gtok", "g")
     slim = {
-        "keys": data["keys"], "strategies": data["strategies"], "language": language,
+        **shared,
+        "book_groups": data["book_groups"], "collection_groups": data["collection_groups"],
         "tree": [{"label": c["label"], "xy": c["xy"], "markers": c["markers"],
                   "n_verses": c["n_verses"], "n_tokens": c["n_tokens"],
+                  **{f: c[f] for f in keep if f in c},
                   "children": [{"label": w["label"], "code": w["code"], "xy": w["xy"],
                                 "markers": w["markers"], "n_verses": w["n_verses"],
                                 "n_tokens": w["n_tokens"], "slug": _slug(w["code"]),
-                                "n_chapters": len(w["children"])}
+                                "n_chapters": len(w["children"]),
+                                **{f: w[f] for f in keep if f in w}}
                                for w in c["children"]]}
                  for c in data["tree"]],
     }
@@ -161,31 +222,50 @@ def write(data: dict, out_dir: str | Path) -> Path:
         page += f" · no data for: {', '.join(data['unavailable'])}"
     page += """</p>
 <div class="bar" id="bar"></div>
+<div class="headline" id="head"></div>
 <div class="cols"><div id="list"></div><div><div class="card" id="side"></div></div></div>
 <script>const DATA = """ + json.dumps(slim, ensure_ascii=False) + ";\n" + JS_COMMON + """
 let collection = null;
 function render() {
   const list = document.getElementById('list'), side = document.getElementById('side');
-  const nodes = collection === null ? DATA.tree : DATA.tree[collection].children;
-  const here = collection === null ? null : DATA.tree[collection];
-  list.innerHTML = (collection === null
+  const top = collection === null;
+  const nodes = top ? DATA.tree : DATA.tree[collection].children;
+  const here = top ? null : DATA.tree[collection];
+  // At the top the page lists collections, so that is the partition it reports; the headline above
+  // it is the one worth quoting, every book of the language grouped together.
+  const parent = top ? DATA.collection_groups : here;
+  const unit = top ? 'collections' : 'books';
+
+  const books = groupsOf(DATA.book_groups);
+  document.getElementById('head').innerHTML = books.k > 1
+    ? `Under this strategy the <b>${books.n} books</b> of this language fall into
+       <b>${books.k} style groups</b>${books.ari != null ? ` (stable to ARI ${books.ari})` : ''}.
+       Change the strategy and see whether that survives.`
+    : `Under this strategy the <b>${books.n} books</b> of this language do not split:
+       ${(DATA.group_reasons || {})[books.reason] || 'no split is supported'}.`;
+
+  list.innerHTML = (top
       ? '<h2>Collections</h2>'
-      : `<h2>${DATA.tree[collection].label} — books</h2><button class="row" id="up"><span class="t">← back to collections</span><span class="n"></span></button>`)
+      : `<h2>${DATA.tree[collection].label} — books</h2>`)
+    + groupSummary(parent, unit) + groupLegend(parent)
+    + (top ? '' : '<button class="row" id="up"><span class="t">← back to collections</span><span class="n"></span></button>')
     + nodes.map((n, i) => `<button class="row" data-i="${i}">
         <span class="t">${n.label}</span>
         <span class="n">${n.n_verses.toLocaleString()} verses</span>
         <span class="s">${n.code ? n.code + ' · ' + n.n_chapters + ' chapters · ' : ''}${n.n_tokens.toLocaleString()} tokens</span>
+        ${groupBadge(parent, n)}
       </button>`).join('');
-  if (collection !== null) document.getElementById('up').addEventListener('click', () => { collection = null; render(); });
+  if (!top) document.getElementById('up').addEventListener('click', () => { collection = null; render(); });
   list.querySelectorAll('.row[data-i]').forEach(b => b.addEventListener('click', () => {
     const n = nodes[+b.dataset.i];
-    if (collection === null) { collection = +b.dataset.i; render(); }
+    if (top) { collection = +b.dataset.i; render(); }
     else location.href = 'works/' + n.slug + '.html?s=' + encodeURIComponent(strategy);
   }));
   const holder = document.createElement('div');
   side.innerHTML = '';
   side.appendChild(holder);
-  plot(nodes.map(n => ({ label: n.label, xy: xyOf(n) })), holder, null);
+  const many = groupsOf(parent).k > 1;
+  plot(nodes.map(n => ({ label: n.label, xy: xyOf(n), g: many ? groupOf(n) : 0 })), holder, null);
   const mk = document.createElement('div');
   side.appendChild(mk);
   markerList(here || { markers: {} }, mk);
@@ -199,12 +279,14 @@ strategyBar(render); render();
     for collection in data["tree"]:
         for work in collection["children"]:
             payload = {
-                "keys": data["keys"], "strategies": data["strategies"], "language": language,
+                **shared,
                 "work": {"label": work["label"], "code": work["code"], "xy": work["xy"],
-                         "markers": work["markers"], "n_verses": work["n_verses"]},
+                         "markers": work["markers"], "n_verses": work["n_verses"],
+                         **{f: work[f] for f in keep if f in work}},
                 "collection": collection["label"],
                 "chapters": [{"label": ch["label"], "xy": ch["xy"], "markers": ch["markers"],
-                              "n_verses": ch["n_verses"], "v": ch["v"]} for ch in work["children"]],
+                              "n_verses": ch["n_verses"], "v": ch["v"],
+                              **{f: ch[f] for f in keep if f in ch}} for ch in work["children"]],
             }
             body = _head(f"{work['label']} — style explorer")
             body += f"""<div class="crumb"><a href="../../index.html">All languages</a> ·
@@ -215,38 +297,47 @@ strategyBar(render); render();
 <div class="cols"><div id="list"></div><div><div class="card" id="side"></div></div></div>
 <script>const DATA = """ + json.dumps(payload, ensure_ascii=False) + ";\n" + JS_COMMON + f"""
 const RTL = {'true' if rtl else 'false'};
+const vGroupOf = v => v[4][idx()];
 let chapter = null, verse = null;
 function render() {{
   const list = document.getElementById('list'), side = document.getElementById('side');
   if (chapter === null) {{
-    list.innerHTML = '<h2>Chapters</h2>' + DATA.chapters.map((c, i) =>
+    list.innerHTML = '<h2>Chapters</h2>' + groupSummary(DATA.work, 'chapters') + groupLegend(DATA.work)
+      + DATA.chapters.map((c, i) =>
       `<button class="row" data-i="${{i}}"><span class="t">Chapter ${{c.label}}</span>
-       <span class="n">${{c.n_verses}} verses</span></button>`).join('');
+       <span class="n">${{c.n_verses}} verses</span>${{groupBadge(DATA.work, c)}}</button>`).join('');
     list.querySelectorAll('.row').forEach(b => b.addEventListener('click', () => {{
       chapter = +b.dataset.i; verse = null; render(); }}));
     const h = document.createElement('div'); side.innerHTML = ''; side.appendChild(h);
-    plot(DATA.chapters.map(c => ({{ label: 'Chapter ' + c.label, xy: xyOf(c) }})), h, null);
+    const many = groupsOf(DATA.work).k > 1;
+    plot(DATA.chapters.map(c => ({{ label: 'Chapter ' + c.label, xy: xyOf(c), g: many ? groupOf(c) : 0 }})), h, null);
     const mk = document.createElement('div'); side.appendChild(mk); markerList(DATA.work, mk);
     mk.insertAdjacentHTML('afterbegin', '<p class="small">Each point is a chapter of this book.</p>');
     return;
   }}
   const ch = DATA.chapters[chapter];
-  list.innerHTML = `<h2>Chapter ${{ch.label}} — verses</h2>
-    <button class="row" id="up"><span class="t">← back to chapters</span><span class="n"></span></button>`
+  const many = groupsOf(ch).k > 1;
+  list.innerHTML = `<h2>Chapter ${{ch.label}} — verses</h2>` + groupSummary(ch, 'verses') + groupLegend(ch)
+    + `<button class="row" id="up"><span class="t">← back to chapters</span><span class="n"></span></button>`
     + ch.v.map((v, i) => `<button class="row" data-i="${{i}}">
         <span class="t">${{ch.label}}:${{v[0]}}</span><span class="n">${{v[2]}} tokens</span>
-        <span class="s vtext ${{RTL ? 'rtl' : ''}}">${{v[1]}}</span></button>`).join('');
+        <span class="s vtext ${{RTL ? 'rtl' : ''}}">${{v[1]}}</span>
+        ${{many ? `<span class="gb"><i style="background:${{G(vGroupOf(v))}}"></i>Group ${{vGroupOf(v)}}</span>` : ''}}
+      </button>`).join('');
   document.getElementById('up').addEventListener('click', () => {{ chapter = null; verse = null; render(); }});
   list.querySelectorAll('.row[data-i]').forEach(b => b.addEventListener('click', () => {{
     verse = +b.dataset.i; render(); }}));
   const h = document.createElement('div'); side.innerHTML = ''; side.appendChild(h);
-  plot(ch.v.map(v => ({{ label: ch.label + ':' + v[0], xy: vxyOf(v) }})), h, p => {{
+  plot(ch.v.map(v => ({{ label: ch.label + ':' + v[0], xy: vxyOf(v), g: many ? vGroupOf(v) : 0 }})), h, p => {{
     verse = ch.v.findIndex(v => ch.label + ':' + v[0] === p.label); render(); }});
   const mk = document.createElement('div'); side.appendChild(mk);
   if (verse !== null) {{
     const v = ch.v[verse], xy = vxyOf(v);
     mk.innerHTML = `<h2>${{ch.label}}:${{v[0]}}</h2>
       <div class="vtext ${{RTL ? 'rtl' : ''}}">${{v[1]}}</div>
+      ${{many ? `<div class="mk"><span>group in this chapter</span>
+        <span><i class="sw" style="display:inline-block;width:9px;height:9px;border-radius:2px;
+        margin-right:5px;background:${{G(vGroupOf(v))}}"></i>${{vGroupOf(v)}} of ${{groupsOf(ch).k}}</span></div>` : ''}}
       <div class="mk"><span>position under this strategy</span><span>${{xy[0].toFixed(1)}}, ${{xy[1].toFixed(1)}}</span></div>
       <div class="mk"><span>tokens</span><span>${{v[2]}}</span></div>
       <p class="small" style="margin-top:10px">A single verse is far too short to characterise a hand.

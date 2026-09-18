@@ -348,9 +348,10 @@ def test_the_explorer_places_every_level_under_every_available_strategy():
             for chapter in work["children"]:
                 assert len(chapter["xy"]) == 2 * len(data["keys"])
                 for verse in chapter["v"]:
-                    ref, text, tokens, xy = verse
+                    ref, text, tokens, xy, group = verse
                     assert text and tokens > 0
                     assert len(xy) == 2 * len(data["keys"]), "a verse is placed under every strategy"
+                    assert len(group) == len(data["keys"]), "and grouped under every strategy"
 
 
 def test_a_strategy_without_data_is_absent_from_the_explorer_rather_than_flat():
@@ -426,3 +427,136 @@ def test_a_strategy_missing_for_a_language_is_said_out_loud(tmp_path):
     overview = (out / "index.html").read_text(encoding="utf-8")
     assert "const unavailable" in overview
     assert "opened on the first strategy instead" in overview
+
+
+# --- style-group counts at every level ----------------------------------------------------------------
+
+def test_group_units_refuses_to_partition_too_few_units():
+    """Two groups fitted to five documents is arithmetic, not evidence."""
+    import numpy as np
+
+    from stylometry.explorer import GROUP_MIN_UNITS, group_units
+
+    rng = np.random.default_rng(0)
+    result = group_units(rng.normal(size=(GROUP_MIN_UNITS - 1, 20)))
+    assert result["k"] == 1 and result["reason"] == "too_few_units"
+    assert result["labels"] == [1] * (GROUP_MIN_UNITS - 1)
+
+
+def test_group_units_finds_a_real_split_and_declines_a_spurious_one():
+    import numpy as np
+
+    from stylometry.explorer import group_units
+
+    rng = np.random.default_rng(0)
+    far = np.vstack([rng.normal(0, .3, size=(20, 12)), rng.normal(9, .3, size=(20, 12))])
+    split = group_units(far)
+    assert split["k"] == 2, "two well-separated clouds are two groups"
+    assert set(split["labels"][:20]) != set(split["labels"][20:]), "the split follows the clouds"
+    assert split["min_ari"] >= 0.8
+
+    noise = group_units(rng.normal(size=(40, 12)))
+    assert noise["k"] == 1, "structureless noise must not be partitioned"
+    assert noise["reason"] in {"no_supported_split", "unstable"}
+
+
+def test_every_level_reports_how_many_groups_its_children_fall_into():
+    from stylometry.explorer import build
+
+    data = build(_explorer_verses(n_works=12, n_chapters=3, per_chapter=10),
+                 "grc", progress=lambda m: None, workers=1)
+    n_keys = len(data["keys"])
+
+    for packed in (data["book_groups"], data["collection_groups"]):
+        assert len(packed["gk"]) == n_keys and all(k >= 1 for k in packed["gk"])
+    assert data["book_groups"]["gn"] == 12, "the headline counts every book of the language"
+
+    for collection in data["tree"]:
+        assert len(collection["gk"]) == n_keys
+        assert collection["gn"] == len(collection["children"]), "a collection groups its books"
+        for i, k in enumerate(collection["gk"]):
+            assert 1 <= collection["g"][i] <= data["collection_groups"]["gk"][i]
+            for work in collection["children"]:
+                assert 1 <= work["g"][i] <= k, "a book's group is inside its collection's partition"
+        for work in collection["children"]:
+            assert work["gn"] == len(work["children"]), "a book groups its chapters"
+            for chapter in work["children"]:
+                assert chapter["gn"] == len(chapter["v"]), "a chapter groups its verses"
+                for i, k in enumerate(chapter["gk"]):
+                    assert 1 <= chapter["g"][i] <= work["gk"][i]
+                    for verse in chapter["v"]:
+                        assert 1 <= verse[4][i] <= k, "a verse's group is inside its chapter's"
+
+
+def test_one_group_always_carries_the_reason_it_is_one():
+    """A bare "1" reads as a finding. It is usually the absence of one, and has to say so."""
+    from stylometry.explorer import GROUP_REASONS, build
+
+    data = build(_explorer_verses(), "grc", progress=lambda m: None, workers=1)
+    seen = set()
+    for node in [data["book_groups"], data["collection_groups"]] + data["tree"]:
+        for k, reason in zip(node["gk"], node["gr"]):
+            assert (reason is None) == (k > 1), "a reason accompanies one group and only one group"
+            if reason is not None:
+                assert reason in GROUP_REASONS, reason
+                seen.add(reason)
+    assert seen, "this fixture is small enough that something must decline to split"
+
+
+def test_grouping_in_parallel_matches_grouping_serially():
+    """Fanning out over strategies is a speed change, not a result change."""
+    from stylometry.explorer import build
+
+    verses = _explorer_verses(n_works=10, n_chapters=2, per_chapter=8)
+    serial = build(verses, "grc", progress=lambda m: None, workers=1)
+    parallel = build(verses, "grc", progress=lambda m: None, workers=4)
+    assert serial["book_groups"] == parallel["book_groups"]
+    assert [c["gk"] for c in serial["tree"]] == [c["gk"] for c in parallel["tree"]]
+    assert [w["g"] for c in serial["tree"] for w in c["children"]] == \
+           [w["g"] for c in parallel["tree"] for w in c["children"]]
+
+
+def test_the_pages_show_the_group_counts_and_never_colour_alone(tmp_path):
+    from stylometry.explorer import build
+    from stylometry.explorer_html import write
+
+    data = build(_explorer_verses(n_works=10, n_chapters=2, per_chapter=8),
+                 "grc", progress=lambda m: None, workers=1)
+    out = write(data, tmp_path / "grc")
+    overview = (out / "index.html").read_text(encoding="utf-8")
+    book = sorted((out / "works").glob("*.html"))[0].read_text(encoding="utf-8")
+
+    for page in (overview, book):
+        assert "groupSummary" in page and "style group" in page
+        # The lighter hues fall below 3:1 against the page, so the group number is always written out.
+        assert "Group ${groupOf(child)}" in page or "Group ${vGroupOf(v)}" in page
+    assert "book_groups" in overview and "collection_groups" in overview
+    assert '"gk"' in overview and '"g"' in overview
+    assert "group_reasons" in overview, "the page can explain a count of one"
+
+
+def test_a_split_of_units_too_short_to_attribute_says_so(tmp_path):
+    """A stable split is not automatically an authorial one.
+
+    Vocabulary richness over an eighteen-token verse takes few distinct values, so verses cluster
+    cleanly and the stability gate passes. Section 1 of this project measured that units that short
+    cannot support attribution, which is why the analysis pools into 1,000-token passages. The page
+    has to carry that where it applies, or it asserts what the project has already disproved.
+    """
+    from stylometry.explorer import GROUP_RELIABLE_TOKENS, build
+    from stylometry.explorer_html import write
+
+    data = build(_explorer_verses(n_works=10, n_chapters=2, per_chapter=12),
+                 "grc", progress=lambda m: None, workers=1)
+    assert data["reliable_tokens"] == GROUP_RELIABLE_TOKENS
+
+    for collection in data["tree"]:
+        for work in collection["children"]:
+            for chapter in work["children"]:
+                assert chapter["gtok"] > 0, "a partition records how long its units are"
+                assert chapter["gtok"] < GROUP_RELIABLE_TOKENS, "verses in this fixture are short"
+
+    page = (write(data, tmp_path / "grc") / "index.html").read_text(encoding="utf-8")
+    assert "shortUnitWarning" in page
+    assert "cannot support attribution" in page
+    assert "reliable_tokens" in page

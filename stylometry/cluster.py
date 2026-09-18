@@ -211,6 +211,36 @@ def partition_stability(X: np.ndarray, labels: np.ndarray, verses: list[dict], k
             "method": "80% passage subsamples; fixed feature map"}
 
 
+def subsample_stability(X: np.ndarray, labels: np.ndarray, k: int, seed: int = 0,
+                        repeats: int = 5, fraction: float = 0.8) -> dict:
+    """Refit on a fraction of the observations and score the agreement on all of them.
+
+    ``partition_stability`` omits whole passages because consecutive verses are smoothed together
+    there and dropping single rows would leak. Here the units are already pooled documents - books,
+    chapters, verses in their own right - with no smoothing between them, so plain subsampling is
+    both correct and the ordinary way this check is done.
+    """
+    if repeats < 1:
+        raise ValueError("stability repeats must be positive")
+    if k < 2:
+        return {"available": False, "reason": "single_group", "repeats": 0}
+    n = len(X)
+    take = int(round(n * fraction))
+    if take < k + 1 or take >= n:
+        return {"available": False, "reason": "too_few_observations", "repeats": 0}
+    rng = np.random.default_rng(seed)
+    aris = []
+    for rep in range(repeats):
+        selected = rng.choice(n, take, replace=False)
+        if len(np.unique(X[selected], axis=0)) < k:
+            aris.append(0.0)
+            continue
+        fitted = KMeans(n_clusters=k, n_init=10, random_state=seed + rep + 1).fit(X[selected])
+        aris.append(float(adjusted_rand_score(labels, fitted.predict(X))))
+    return {"available": True, "repeats": repeats, "mean_ari": float(np.mean(aris)),
+            "min_ari": min(aris), "ari": aris, "method": f"{fraction:.0%} subsamples of {n} units"}
+
+
 def cluster(X: np.ndarray, k: int, seed: int = 0) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     if k < 1 or k > len(np.unique(X, axis=0)):
         raise ValueError("k must be between 1 and the number of distinct observations")

@@ -519,7 +519,8 @@ def cmd_explore(args) -> None:
             print(f"  {language}: {len(verses)} verses, skipped")
             continue
         print(f"{language}: {len(verses):,} verses")
-        data = build(verses, language, seed=args.seed, progress=lambda m: None)
+        data = build(verses, language, seed=args.seed, workers=args.workers,
+                     progress=lambda m: print(f'  {m.strip()}', flush=True))
         write(data, out / language)
         built.append((language, data))
         print(f"  wrote {out / language / 'index.html'} "
@@ -543,13 +544,23 @@ def _write_explorer_index(out: Path, built: list) -> None:
     for _, data in built:
         for s in data["strategies"]:
             strategies.setdefault(s["key"], s)
+
+    def by_strategy(data: dict) -> dict:
+        """Keyed by name, not packed by position: this page's key order is the union, not a language's."""
+        packed = data["book_groups"]
+        return {key: {"k": packed["gk"][i], "reason": packed["gr"][i],
+                      "ari": packed["gari"][i], "n": packed["gn"]}
+                for i, key in enumerate(data["keys"])}
+
     payload = {
         "keys": list(strategies),
         "strategies": list(strategies.values()),
+        "group_reasons": built[0][1]["group_reasons"],
         "languages": [{"code": lang, "label": LANGUAGE_NAMES.get(lang, lang),
                        "verses": data["n_verses"],
                        "books": sum(len(c["children"]) for c in data["tree"]),
-                       "keys": [s["key"] for s in data["strategies"]]}
+                       "keys": [s["key"] for s in data["strategies"]],
+                       "groups": by_strategy(data)}
                       for lang, data in built],
     }
     (out / "index.html").write_text(
@@ -560,23 +571,35 @@ def _write_explorer_index(out: Path, built: list) -> None:
         'family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">'
         f"<style>{CSS}.row{{text-decoration:none;display:grid}}"
         ".row.dim{opacity:.55}.row .w{grid-column:1;font-size:12.5px;color:var(--clay)}"
+        ".row .k{grid-row:2;grid-column:2;font-family:'IBM Plex Mono',monospace;font-size:11.5px;"
+        "color:var(--muted);white-space:nowrap;align-self:end}"
         "</style></head><body><div class=\"wrap\">"
         "<h1>Style explorer</h1>"
         "<p class=\"small\">Pick a strategy, then a language, then drill from collection to book to "
-        "chapter to verse. The strategy can be changed on every page and everything re-plots — a grouping "
-        "that survives the change means something, one that rearranges itself does not.</p>"
+        "chapter to verse. Every level reports how many style groups the units it lists fall into, and "
+        "the strategy can be changed on every page — a grouping that survives the change means "
+        "something, one that rearranges itself does not.</p>"
         "<div class=\"bar\" id=\"bar\"></div><div id=\"list\"></div>"
-        "<p class=\"small\" style=\"margin-top:22px\">Positions are the first two principal components of "
-        "the chosen strategy's standardised features, fitted over every verse of that language. They are "
-        "comparable within a strategy, never between strategies. No model is involved at any point.</p>"
+        "<p class=\"small\" style=\"margin-top:22px\">A style group is a partition of the units a level "
+        "lists, fitted on pooled profiles and kept only if it survives refitting on 80% subsamples at an "
+        "adjusted Rand index of 0.8 or better. One group means no split was supported, not that one hand "
+        "wrote the text. Positions are the first two principal components of the chosen strategy's "
+        "standardised features, comparable within a strategy and never between strategies. No model is "
+        "involved at any point.</p>"
         "<script>const DATA = " + _json.dumps(payload, ensure_ascii=False) + ";\n" + JS_COMMON + """
 function render() {
   document.getElementById('list').innerHTML = DATA.languages.map(l => {
-    const has = l.keys.includes(strategy);
+    const has = l.keys.includes(strategy), g = l.groups[strategy];
+    const count = !has ? '' : g.k > 1
+      ? `<span class="k">${g.k} style groups</span>`
+      : `<span class="k">1 style group</span>`;
+    const why = (!has || g.k > 1) ? '' :
+      `<span class="w">${(DATA.group_reasons || {})[g.reason] || 'no split is supported'}</span>`;
     return `<a class="row${has ? '' : ' dim'}" href="${l.code}/index.html?s=${encodeURIComponent(strategy)}">
       <span class="t">${l.label}</span>
       <span class="n">${l.verses.toLocaleString()} verses</span>
       <span class="s">${l.books} books · ${l.keys.length} strategies</span>
+      ${count}${why}
       ${has ? '' : `<span class="w">no ${strategy} data here — opens on ${l.keys[0]}</span>`}
     </a>`;
   }).join('');
@@ -963,6 +986,8 @@ def main(argv: list[str] | None = None) -> None:
                     help="explore every manuscript's text rather than one witness per work")
     ex.add_argument('--seed', type=int, default=0)
     ex.add_argument('--out', default=None)
+    ex.add_argument('--workers', type=int, default=None,
+                    help='processes to group strategies across (default: one per strategy, capped at the core count)')
     ex.set_defaults(func=cmd_explore)
 
     r = sub.add_parser("report", help="render output/<language>/report.md")
