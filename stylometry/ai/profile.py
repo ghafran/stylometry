@@ -303,7 +303,7 @@ def coerce_profile(p: object, *, allow_legacy: bool = False) -> dict | None:
 
 def chunk_verses(verses: list[dict], size: int = 25) -> list[list[dict]]:
     """Uninterrupted units of one passage, at most ``size`` per chunk."""
-    from .continuity import consecutive
+    from ..continuity import consecutive
 
     if size < 1:
         raise ValueError("chunk size must be positive")

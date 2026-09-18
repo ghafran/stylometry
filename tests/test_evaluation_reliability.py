@@ -10,8 +10,8 @@ from sklearn.model_selection import StratifiedKFold, cross_val_score
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
-from stylometry.ai_profile import CATEGORICAL_DIMS, NUMERIC_DIMS, PROMPT_VERSION, SCHEMA_VERSION, validate_profiles_for_corpus
-from stylometry.compare import (
+from stylometry.ai.profile import CATEGORICAL_DIMS, NUMERIC_DIMS, PROMPT_VERSION, SCHEMA_VERSION, validate_profiles_for_corpus
+from stylometry.ai.compare import (
     ModelSet,
     _fit_tag_vectorizer,
     _grouped_folds,

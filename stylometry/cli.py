@@ -4,7 +4,7 @@
     stylometry estimate  [--scope ..] [--model] print the AI-profiling cost estimate
     stylometry profile   [--backend sdk|batch|cli] [--scope ..] [--limit N]   AI style profiles
     stylometry profile-collect                  fetch finished Batch API results
-    stylometry cluster   [--k N] [--scope ..] [--no-ai]   discover authors A1..Ak
+    stylometry cluster   [--k N] [--scope ..] [--with-ai]  exploratory style groups (lexical by default)
     stylometry report                           write output/report.md
     stylometry html / witnesses                 HTML site; manuscript-witness comparison
     stylometry compare-models --set NAME=PATH   accuracy, stability and cost of the profiling models
@@ -99,7 +99,7 @@ def cmd_build(args) -> None:
 
 
 def cmd_estimate(args) -> None:
-    from .ai_profile import estimate_cost, load_profiles, chunk_verses
+    from .ai.profile import estimate_cost, load_profiles, chunk_verses
 
     verses = _select(args, _load_corpus())
     done = load_profiles(_profiles_path(args))
@@ -119,7 +119,7 @@ def cmd_estimate(args) -> None:
 
 
 def cmd_profile(args) -> None:
-    from .ai_profile import (estimate_cost, run_profile, load_profiles, profile_settings,
+    from .ai.profile import (estimate_cost, run_profile, load_profiles, profile_settings,
                              _resume_chunks, OPENAI_PRESETS)
 
     verses = _select(args, _load_corpus())
@@ -146,25 +146,33 @@ def cmd_profile(args) -> None:
 
 
 def cmd_collect(args) -> None:
-    from .ai_profile import collect_batches
+    from .ai.profile import collect_batches
 
     verses = _load_corpus()
     print(json.dumps(collect_batches(_profiles_path(args), {v["id"]: v for v in verses}, wait=args.wait), indent=1))
 
 
 def cmd_cluster(args) -> None:
-    from .ai_profile import load_profiles
     from .cluster import run
 
     args.language = args.language or "grc"
     verses = _select(args, _load_corpus())
     if not verses:
         sys.exit(f"no verses for language={args.language} scope={args.scope} works={args.works}")
-    profiles = None if args.no_ai else load_profiles(_profiles_path(args))
-    if profiles is not None and not profiles:
-        sys.exit("no AI profiles found; generate profiles or explicitly use --no-ai")
-    if profiles and not any(v["id"] in profiles for v in verses):
-        sys.exit("no AI profiles cover this selection; generate profiles or explicitly use --no-ai")
+    # Lexical by default: style is measured from the text alone, so a run needs no key, no network
+    # and no spend, and anyone with the corpus can reproduce it exactly. --with-ai opts back into the
+    # archived profiling in stylometry/ai/, which is kept but is no longer part of the analysis.
+    profiles = None
+    if args.with_ai:
+        from .ai.profile import load_profiles
+
+        profiles = load_profiles(_profiles_path(args))
+        if not profiles:
+            sys.exit(f"--with-ai found no profiles in {_profiles_path(args)}; "
+                     f"drop the flag to run on lexical features")
+        if not any(v["id"] in profiles for v in verses):
+            sys.exit(f"--with-ai: no profile in {_profiles_path(args)} covers this selection; "
+                     f"drop the flag to run on lexical features")
     weights = {"lex": args.w_lex, "ai": args.w_ai, "tags": args.w_tags}
     out = _lang_out(args)
     summary = run(verses, profiles, out, k=args.k, kmin=args.kmin, kmax=args.kmax,
@@ -202,7 +210,7 @@ def cmd_cluster_passages(args) -> None:
     # asked for explicitly, and the summary records which of the two was run.
     pooled = None
     if args.with_ai:
-        from .ai_profile import load_profiles
+        from .ai.profile import load_profiles
 
         verse_profiles = load_profiles(_profiles_path(args))
         if not verse_profiles:
@@ -506,7 +514,7 @@ def cmd_accuracy_gate(args) -> None:
 
 
 def cmd_compare(args) -> None:
-    from .compare import build, load_set, parse_set
+    from .ai.compare import build, load_set, parse_set
     from .corpus.meta import select_verses
 
     verses = _load_corpus()
@@ -712,7 +720,12 @@ def main(argv: list[str] | None = None) -> None:
     c.add_argument("--w-lex", type=float, default=1.0)
     c.add_argument("--w-ai", type=float, default=1.0)
     c.add_argument("--w-tags", type=float, default=0.7)
-    c.add_argument("--no-ai", action="store_true", help="ignore AI profiles even if present")
+    c.add_argument("--with-ai", action="store_true",
+                   help="also use the archived AI style profiles (stylometry/ai/). Off by default: "
+                        "the analysis is lexical, so it needs no API key, no network and no spend, "
+                        "and reproduces exactly from the corpus alone.")
+    c.add_argument("--no-ai", action="store_true",
+                   help=argparse.SUPPRESS)  # retained so older scripts keep working; lexical is now the default
     c.add_argument("--seed", type=int, default=0)
     c.add_argument("--k-criterion", default="silhouette", choices=["silhouette", "bic", "davies_bouldin", "calinski"],
                    help="rank supported style partitions; single-group and stability checks still apply")

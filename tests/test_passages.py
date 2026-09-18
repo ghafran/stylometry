@@ -204,7 +204,7 @@ def test_bridging_recovers_text_that_chapter_length_would_otherwise_discard():
 # --- pooling verse profiles into a passage ---------------------------------------------------------
 
 def test_pooled_profile_averages_the_scales_and_takes_the_commonest_category():
-    from stylometry.ai_profile import CATEGORICAL_DIMS, NUMERIC_DIMS
+    from stylometry.ai.profile import CATEGORICAL_DIMS, NUMERIC_DIMS
     from stylometry.passages import pool_profiles
 
     def profile(ident, value, category, tag):
@@ -223,7 +223,7 @@ def test_pooled_profile_averages_the_scales_and_takes_the_commonest_category():
 
 
 def test_a_passage_mostly_lacking_profiles_is_omitted_rather_than_averaged_from_a_fragment():
-    from stylometry.ai_profile import CATEGORICAL_DIMS, NUMERIC_DIMS
+    from stylometry.ai.profile import CATEGORICAL_DIMS, NUMERIC_DIMS
     from stylometry.passages import pool_profiles
 
     one = {"id": "a", **{d: 0.5 for d in NUMERIC_DIMS},

@@ -7,7 +7,7 @@ from types import SimpleNamespace as NS
 
 import pytest
 
-from stylometry import ai_profile as ap
+from stylometry.ai import profile as ap
 
 
 def verses(n=4):

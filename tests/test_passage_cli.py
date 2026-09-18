@@ -5,7 +5,8 @@ import json
 
 import pytest
 
-from stylometry import ai_profile, cli, cluster
+from stylometry import cli, cluster
+from stylometry.ai import profile as ai_profile
 
 
 def source(position, count=250, *, work="W", language="grc", collection="NT", **changes):

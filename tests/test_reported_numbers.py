@@ -15,7 +15,7 @@ import numpy as np
 import pytest
 
 from stylometry import cluster as cl
-from stylometry.ai_profile import CATEGORICAL_DIMS, NUMERIC_DIMS, chunk_verses
+from stylometry.ai.profile import CATEGORICAL_DIMS, NUMERIC_DIMS, chunk_verses
 from stylometry.features import lexical_features
 
 
@@ -151,7 +151,7 @@ def test_chunking_default_size_is_small_enough_to_answer_in_one_response() -> No
 
 def test_a_model_does_not_vote_in_its_own_consensus_score() -> None:
     """Self-voting would inflate every score and flatter whichever model is being judged."""
-    from stylometry.compare import ModelSet, consensus_agreement
+    from stylometry.ai.compare import ModelSet, consensus_agreement
 
     ids = [f"grc:X.1.{i}" for i in range(1, 11)]
 

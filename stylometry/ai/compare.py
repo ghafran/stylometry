@@ -37,7 +37,7 @@ from sklearn.metrics import accuracy_score, adjusted_rand_score
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
-from .ai_profile import (
+from .profile import (
     CATEGORICAL_DIMS, NUMERIC_DIMS, PROMPT_VERSION, SCHEMA_VERSION, load_profiles, validate_profiles_for_corpus,
 )
 
@@ -392,7 +392,7 @@ def cluster_replication(
     sets: dict[str, ModelSet], verses: list[dict], out_root: Path, seed: int = 0
 ) -> dict[str, dict]:
     """Run the real clustering on the pilot verses with each model's profiles (and with none)."""
-    from .cluster import run as cluster_run
+    from ..cluster import run as cluster_run
 
     ids = [v["id"] for v in verses]
     n_works = len({v["work"] for v in verses})
@@ -896,7 +896,7 @@ def render_markdown(res: dict) -> str:
 
 
 def render_html(res: dict) -> str:
-    from .html import LIGHT, page
+    from ..html import LIGHT, page
 
     rec = res["recommendation"]
     models = res["models"]

@@ -16,7 +16,7 @@ from pathlib import Path
 
 import pytest
 
-from stylometry.ai_profile import CATEGORICAL_DIMS, NUMERIC_DIMS, coerce_profile, load_profiles
+from stylometry.ai.profile import CATEGORICAL_DIMS, NUMERIC_DIMS, coerce_profile, load_profiles
 from stylometry.corpus.build import load_corpus
 
 PROCESSED = Path(__file__).resolve().parent.parent / "data" / "processed"

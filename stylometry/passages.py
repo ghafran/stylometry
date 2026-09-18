@@ -169,7 +169,7 @@ def pool_profiles(passages: list[dict], profiles: dict[str, dict], *, min_covera
     itself; ``min_coverage`` is that floor. Averaging discards the within-passage distribution of the
     categorical fields, which is real information a later feature map could use.
     """
-    from .ai_profile import CATEGORICAL_DIMS, NUMERIC_DIMS
+    from .ai.profile import CATEGORICAL_DIMS, NUMERIC_DIMS
 
     if not 0 < min_coverage <= 1:
         raise ValueError("min_coverage must be in (0, 1]")

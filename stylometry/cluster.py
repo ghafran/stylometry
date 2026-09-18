@@ -22,7 +22,6 @@ from sklearn.metrics import adjusted_rand_score, calinski_harabasz_score, davies
 from sklearn.mixture import GaussianMixture
 from sklearn.preprocessing import StandardScaler
 
-from .ai_profile import CATEGORICAL_DIMS, NUMERIC_DIMS, PROMPT_VERSION, validate_profiles_for_corpus
 from .features import lexical_features
 from .continuity import annotate_continuity, consecutive, contiguous_runs
 
@@ -33,11 +32,24 @@ def _standardize(X: np.ndarray) -> np.ndarray:
     return StandardScaler().fit_transform(X).astype(np.float32)
 
 
+def _unverified_profiles(verses: list[dict], profiles: dict[str, dict] | None) -> int:
+    """How many profiles were made with a prompt other than the current one; zero without profiles."""
+    if not profiles:
+        return 0
+    from .ai.profile import PROMPT_VERSION
+
+    return sum(profiles[v["id"]].get("provenance", {}).get("prompt_version") != PROMPT_VERSION
+               for v in verses)
+
+
 def build_blocks(verses: list[dict], profiles: dict[str, dict] | None, seed: int = 0) -> list[tuple[str, np.ndarray, list[str]]]:
     blocks: list[tuple[str, np.ndarray, list[str]]] = []
     X_lex, names_lex = lexical_features(verses, seed=seed)
     blocks.append(("lex", _standardize(X_lex), names_lex))
     if profiles:
+        # Imported here rather than at module scope: the analysis is lexical, and importing the
+        # archived profiling package to define a schema it never uses would undo the separation.
+        from .ai.profile import CATEGORICAL_DIMS, NUMERIC_DIMS
         num = np.array([[float(profiles[v["id"]].get(d, 0.5)) for d in NUMERIC_DIMS] for v in verses], np.float32)
         names = [f"ai:{d}" for d in NUMERIC_DIMS]
         cols = []
@@ -278,6 +290,8 @@ def describe_authors(
             ],
         }
         if profiles:
+            from .ai.profile import NUMERIC_DIMS
+
             entry["ai_profile_means"] = {
                 d: round(float(np.mean([profiles[v["id"]].get(d, 0.5) for v in members])), 3) for d in NUMERIC_DIMS
             }
@@ -400,6 +414,8 @@ def run(
     if profiles is not None:
         if not profiles:
             raise ValueError("no AI profiles; use no-AI mode explicitly")
+        from .ai.profile import validate_profiles_for_corpus
+
         validate_profiles_for_corpus(verses, profiles)
         missing = [v["id"] for v in verses if v["id"] not in profiles]
         if missing:
@@ -521,7 +537,7 @@ def run(
         "profile_metadata": {
             "models": sorted({str(profiles[v["id"]].get("model", "unknown")) for v in verses}) if profiles else [],
             "prompt_versions": sorted({str(profiles[v["id"]].get("provenance", {}).get("prompt_version", "legacy")) for v in verses}) if profiles else [],
-            "unverified_profiles": sum(profiles[v["id"]].get("provenance", {}).get("prompt_version") != PROMPT_VERSION for v in verses) if profiles else 0,
+            "unverified_profiles": _unverified_profiles(verses, profiles),
         },
         "feature_blocks": {name: int(Z.shape[1]) for name, Z, _ in blocks},
         "weights": weights,

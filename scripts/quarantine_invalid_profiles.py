@@ -19,7 +19,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from stylometry.ai_profile import coerce_profile  # noqa: E402
+from stylometry.ai.profile import coerce_profile  # noqa: E402
 
 TAG_RULE = "style_tags must be 1-8 lowercase ASCII snake_case tags"
 

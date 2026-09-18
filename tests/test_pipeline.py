@@ -8,7 +8,7 @@ import numpy as np
 import pytest
 
 from stylometry import cluster as cl
-from stylometry.ai_profile import CATEGORICAL_DIMS, NUMERIC_DIMS, _validate, chunk_verses, output_schema
+from stylometry.ai.profile import CATEGORICAL_DIMS, NUMERIC_DIMS, _validate, chunk_verses, output_schema
 from stylometry.corpus import first1k, inscriptions, sinaiticus, vaticanus
 from stylometry.corpus.build import resolve_witnesses
 from stylometry.corpus.meta import book_code, select_verses
@@ -132,7 +132,7 @@ def test_schema_and_validation():
 
 
 def test_coerce_profile_and_json_prompt():
-    from stylometry.ai_profile import coerce_profile, json_mode_system_prompt, system_prompt
+    from stylometry.ai.profile import coerce_profile, json_mode_system_prompt, system_prompt
 
     # Missing measurements must not be replaced with plausible-looking values.
     assert coerce_profile({"id": "unit_0001", "register": "1.7", "hypotaxis": None}) is None
@@ -197,8 +197,8 @@ def test_lexical_features_reject_mixed_languages():
 
 
 def test_compare_models_metrics():
-    from stylometry.compare import ModelSet, ensemble, pair_agreement, pareto, recommend
-    from stylometry.ai_profile import NUMERIC_DIMS, CATEGORICAL_DIMS
+    from stylometry.ai.compare import ModelSet, ensemble, pair_agreement, pareto, recommend
+    from stylometry.ai.profile import NUMERIC_DIMS, CATEGORICAL_DIMS
 
     def prof(i, shift=0.0, label="narrative"):
         rec = {"id": i, **{d: min(1.0, 0.1 * i + shift) for d in NUMERIC_DIMS}}

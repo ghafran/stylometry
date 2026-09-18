@@ -158,7 +158,7 @@ def test_divine_name_counts_match_the_text(tmp_path: Path) -> None:
 
 def _profiles(verses: list[dict]) -> dict[str, dict]:
     """Minimal valid AI profiles, so the device-tag and marker branches are actually reached."""
-    from stylometry.ai_profile import CATEGORICAL_DIMS, NUMERIC_DIMS
+    from stylometry.ai.profile import CATEGORICAL_DIMS, NUMERIC_DIMS
 
     return {v["id"]: {"id": v["id"], **{d: 0.4 for d in NUMERIC_DIMS},
                       **{d: values[0] for d, values in CATEGORICAL_DIMS.items()},
