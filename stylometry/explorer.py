@@ -263,10 +263,16 @@ def build(verses: list[dict], language: str, seed: int = 0, progress=print,
             out.update(extra)
         return out
 
+    # The language-wide partition of every book runs in the same nested order `_partitions` built it,
+    # so a single running index maps it back onto the tree. It is carried per book because the
+    # alternative - reading a book's group *within its own collection* and comparing that across
+    # collections - is meaningless: both label sets start at A1 whatever the data says.
+    book_index = 0
     tree = []
     for ci, (collection, works) in enumerate(shape):
         works_out = []
         collection_rows: list[int] = []
+        collection_book_span = (book_index, book_index + len(works))
         for wi, (work, chapters) in enumerate(works):
             chapters_out = []
             work_rows: list[int] = []
@@ -290,12 +296,20 @@ def build(verses: list[dict], language: str, seed: int = 0, progress=print,
                 **node(work_rows, title, "work", {
                     "code": work,
                     "g": [groups[k]["books"][ci]["labels"][wi] for k in keys],
+                    # ... and its group among every book of the language, which is a different thing.
+                    "gl": [groups[k]["language_books"]["labels"][book_index] for k in keys],
                     **_pack([groups[k]["chapters"][(ci, wi)] for k in keys]),
                 }),
                 "children": chapters_out})
+            book_index += 1
+        lo, hi = collection_book_span
         tree.append({
             **node(collection_rows, collection, "collection", {
                 "g": [groups[k]["collections"]["labels"][ci] for k in keys],
+                # How this collection's books fall across the language-wide grouping: the line that
+                # says whether a grouping of the language tracks its collections or cuts across them.
+                "glsz": [[groups[k]["language_books"]["labels"][lo:hi].count(g)
+                          for g in range(1, groups[k]["language_books"]["k"] + 1)] for k in keys],
                 **_pack([groups[k]["books"][ci] for k in keys]),
             }),
             "children": works_out})

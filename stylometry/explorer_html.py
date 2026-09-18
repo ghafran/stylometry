@@ -62,8 +62,20 @@ color:var(--muted);margin:-4px 0 9px}
 .gsum b{color:var(--ink);font-weight:600}
 .legend{display:flex;flex-wrap:wrap;gap:5px 14px;font-size:12px;color:var(--muted);margin:0 0 11px}
 .legend i,.gb i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+.vrow{display:grid;grid-template-columns:78px 40px minmax(0,1fr);gap:3px 11px;align-items:start;
+width:100%;text-align:left;background:var(--card);border:1px solid var(--line);border-left:3px solid transparent;
+border-radius:9px;padding:9px 13px;margin-bottom:7px;font:inherit;color:inherit;cursor:pointer}
+.vrow:hover{border-color:var(--clay)}
+.vrow .vref{font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-weight:600;color:var(--ink);white-space:nowrap}
+.vrow .vtok{grid-row:2;grid-column:1;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--faint)}
+.vrow .vgrp{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;white-space:nowrap}
+.vrow .vgrp i{display:block;width:100%;height:3px;border-radius:2px;margin-top:3px}
+.vrow .vbody{grid-row:1/span 2;grid-column:3}
+.vhead{display:grid;grid-template-columns:78px 40px minmax(0,1fr);gap:11px;padding:0 13px 5px;
+font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint)}
 .gin{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);margin-left:7px;font-weight:400}
 .gin i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+.gb.lg{grid-row:1;grid-column:2;align-self:start;color:var(--ink);font-weight:600}
 .gb{grid-row:2;grid-column:2;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);
 white-space:nowrap;align-self:end}
 .headline{background:var(--panel);border-radius:9px;padding:11px 14px;margin:0 0 16px;font-size:13.5px;color:var(--muted)}
@@ -78,6 +90,14 @@ white-space:nowrap;align-self:end}
 .bval{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
 .stack{display:flex;height:9px;gap:2px;border-radius:3px;overflow:hidden;margin:5px 0 1px;max-width:260px}
 .stack>span{display:block;height:100%;min-width:2px}
+.rbars{grid-column:1/-1;display:block;margin:7px 0 1px;max-width:340px}
+.rcap{display:block;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.05em;
+text-transform:uppercase;color:var(--faint);margin-bottom:4px}
+.rrow{display:grid;grid-template-columns:24px 1fr auto;align-items:center;gap:7px;margin-bottom:3px}
+.rlab{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600}
+.rtrack{height:8px;background:var(--panel);border-radius:2px;overflow:hidden}
+.rfill{display:block;height:100%;border-radius:0 2px 2px 0;min-width:2px}
+.rval{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums}
 .row{border-left:3px solid transparent}
 .vtext.grouped{padding-left:9px;border-left:3px solid var(--line)}
 """
@@ -157,16 +177,61 @@ function groupLegend(node) {
 // How the units divide between the groups. A1 is always the largest: the clustering ranks them by
 // size before naming them, so a long tail of one-member groups is visible at a glance rather than
 // hidden inside a count of "5 style groups".
-function groupBars(node, unit) {
-  const g = groupsOf(node);
-  if (g.k < 2 || !g.sizes.length) return '';
-  const max = Math.max(...g.sizes), total = g.sizes.reduce((a, b) => a + b, 0);
-  return `<h2>Style groups</h2><div class="bars">` + g.sizes.map((c, i) => `
+function barChart(sizes, unit, heading, note) {
+  if (!sizes.length) return '';
+  const max = Math.max(...sizes), total = sizes.reduce((a, b) => a + b, 0);
+  if (!total) return '';
+  return `<h2>${heading}</h2>` + (note || '') + `<div class="bars">` + sizes.map((c, i) => `
     <div class="brow">
       <span class="blab">${A(i + 1)}</span>
       <span class="btrack"><span class="bfill" style="width:${(c / max * 100).toFixed(1)}%;background:${G(i + 1)}"></span></span>
       <span class="bval">${c.toLocaleString()} · ${(c / total * 100).toFixed(0)}%</span>
-    </div>`).join('') + `</div>`;
+    </div>`).join('') + `</div><p class="small">${total.toLocaleString()} ${unit}.</p>`;
+}
+
+function groupBars(node, unit, heading) {
+  const g = groupsOf(node);
+  const why = g.k > 1 ? '' :
+    `<p class="small">${(DATA.group_reasons || {})[g.reason] || 'no split is supported'}.</p>`;
+  return barChart(g.sizes, unit, heading || 'Style groups', why);
+}
+
+// The same chart for a collection's books placed in the language-wide grouping, which is the only
+// grouping comparable between collections.
+function acrossChart(node, label) {
+  const sizes = (node.glsz ? node.glsz[idx()] : null) || [];
+  return barChart(sizes, `books of ${label}`, "Where its books sit in the language's groups",
+    `<p class="small">Groups fitted over every book of the language, so these are comparable
+     with the other collections. The chart above groups ${label}'s books among themselves.</p>`);
+}
+
+// A chart small enough to sit inside a row, so a list can be read for how each entry divides without
+// selecting it first. Same bars as the side panel, tighter.
+function rowBars(sizes, caption) {
+  const total = sizes.reduce((a, b) => a + b, 0);
+  if (sizes.filter(c => c > 0).length < 2 || !total) return '';
+  const max = Math.max(...sizes);
+  return `<span class="rbars"><span class="rcap">${caption}</span>` + sizes.map((c, i) => c ? `
+    <span class="rrow">
+      <span class="rlab" style="color:${G(i + 1)}">${A(i + 1)}</span>
+      <span class="rtrack"><span class="rfill" style="width:${(c / max * 100).toFixed(1)}%;background:${G(i + 1)}"></span></span>
+      <span class="rval">${c.toLocaleString()}</span>
+    </span>` : '').join('') + `</span>`;
+}
+
+// A collection's books, placed in the grouping of *every* book of the language. This is the only
+// comparison that can show whether a grouping follows the collections or cuts across them; a book's
+// group within its own collection cannot, because every collection's labels start at A1.
+function acrossLanguage(node) {
+  const sizes = (node.glsz ? node.glsz[idx()] : null) || [];
+  return rowBars(sizes, `its ${sizes.reduce((a, b) => a + b, 0)} books across the language's groups`);
+}
+
+// How this node's own children divide: a collection's books among themselves, a book's chapters,
+// a chapter's verses.
+function ownBars(node, unit) {
+  const g = groupsOf(node);
+  return g.k > 1 ? rowBars(g.sizes, `its ${g.n} ${unit} in ${g.k} groups`) : '';
 }
 
 const groupStack = node => {
@@ -181,6 +246,12 @@ const groupStack = node => {
 // so colour is never the only thing carrying which group a unit is in.
 const groupBadge = (node, child) =>
   groupsOf(node).k > 1 ? `<span class="gb"><i style="background:${G(groupOf(child))}"></i>${A(groupOf(child))}</span>` : '';
+// A book's group among every book of the language. Always defined, and the one that can be compared
+// between collections, so it is on the row even when the collection does not split internally.
+const langOf = n => (n.gl ? n.gl[idx()] : 0);
+const langBadge = (n, language) => langOf(n)
+  ? `<span class="gb lg"><i style="background:${G(langOf(n))}"></i>${A(langOf(n))} in ${language}</span>` : '';
+
 // The row itself is tinted, so a list of text can be read down the left edge for where a group changes.
 const groupEdge = (node, g) => groupsOf(node).k > 1 ? ` style="border-left-color:${G(g)}"` : '';
 
@@ -239,7 +310,7 @@ def write(data: dict, out_dir: str | Path) -> Path:
               "group_reasons": data["group_reasons"], "reliable_tokens": data["reliable_tokens"]}
 
     # --- overview: collections, their works, and the chapters of each --------------------------------
-    keep = ("gk", "gr", "gari", "gn", "gtok", "gsz", "g")
+    keep = ("gk", "gr", "gari", "gn", "gtok", "gsz", "g", "gl", "glsz")
     slim = {
         **shared,
         "book_groups": data["book_groups"], "collection_groups": data["collection_groups"],
@@ -264,7 +335,8 @@ def write(data: dict, out_dir: str | Path) -> Path:
 <div class="bar" id="bar"></div>
 <div class="headline" id="head"></div>
 <div class="cols"><div id="list"></div><div><div class="card" id="side"></div></div></div>
-<script>const DATA = """ + json.dumps(slim, ensure_ascii=False) + ";\n" + JS_COMMON + """
+<script>const DATA = """ + json.dumps(slim, ensure_ascii=False) + ";\nconst LANG = " \
+        + json.dumps(name, ensure_ascii=False) + ";\n" + JS_COMMON + """
 let collection = null;
 function render() {
   const list = document.getElementById('list'), side = document.getElementById('side');
@@ -290,12 +362,18 @@ function render() {
       : `<h2>${DATA.tree[collection].label} — books</h2>`)
     + groupSummary(parent, unit) + groupLegend(parent)
     + (top ? '' : '<button class="row" id="up"><span class="t">← back to collections</span><span class="n"></span></button>')
-    + nodes.map((n, i) => `<button class="row" data-i="${i}"${groupEdge(parent, groupOf(n))}>
+    + nodes.map((n, i) => {
+        // On the books list the edge follows the language-wide group: it is always defined, and it
+        // is the only one that means the same thing in another collection.
+        const edge = top ? groupEdge(parent, groupOf(n))
+                         : (langOf(n) ? ` style="border-left-color:${G(langOf(n))}"` : '');
+        return `<button class="row" data-i="${i}"${edge}>
         <span class="t">${n.label}</span>
-        <span class="n">${n.n_verses.toLocaleString()} verses</span>
-        <span class="s">${n.code ? n.code + ' · ' + n.n_chapters + ' chapters · ' : ''}${n.n_tokens.toLocaleString()} tokens</span>
+        <span class="n">${top ? n.n_verses.toLocaleString() + ' verses' : langBadge(n, LANG)}</span>
+        <span class="s">${n.code ? n.code + ' · ' + n.n_chapters + ' chapters · ' : ''}${n.n_tokens.toLocaleString()} tokens${top ? '' : ' · ' + n.n_verses.toLocaleString() + ' verses'}</span>
         ${groupBadge(parent, n)}
-      </button>`).join('');
+        ${top ? acrossLanguage(n) + ownBars(n, 'books') : ownBars(n, 'chapters')}
+      </button>`;}).join('');
   if (!top) document.getElementById('up').addEventListener('click', () => { collection = null; render(); });
   list.querySelectorAll('.row[data-i]').forEach(b => b.addEventListener('click', () => {
     const n = nodes[+b.dataset.i];
@@ -309,7 +387,12 @@ function render() {
   plot(nodes.map(n => ({ label: n.label, xy: xyOf(n), g: many ? groupOf(n) : 0 })), holder, null);
   const bars = document.createElement('div');
   side.appendChild(bars);
-  bars.innerHTML = groupBars(parent, unit);
+  // At the top the list is three collections, which is too few to partition and says so; the chart
+  // worth showing there is the one the headline reports, every book of the language.
+  bars.innerHTML = top
+    ? groupBars(DATA.book_groups, 'books of this language', 'Style groups across the language')
+    : groupBars(parent, `books of ${here.label}`, `Style groups within ${here.label}`)
+      + acrossChart(here, here.label);
   const mk = document.createElement('div');
   side.appendChild(mk);
   markerList(here || { markers: {} }, mk);
@@ -350,14 +433,15 @@ function render() {{
       + DATA.chapters.map((c, i) =>
       `<button class="row" data-i="${{i}}"${{groupEdge(DATA.work, groupOf(c))}}>
        <span class="t">Chapter ${{c.label}}</span>
-       <span class="n">${{c.n_verses}} verses</span>${{groupBadge(DATA.work, c)}}</button>`).join('');
+       <span class="n">${{c.n_verses}} verses</span>${{groupBadge(DATA.work, c)}}
+       ${{ownBars(c, 'verses')}}</button>`).join('');
     list.querySelectorAll('.row').forEach(b => b.addEventListener('click', () => {{
       chapter = +b.dataset.i; verse = null; render(); }}));
     const h = document.createElement('div'); side.innerHTML = ''; side.appendChild(h);
     const many = groupsOf(DATA.work).k > 1;
     plot(DATA.chapters.map(c => ({{ label: 'Chapter ' + c.label, xy: xyOf(c), g: many ? groupOf(c) : 0 }})), h, null);
     const bars = document.createElement('div'); side.appendChild(bars);
-    bars.innerHTML = groupBars(DATA.work, 'chapters');
+    bars.innerHTML = groupBars(DATA.work, 'chapters of this book', 'Style groups among the chapters');
     const mk = document.createElement('div'); side.appendChild(mk); markerList(DATA.work, mk);
     mk.insertAdjacentHTML('afterbegin', '<p class="small">Each point is a chapter of this book.</p>');
     return;
@@ -366,20 +450,22 @@ function render() {{
   const many = groupsOf(ch).k > 1;
   list.innerHTML = `<h2>Chapter ${{ch.label}} — verses</h2>` + groupSummary(ch, 'verses') + groupLegend(ch)
     + `<button class="row" id="up"><span class="t">← back to chapters</span><span class="n"></span></button>`
-    + ch.v.map((v, i) => `<button class="row" data-i="${{i}}"${{groupEdge(ch, vGroupOf(v))}}>
-        <span class="t">${{ch.label}}:${{v[0]}}
-          ${{many ? `<span class="gin"><i style="background:${{G(vGroupOf(v))}}"></i>${{A(vGroupOf(v))}}</span>` : ''}}</span>
-        <span class="n">${{v[2]}} tokens</span>
-        <span class="s vtext ${{RTL ? 'rtl' : ''}}">${{v[1]}}</span>
+    + `<div class="vhead"><span>verse</span><span>${{many ? 'group' : ''}}</span><span>text</span></div>`
+    + ch.v.map((v, i) => `<button class="vrow" data-i="${{i}}"${{groupEdge(ch, vGroupOf(v))}}>
+        <span class="vref">${{ch.label}}:${{v[0]}}</span>
+        <span class="vtok">${{v[2]}} tok</span>
+        <span class="vgrp" style="color:${{many ? G(vGroupOf(v)) : 'var(--faint)'}}">${{many ? A(vGroupOf(v)) : '—'}}
+          ${{many ? `<i style="background:${{G(vGroupOf(v))}}"></i>` : ''}}</span>
+        <span class="vbody vtext ${{RTL ? 'rtl' : ''}}">${{v[1]}}</span>
       </button>`).join('');
   document.getElementById('up').addEventListener('click', () => {{ chapter = null; verse = null; render(); }});
-  list.querySelectorAll('.row[data-i]').forEach(b => b.addEventListener('click', () => {{
+  list.querySelectorAll('.vrow[data-i]').forEach(b => b.addEventListener('click', () => {{
     verse = +b.dataset.i; render(); }}));
   const h = document.createElement('div'); side.innerHTML = ''; side.appendChild(h);
   plot(ch.v.map(v => ({{ label: ch.label + ':' + v[0], xy: vxyOf(v), g: many ? vGroupOf(v) : 0 }})), h, p => {{
     verse = ch.v.findIndex(v => ch.label + ':' + v[0] === p.label); render(); }});
   const bars = document.createElement('div'); side.appendChild(bars);
-  bars.innerHTML = groupBars(ch, 'verses');
+  bars.innerHTML = groupBars(ch, `verses of chapter ${{ch.label}}`, 'Style groups among the verses');
   const mk = document.createElement('div'); side.appendChild(mk);
   if (verse !== null) {{
     const v = ch.v[verse], xy = vxyOf(v);

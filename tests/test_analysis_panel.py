@@ -613,3 +613,92 @@ def test_the_front_page_shows_how_each_language_divides(tmp_path):
     page = (tmp_path / "index.html").read_text(encoding="utf-8")
     assert '"sizes"' in page and 'class="stack"' in page
     assert "A${i + 1}" in page
+
+
+def test_a_book_carries_its_group_among_all_books_not_only_within_its_collection(tmp_path):
+    """The two are different numbers and confusing them answers the wrong question.
+
+    A book's group within its own collection cannot be compared across collections: every
+    collection's labels start at A1, so suras would be matched against suras and the comparison
+    could not track the collection whatever the data said. The language-wide partition is the one
+    that answers it, so every book carries its place in that too, and every collection carries how
+    its books spread across it.
+    """
+    from stylometry.explorer import build
+
+    data = build(_explorer_verses(n_works=12, n_chapters=2, per_chapter=9),
+                 "grc", progress=lambda m: None, workers=1)
+    n_keys = len(data["keys"])
+    seen = {i: [] for i in range(n_keys)}
+    for collection in data["tree"]:
+        assert len(collection["glsz"]) == n_keys
+        for i, spread in enumerate(collection["glsz"]):
+            assert len(spread) == data["book_groups"]["gk"][i], "one slot per language-wide group"
+            assert sum(spread) == len(collection["children"]), "all of its books are placed"
+        for work in collection["children"]:
+            assert len(work["gl"]) == n_keys
+            for i, g in enumerate(work["gl"]):
+                assert 1 <= g <= data["book_groups"]["gk"][i]
+                seen[i].append(g)
+    for i, groups in seen.items():
+        assert len(groups) == data["book_groups"]["gn"], "every book of the language, exactly once"
+        for g in range(1, data["book_groups"]["gk"][i] + 1):
+            assert groups.count(g) == data["book_groups"]["gsz"][i][g - 1], "and the counts agree"
+
+
+def test_the_bar_chart_is_shown_at_every_level_and_verses_get_a_group_column(tmp_path):
+    from stylometry.explorer import build
+    from stylometry.explorer_html import write
+
+    data = build(_explorer_verses(n_works=12, n_chapters=2, per_chapter=9),
+                 "grc", progress=lambda m: None, workers=1)
+    out = write(data, tmp_path / "grc")
+    overview = (out / "index.html").read_text(encoding="utf-8")
+    book = sorted((out / "works").glob("*.html"))[0].read_text(encoding="utf-8")
+
+    assert "Style groups across the language" in overview
+    assert "Style groups within" in overview
+    assert "acrossLanguage" in overview and '"glsz"' in overview
+    assert "Style groups among the chapters" in book
+    assert "Style groups among the verses" in book
+    # The verse list is a table: reference, group, text.
+    assert 'class="vhead"' in book and 'class="vrow"' in book and 'class="vgrp"' in book
+    # A chart with one bar still renders, so the level is never simply blank: the only thing that
+    # suppresses it is having nothing at all to draw.
+    assert "function barChart" in book
+    assert "g.k < 2" not in book.split("function groupBars")[1].split("}")[0]
+
+
+def test_every_row_carries_its_own_bar_chart(tmp_path):
+    """A list should be readable for how each entry divides, without selecting it first."""
+    from stylometry.explorer import build
+    from stylometry.explorer_html import write
+
+    data = build(_explorer_verses(n_works=12, n_chapters=3, per_chapter=10),
+                 "grc", progress=lambda m: None, workers=1)
+    out = write(data, tmp_path / "grc")
+    overview = (out / "index.html").read_text(encoding="utf-8")
+    book = sorted((out / "works").glob("*.html"))[0].read_text(encoding="utf-8")
+
+    assert "function rowBars" in overview and "function ownBars" in overview
+    # A collection shows both: its books among themselves, and its books across the whole language.
+    assert "acrossLanguage(n) + ownBars(n, 'books')" in overview
+    assert "ownBars(n, 'chapters')" in overview, "a book row shows how its chapters divide"
+    assert "ownBars(c, 'verses')" in book, "a chapter row shows how its verses divide"
+    assert ".rbars" in overview and ".rfill" in overview
+
+
+def test_a_book_shows_its_group_across_the_language_even_when_its_collection_does_not_split(tmp_path):
+    """The gap this closes: drill into a collection whose books do not divide among themselves and
+    every row was blank, although each book does have a place in the language-wide grouping."""
+    from stylometry.explorer import build
+    from stylometry.explorer_html import write
+
+    data = build(_explorer_verses(n_works=12, n_chapters=2, per_chapter=9),
+                 "grc", progress=lambda m: None, workers=1)
+    overview = (write(data, tmp_path / "grc") / "index.html").read_text(encoding="utf-8")
+    assert "const langOf" in overview and "langBadge(n, LANG)" in overview
+    assert "const LANG = " in overview, "the badge names the language it is comparing across"
+    assert "acrossChart(here, here.label)" in overview, "and the side panel charts the same thing"
+    # The row is tinted by the language-wide group there, so the list reads across collections.
+    assert "border-left-color:${G(langOf(n))}" in overview

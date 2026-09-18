@@ -223,50 +223,46 @@ reports show matn without isnad.
 
 **An exploratory observation that constrains the design, recorded before 7.1 is written.** Building
 the explorer over the rebuilt corpus put both Arabic collections in one space: 211 books, 114 suras
-and 97 kutub, grouped book by book under each of the fourteen strategies. The grouping does **not**
-track the collection. Adjusted Rand index against the Quran/Bukhari label:
+and 97 kutub, pooled to one profile per book and grouped under each of the fourteen strategies.
+**Nearly every strategy separates the two collections, and several separate them perfectly.** The
+best stability-scoring candidate for each, and how far that partition agrees with the Quran/hadith
+label:
 
-| clause | clause 5 groups | 0.16 |
-|---|---|---|
-| word_frequency, hapax, topics | 2 groups each | 0.13 – 0.15 |
-| the other ten strategies | 1 – 5 groups | 0.00 – 0.02 |
+| strategy | best candidate | min ARI | ARI vs collection |
+|---|---|---:|---:|
+| word_frequency, char_ngrams, length, punctuation, topics | k=2 | 0.98 – 1.00 | **1.00** |
+| word_ngrams, embeddings | k=2 | 0.94 – 0.98 | 0.94 |
+| hapax | k=2 | 1.00 | 0.91 |
+| lexical_preference, clause | k=2 | 0.94 – 0.98 | 0.87 – 0.89 |
+| richness | k=2 | 0.98 | 0.80 |
+| rhythm | k=7 | 0.98 | 0.69 |
+| function_words | k=4 | 0.78 | 0.60 |
+| morphology | k=2 | 0.94 | 0.50 |
 
-Nothing reaches 0.2. Unsupervised grouping of these 211 books finds structure that has nothing to do
-with whether a book is a sura or a kitab — the same result this project keeps getting, that clustering
-is dominated by genre, length and subject rather than by who wrote the text.
+Under function words alone, the k=2 candidate puts 105 of 114 suras in one group and 95 of 97 kutub
+in the other — 200 of 211 books on the right side, ARI 0.80. It is reported as one group only because
+its stability is [0.43, 0.91, 0.93, 0.91, 0.96] and the gate takes the minimum.
 
-This does **not** say the two corpora are indistinguishable, and it must not be quoted as if it did.
-It says clustering is the wrong instrument, which is what 7.2 already assumes: the declared test is a
-*supervised* discrimination test at passage level, and a classifier is very likely to separate these
-two corpora easily. What this observation adds is that it will be doing so on something that is not
-the dominant axis of variation in the corpus, which makes the controls in 7.3 the whole substance of
-the test rather than a formality. The confounds to beat, in order of how cheap they are to exploit:
+**This is a warning, not a finding, and it is the reason 7.3 is the whole substance of the test.**
+Three of the strategies that separate the collections perfectly are the ones this project already
+labels as *not authorial*:
 
-1. `qāla rasūlu llāh` and the other report-opening formulae, in thousands of hadith and in the Quran
-   never. Must be removed as a control; §6 kept them deliberately and flagged it.
-2. Unit length — Quran verses run 10 tokens, hadith reports 31. Passage pooling addresses this only
-   if passages are built to the same token budget from both.
-3. Genre and register, two centuries of separate transmission, and the isnad removal itself.
+- **length** — ARI 1.00. Quran verses run 10 tokens, hadith reports 31. This is the unit-length gap
+  and nothing else.
+- **punctuation** — ARI 1.00. Editorial marks supplied by two different digital editions.
+- **topics** — ARI 1.00. Subject matter: scripture against law and biography.
 
-**What this test can and cannot show, on the evidence already in hand.** Two results from this session
-set the limits, and the paper has to live inside them:
+A separation that a pure length feature achieves perfectly is not evidence about authorship. §7 must
+be run with the length, punctuation and topic strategies excluded, on passages built to the same token
+budget from both corpora, and with the report-opening formulae removed — and even then, genre and two
+centuries of separate transmission remain unaddressed by any of it.
 
-1. **The pipeline returned `k=1, split_not_stable` for Codex Sinaiticus** — a codex containing 51 works
-   including Paul, Luke, Revelation and several independent Septuagint translators. It returned exactly
-   the same verdict for the Quran (stability 0.61 vs 0.72, both under the 0.80 bar). A result that
-   cannot distinguish "many authors" from "one author" in a case where the answer is known cannot be
-   offered as evidence of single authorship anywhere else. The report already says this in terms:
-   *one group means no supported split, not one proven author.*
-2. **`stylometry accuracy-gate` fails.** On labelled authors the method reaches 85.0% accuracy against
-   a 95% target, and accepts 90.5% of texts by authors it has never seen. A method that almost never
-   says "not this author" cannot be used to conclude that two corpora have different authors.
-
-So the honest form of this test is *distinguishability*, not authorship: can a classifier separate
-Quran passages from hadith passages above chance, and does it survive the controls? Even a clean
-separation has at least four ordinary explanations that must be addressed before authorship: genre
-(recited scripture vs. legal and biographical report), register, two centuries of separate
-transmission and redaction, and the isnad removal in 6.2. Style can show two corpora differ. Showing
-*why* they differ is a separate argument, and this method does not settle it.
+**A correction, recorded so it is not repeated.** This table replaces an earlier one in this file that
+reported a maximum ARI of 0.16 and concluded the grouping did not track the collection. That was
+measuring the wrong partition: the per-book group the explorer stores is a book's group *within its own
+collection*, so suras were being compared against suras and kutub against kutub, and the two label sets
+both start at A1. It could not have tracked the collection whatever the data said. The language-wide
+partition of all 211 books is the one that answers the question, and it says close to the opposite.
 
 ## 8. The paper
 

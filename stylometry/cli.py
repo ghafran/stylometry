@@ -574,6 +574,8 @@ def _write_explorer_index(out: Path, built: list) -> None:
         ".row .k{grid-row:2;grid-column:2;font-family:'IBM Plex Mono',monospace;font-size:11.5px;"
         "color:var(--muted);white-space:nowrap;align-self:end}"
         ".row .bk{grid-column:1/-1;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--faint)}"
+        ".stack{display:flex;height:9px;gap:2px;border-radius:3px;overflow:hidden;margin:5px 0 1px;max-width:260px}"
+        ".stack>span{display:block;height:100%;min-width:2px}"
         "</style></head><body><div class=\"wrap\">"
         "<h1>Style explorer</h1>"
         "<p class=\"small\">Pick a strategy, then a language, then drill from collection to book to "
