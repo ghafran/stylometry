@@ -702,3 +702,39 @@ def test_a_book_shows_its_group_across_the_language_even_when_its_collection_doe
     assert "acrossChart(here, here.label)" in overview, "and the side panel charts the same thing"
     # The row is tinted by the language-wide group there, so the list reads across collections.
     assert "border-left-color:${G(langOf(n))}" in overview
+
+
+def test_a_book_page_says_where_the_book_itself_sits(tmp_path):
+    """Everything else on a book page is about its insides.
+
+    Without this the page never states which group the book is in — BUKH01 is A3 among the 211
+    Arabic books, and its own page had no way to say so, because its single chapter and seven verses
+    are both too few to partition and every chart on the page came back with one bar.
+    """
+    from stylometry.explorer import build
+    from stylometry.explorer_html import write
+
+    data = build(_explorer_verses(n_works=12, n_chapters=2, per_chapter=9),
+                 "grc", progress=lambda m: None, workers=1)
+    book = sorted((write(data, tmp_path / "grc") / "works").glob("*.html"))[0].read_text(encoding="utf-8")
+
+    assert '"book_groups"' in book, "the language-wide grouping travels to the book page"
+    assert '"collection_books"' in book, "and its collection's grouping"
+    assert '"language_name"' in book
+    assert "function placement" in book and 'id="head"' in book
+    assert "mineAcross()" in book and "mineInCollection()" in book
+    # The chart marks which row is this book's rather than leaving it to be counted off.
+    assert "Where this book sits" in book
+    assert "mark === i + 1 ? ' mine' : ''" in book
+
+
+def test_the_placement_line_does_not_invent_a_group_where_there_is_none(tmp_path):
+    """When nothing divides, it has to say that instead of naming a group."""
+    from stylometry.explorer import build
+    from stylometry.explorer_html import write
+
+    data = build(_explorer_verses(n_works=3, n_chapters=2, per_chapter=6),
+                 "grc", progress=lambda m: None, workers=1)
+    book = sorted((write(data, tmp_path / "grc") / "works").glob("*.html"))[0].read_text(encoding="utf-8")
+    assert "do not divide under this strategy" in book
+    assert "do not divide among themselves" in book

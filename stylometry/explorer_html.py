@@ -88,6 +88,9 @@ white-space:nowrap;align-self:end}
 .btrack{height:11px;background:var(--panel);border-radius:3px;overflow:hidden}
 .bfill{display:block;height:100%;border-radius:0 3px 3px 0;min-width:2px}
 .bval{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.brow.mine .blab::after{content:"\\25C0";margin-left:5px;font-size:9px;color:var(--clay);vertical-align:1px}
+.brow.mine .bval{color:var(--ink);font-weight:600}
+.brow.mine .btrack{outline:1px solid var(--clay);outline-offset:1px}
 .stack{display:flex;height:9px;gap:2px;border-radius:3px;overflow:hidden;margin:5px 0 1px;max-width:260px}
 .stack>span{display:block;height:100%;min-width:2px}
 .rbars{grid-column:1/-1;display:block;margin:7px 0 1px;max-width:340px}
@@ -177,12 +180,12 @@ function groupLegend(node) {
 // How the units divide between the groups. A1 is always the largest: the clustering ranks them by
 // size before naming them, so a long tail of one-member groups is visible at a glance rather than
 // hidden inside a count of "5 style groups".
-function barChart(sizes, unit, heading, note) {
+function barChart(sizes, unit, heading, note, mark) {
   if (!sizes.length) return '';
   const max = Math.max(...sizes), total = sizes.reduce((a, b) => a + b, 0);
   if (!total) return '';
   return `<h2>${heading}</h2>` + (note || '') + `<div class="bars">` + sizes.map((c, i) => `
-    <div class="brow">
+    <div class="brow${mark === i + 1 ? ' mine' : ''}">
       <span class="blab">${A(i + 1)}</span>
       <span class="btrack"><span class="bfill" style="width:${(c / max * 100).toFixed(1)}%;background:${G(i + 1)}"></span></span>
       <span class="bval">${c.toLocaleString()} · ${(c / total * 100).toFixed(0)}%</span>
@@ -411,6 +414,11 @@ strategyBar(render); render();
                          "markers": work["markers"], "n_verses": work["n_verses"],
                          **{f: work[f] for f in keep if f in work}},
                 "collection": collection["label"],
+                "language_name": name,
+                # Where this book sits: among every book of the language, and among its collection's.
+                "book_groups": data["book_groups"],
+                "collection_books": {f: collection[f] for f in ("gk", "gr", "gari", "gn", "gsz")
+                                     if f in collection},
                 "chapters": [{"label": ch["label"], "xy": ch["xy"], "markers": ch["markers"],
                               "n_verses": ch["n_verses"], "v": ch["v"],
                               **{f: ch[f] for f in keep if f in ch}} for ch in work["children"]],
@@ -421,12 +429,34 @@ strategyBar(render); render();
 <h1>{work['label']}</h1>
 <p class="small">{work['code']} · {work['n_verses']:,} verses · {len(work['children'])} chapters</p>
 <div class="bar" id="bar"></div>
+<div class="headline" id="head"></div>
 <div class="cols"><div id="list"></div><div><div class="card" id="side"></div></div></div>
 <script>const DATA = """ + json.dumps(payload, ensure_ascii=False) + ";\n" + JS_COMMON + f"""
 const RTL = {'true' if rtl else 'false'};
 const vGroupOf = v => v[4][idx()];
+const mineAcross = () => (DATA.work.gl ? DATA.work.gl[idx()] : 0);
+const mineInCollection = () => (DATA.work.g ? DATA.work.g[idx()] : 0);
+
+// Where this book itself sits. Everything below is about its insides; this is the one line that
+// places the book among its peers, and without it the page never says which group the book is in.
+function placement() {{
+  const across = groupsOf(DATA.book_groups), mine = mineAcross();
+  const within = groupsOf(DATA.collection_books), inner = mineInCollection();
+  let out = across.k > 1 && mine
+    ? `Under this strategy this book is <b>${{A(mine)}}</b> of the ${{across.k}} style groups fitted over
+       all <b>${{across.n}} books</b> of ${{DATA.language_name}} — a group holding
+       ${{across.sizes[mine - 1]}} of them.`
+    : `The ${{across.n}} books of ${{DATA.language_name}} do not divide under this strategy:
+       ${{(DATA.group_reasons || {{}})[across.reason] || 'no split is supported'}}.`;
+  out += within.k > 1 && inner
+    ? ` Among the ${{within.n}} books of ${{DATA.collection}} alone it is <b>${{A(inner)}}</b>.`
+    : ` The ${{within.n}} books of ${{DATA.collection}} do not divide among themselves.`;
+  return out;
+}}
+
 let chapter = null, verse = null;
 function render() {{
+  document.getElementById('head').innerHTML = placement();
   const list = document.getElementById('list'), side = document.getElementById('side');
   if (chapter === null) {{
     list.innerHTML = '<h2>Chapters</h2>' + groupSummary(DATA.work, 'chapters') + groupLegend(DATA.work)
@@ -441,7 +471,10 @@ function render() {{
     const many = groupsOf(DATA.work).k > 1;
     plot(DATA.chapters.map(c => ({{ label: 'Chapter ' + c.label, xy: xyOf(c), g: many ? groupOf(c) : 0 }})), h, null);
     const bars = document.createElement('div'); side.appendChild(bars);
-    bars.innerHTML = groupBars(DATA.work, 'chapters of this book', 'Style groups among the chapters');
+    bars.innerHTML = groupBars(DATA.work, 'chapters of this book', 'Style groups among the chapters')
+      + barChart(groupsOf(DATA.book_groups).sizes, `books of ${{DATA.language_name}}`,
+                 'Where this book sits', `<p class="small">Groups fitted over every book of the
+                 language. The marked row is this book's.</p>`, mineAcross());
     const mk = document.createElement('div'); side.appendChild(mk); markerList(DATA.work, mk);
     mk.insertAdjacentHTML('afterbegin', '<p class="small">Each point is a chapter of this book.</p>');
     return;
