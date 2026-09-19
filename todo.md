@@ -344,6 +344,49 @@ Function words being unanimous on the cross-genre task and optional on the withi
 same finding twice: inside one genre other things can stand in for authorship, and across genres only
 function words hold.
 
+### 6c.3 The unsupervised grouping does not recover the authors — and one reason is a cap in our own code
+
+The explorer's style groups, the k-selection and the style-group dashboards all rest on unsupervised
+clustering. Here is that machinery run on 15 novels by 5 known authors and 20 cross-genre works by 5
+known authors, 20,000 words each, which is far above any threshold in the literature:
+
+| | grouping found | agreement with the true author |
+|---|---|---|
+| Novels, 14 strategies | **k=1 in 13 of 14** | ARI +0.00, and +0.15 for the one that split |
+| Cross-genre, 14 strategies | **k=1 in 13 of 14** | ARI +0.00, and +0.02 for the one that split |
+
+The same texts, supervised, reach 58–69% attribution against a 20% baseline. So the features carry
+the authors; the clustering does not find them.
+
+**Ignoring the stability gate entirely** — fit every k from 2 to 6 and take the best agreement any of
+them reaches — separates two different failures:
+
+| | Novels (same genre) | Cross-genre |
+|---|---:|---:|
+| word_frequency | **+0.63** (k=6) | +0.19 |
+| lexical_preference | **+0.63** (k=5) | +0.05 |
+| function_words | **+0.61** (k=5) | +0.19 |
+| morphology | **+0.61** (k=5) | +0.18 |
+| word_ngrams | +0.36 | +0.40 |
+
+1. **Within one genre the signal is there and we are throwing it away.** A k=5 partition recovers the
+   five novelists at ARI 0.61–0.63. The explorer reports one group.
+2. **Across genres it is genuinely absent.** Even the best k reaches 0.40, so no gate would help.
+
+**The cause of the first is arithmetic in `group_units`.** `kmax = min(8, n-1, max(2, n // 4))`. For
+the 15 novels that is `15 // 4 = 3`, so the search runs k=2 and k=3 and stops. **Five authors among
+fifteen books is not reachable — the right answer is outside the search space.** The `n // 4` rule was
+written to stop singleton groups, and three books per author is not a singleton.
+
+- [ ] 6c.5 Decide whether to relax the k cap, and re-run everything if so. `n // 3` would put k=5
+      within reach for fifteen units. This is not a small change: every style-group number in the
+      Greek, Hebrew and Arabic output was produced under the current cap, and Hebrew's 278 books and
+      Greek's 102 were never near it, so the effect is confined to small collections — but the
+      collections inside a language are exactly where it bites.
+- [ ] 6c.6 Re-read the k=1 results in the scripture output against this. "One group" there has always
+      been reported as "no split was supported"; it now also has to be read as "and our own search may
+      not have been allowed to look far enough", wherever the unit count was small.
+
 - [ ] 6c.3 Attribute the disputed twelve Federalist papers with the honest mix and report it. The
       published answer is Madison; this is the field's reference test and the corpus is now set up
       for it.
