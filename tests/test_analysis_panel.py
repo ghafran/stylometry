@@ -810,3 +810,106 @@ def test_verses_carry_who_is_speaking_where_the_source_says(tmp_path):
     book = sorted((write(data, tmp_path / "grc") / "works").glob("*.html"))[0].read_text(encoding="utf-8")
     assert "speakerTag(v[5])" in book
     assert "quote of the Prophet" in book and "speech of God" in book
+
+
+def _authored_verses(n_authors=4, works_each=3, chapters=2, per_chapter=8):
+    """Works whose author is known, each author leaning on a different mix of function words."""
+    pool = ["και", "δε", "γαρ", "ουν", "μεν", "τε", "αλλα", "ωστε", "ητοι", "καιτοι"]
+    out, order = [], 0
+    for a in range(n_authors):
+        for k in range(works_each):
+            code = f"A{a}W{k}"
+            for c in range(1, chapters + 1):
+                for v in range(1, per_chapter + 1):
+                    order += 1
+                    words = ([pool[a % len(pool)]] * (7 + v % 3)
+                             + [pool[(a + 1) % len(pool)]] * 4
+                             + [pool[(a + 2 + k) % len(pool)]] * 2
+                             + ["θεοσ", "λογοσ", "ανθρωποσ"])
+                    text = " ".join(words)
+                    out.append({
+                        "id": f"grc:{code}.{c}.{v}", "language": "grc", "work": code,
+                        "work_title": f"Work {code}", "collection": f"C{a % 2}", "canon": "NT",
+                        "group": f"Author {a}", "author": f"Author {a}", "known_author": True,
+                        "genre": "prose", "source": "x", "witness": "S", "copyist": None,
+                        "chapter": str(c), "verse": str(v), "order": order,
+                        "ref": f"{code} {c}:{v}", "text": text, "text_bare": text,
+                        "n_tokens": len(words), "has_gap": False, "supplied_frac": 0.0,
+                        "duplicate_of": None,
+                    })
+    return out
+
+
+def test_recovering_an_author_needs_the_group_to_be_mostly_theirs_not_only_mostly_together():
+    """Recall alone scores five novelists merged into one hand as five perfect recoveries."""
+    from stylometry.explorer import _recovered
+
+    truth = ["a", "a", "b", "b", "c", "c"]
+    assert _recovered(truth, [1, 1, 2, 2, 3, 3]) == 3, "each author alone in their own group"
+    # Every author is 100% "together" here, in a group that is two-thirds other people.
+    assert _recovered(truth, [1, 1, 1, 1, 1, 1]) == 0
+    assert _recovered(truth, [1, 1, 2, 2, 2, 2]) == 1, "only `a` holds a group that is mostly theirs"
+
+
+def test_the_author_view_offers_more_hands_than_the_style_grouping_will_ever_report():
+    """The style grouping stops at eight by a rule we invented; the author count is the reader's."""
+    from stylometry.explorer import GROUP_MAX_K, build
+
+    data = build(_authored_verses(n_authors=5, works_each=3), "grc",
+                 progress=lambda m: None, workers=1)
+    groups = data["author_groups"]
+    assert groups["an"] == 15
+    low, high = groups["arange"]
+    assert low == 2 and high > GROUP_MAX_K, "the offer is not capped at the style-group ceiling"
+    for key_labels in groups["al"]:
+        for count, labels in key_labels.items():
+            assert len(labels) == 15, "every book is placed at every offered count"
+            assert set(labels) <= set(range(1, int(count) + 1))
+
+
+def test_the_author_view_reports_how_well_it_does_where_the_author_is_known():
+    from stylometry.explorer import build
+
+    data = build(_authored_verses(n_authors=5, works_each=3), "grc",
+                 progress=lambda m: None, workers=1)
+    assert [w["author"] for c in data["tree"] for w in c["children"]].count("Author 0") == 3
+    fits = [f for f in data["author_groups"]["af"] if f]
+    assert fits, "a corpus with known authors must carry a calibration"
+    for f in fits:
+        assert f["true_k"] == 5 and f["n_known"] == 15
+        assert 0 <= f["recovered"] <= f["true_k"]
+        assert -1.0 <= f["ari"] <= 1.0
+
+
+def test_a_corpus_with_no_known_author_says_so_rather_than_reporting_a_score():
+    from stylometry.explorer import build
+
+    data = build(_explorer_verses(n_works=9), "grc", progress=lambda m: None, workers=1)
+    assert data["author_groups"]["aknown"] == []
+    assert all(f is None for f in data["author_groups"]["af"]), \
+        "nothing to check against means no number, not a flattering one"
+
+
+def test_a_unit_is_pooled_by_length_so_a_long_verse_is_not_one_vote_among_many():
+    import numpy as np
+
+    from stylometry.explorer import _profiles
+
+    Z = np.array([[0.0], [0.0], [10.0]])
+    tokens = np.array([1, 1, 98])
+    assert _profiles(Z, [[0, 1, 2]])[0][0] == pytest.approx(10 / 3), "unweighted is the old behaviour"
+    assert _profiles(Z, [[0, 1, 2]], tokens)[0][0] == pytest.approx(9.8), "weighted follows the text"
+
+
+def test_the_page_offers_the_author_view_and_never_calls_an_assumed_hand_a_finding(tmp_path):
+    from stylometry.explorer import build
+    from stylometry.explorer_html import write
+
+    data = build(_authored_verses(n_authors=4, works_each=3), "grc",
+                 progress=lambda m: None, workers=1)
+    write(data, tmp_path)
+    page = (tmp_path / "index.html").read_text(encoding="utf-8")
+    assert "Assumed authors" in page and "Style groups" in page, "both views are offered"
+    assert "Assume <b" in page and "authors</label>" in page, "the count is a control, not a result"
+    assert "nothing in the text supplies it" in page
+    assert "known author: " in page, "a real attribution is marked as different from an inferred one"

@@ -574,7 +574,8 @@ def _write_explorer_index(out: Path, built: list) -> None:
         "strategies": list(strategies.values()),
         "group_reasons": languages[0]["group_reasons"],
         "languages": [{"code": e["code"], "label": e["label"], "verses": e["verses"],
-                       "books": e["books"], "keys": e["keys"], "groups": e["groups"]}
+                       "books": e["books"], "keys": e["keys"], "groups": e["groups"],
+                       "authors": e.get("authors") or {}}
                       for e in languages],
     }
     (out / "index.html").write_text(
@@ -590,6 +591,8 @@ def _write_explorer_index(out: Path, built: list) -> None:
         ".row .bk{grid-column:1/-1;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--faint)}"
         ".stack{display:flex;height:9px;gap:2px;border-radius:3px;overflow:hidden;margin:5px 0 1px;max-width:260px}"
         ".stack>span{display:block;height:100%;min-width:2px}"
+        ".row .au{grid-column:1/-1;font-size:12px;color:var(--muted);margin-top:4px;"
+        "border-left:3px solid var(--clay);padding-left:8px}.row .au b{color:var(--ink)}"
         "</style></head><body><div class=\"wrap\">"
         "<h1>Style explorer</h1>"
         "<p class=\"small\">Pick a strategy, then a language, then drill from collection to book to "
@@ -603,6 +606,14 @@ def _write_explorer_index(out: Path, built: list) -> None:
         "wrote the text. Positions are the first two principal components of the chosen strategy's "
         "standardised features, comparable within a strategy and never between strategies. No model is "
         "involved at any point.</p>"
+        "<p class=\"small\">Each language page also offers an <b>assumed-author view</b>, which drops "
+        "the evidence test and asks instead: if there are N hands here, whose is this? N is yours to "
+        "set, because it cannot be read off the text — on the English corpus, where the authors are "
+        "known, choosing it automatically returned 2 whether the truth was 3, 5 or 13. English is "
+        "there to say what that assumption is worth: given the true number of hands, the best "
+        "strategy recovers 2 of 3 Federalist authors and 3 of 5 novelists, and 0 of 13 across the "
+        "whole mixed corpus. The scripture corpora are mixed and have no known author to check "
+        "against.</p>"
         "<script>const DATA = " + _json.dumps(payload, ensure_ascii=False) + ";\n" + JS_COMMON + """
 function render() {
   document.getElementById('list').innerHTML = DATA.languages.map(l => {
@@ -621,6 +632,9 @@ function render() {
       <span class="n">${l.verses.toLocaleString()} verses</span>
       <span class="s">${l.books} books · ${l.keys.length} strategies</span>
       ${count}${why}${stack}
+      ${(has && l.authors[strategy]) ? `<span class="au">Authors are known here: assuming one style is
+        one hand recovers <b>${l.authors[strategy].recovered} of ${l.authors[strategy].true_k}</b>
+        of them under this strategy.</span>` : ''}
       ${has ? '' : `<span class="w">no ${strategy} data here — opens on ${l.keys[0]}</span>`}
     </a>`;
   }).join('');

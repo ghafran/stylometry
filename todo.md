@@ -378,14 +378,70 @@ the 15 novels that is `15 // 4 = 3`, so the search runs k=2 and k=3 and stops. *
 fifteen books is not reachable — the right answer is outside the search space.** The `n // 4` rule was
 written to stop singleton groups, and three books per author is not a singleton.
 
-- [ ] 6c.5 Decide whether to relax the k cap, and re-run everything if so. `n // 3` would put k=5
-      within reach for fifteen units. This is not a small change: every style-group number in the
-      Greek, Hebrew and Arabic output was produced under the current cap, and Hebrew's 278 books and
-      Greek's 102 were never near it, so the effect is confined to small collections — but the
-      collections inside a language are exactly where it bites.
-- [ ] 6c.6 Re-read the k=1 results in the scripture output against this. "One group" there has always
-      been reported as "no split was supported"; it now also has to be read as "and our own search may
-      not have been allowed to look far enough", wherever the unit count was small.
+- [x] 6c.5 **Measured: the cap is not what costs us, and relaxing it would change nothing.** Raising
+      `GROUP_MAX_K` from 8 to 13, 20 and 40 leaves the English language-level answer at k=2, sizes
+      87/33, unchanged. The binding gate is stability, not the ceiling: scanning k=2..20 on the 120
+      English books, only k=2 (min ARI 1.00) and k=3 (0.82) clear the 0.8 threshold, and everything
+      from k=4 up tops out at 0.43. The two splits that pass are the two that track **genre** — the
+      87/33 split is 85 Federalist essays against 25 novels, ARI 0.89 against genre and 0.30 against
+      authorship — while every split that does track authorship (k=11 reaches ARI 0.70, k=7 0.67) is
+      rejected as unstable. **A stable split is evidence the split is easy, not that it is the right
+      question**, and genre is the easy one. So the re-run proposed here was not worth its cost; what
+      needs revisiting is the 0.8 gate, which is a much larger decision because every k=1 scripture
+      result rests on it.
+      Where the cap *does* bind is small collections, via `n // 4` rather than `GROUP_MAX_K`: Novels
+      has 15 books and 5 authors, so kmax = 3 and the true count is unreachable. At k=5 it would
+      score ARI 0.605. That is a real result the cap hides, but the stability gate would have
+      rejected it anyway at 0.36.
+- [x] 6c.6 Re-read: the qualification stands but shifts. "One group" in the scripture output should
+      be read as "no split survived resampling", and the English ground truth now says what that
+      threshold does when the answer is known — it selects the genre split and refuses the authorial
+      one. It is not mainly that the search could not look far enough; it is that the test it had to
+      pass prefers the coarser answer.
+
+### 6c.7 Can a style group be read as an author? Measured, where the answer is known
+
+The explorer now carries an **assumed-author view** beside the style-group one, on the stated
+assumption that one style is one hand. Two things had to be measured before it could be shown.
+
+**The author count cannot be recovered from the text.** Selecting it by silhouette returns **2 for
+every English collection tested**, whose true counts are 3, 5, 5 and 13. So the count is not
+inferred and is not capped: it is a control the reader sets, over the full range the books allow,
+and every label is "under an assumption of N hands" rather than a finding. The old ceiling of 8 was
+ours and had no evidence behind it.
+
+**Length-weighted pooling, which is simply the correct thing, doubles author recovery.** A book's
+rate of a feature is what its whole text does, not the unweighted average of what its verses do; a
+300-token verse and an 8-token verse were being counted as two equal opinions. Fixing it lifts mean
+adjusted Rand against known English authors from **0.20 to 0.43** at the true count. The geometry
+was then chosen on its *worst* collection rather than its best — length-weighted profiles, thirty
+components, k-means — because a grid picked on all three collections and quoted scored 0.645 while
+the same grid validated by holding a collection out scored **0.298**.
+
+**Given every advantage — the right number of hands, the best strategy, the best geometry — it still
+does not recover authors.** Counting an author found only when most of their work lands in one group
+*and* most of that group is theirs:
+
+| set | books | real authors | recovered | adjusted Rand |
+|---|---:|---:|---:|---:|
+| Federalist | 85 | 3 | **2 of 3** | 0.716 |
+| Novels | 15 | 5 | **3 of 5** | 0.720 |
+| Cross-genre | 20 | 5 | **1 of 5** | 0.312 |
+| All English | 120 | 13 | **0 of 13** | 0.319 |
+
+Two cautions came out of this and are now in the code. First, **the adjusted Rand index flatters a
+corpus with one large author in it**: the English language-level partition scores 0.908 at k=7 while
+merging nine novelists into a single assumed hand, because Hamilton's 51 papers are half the known
+books and he is recovered cleanly. Second, **recall alone is not recovery** — at the true count of
+13, Austen, Brontë, Eliot and Hardy each have 100% of their works in one group, and it is the same
+group, which also holds Dickens. A one-sided purity test scored that as four perfect recoveries; the
+two-sided test scores it as zero. Both failure modes are exactly what an unchecked scripture result
+would look like.
+
+**What this licenses.** Within one genre and one collection the assumption is worth something — 2 of
+3 and 3 of 5. Across a mixed corpus it is worth nothing — 0 of 13. Since the scripture corpora are
+mixed by genre and have no known author anywhere to check against, the assumed-author view there
+carries the caution rather than a score.
 
 - [ ] 6c.3 Attribute the disputed twelve Federalist papers with the honest mix and report it. The
       published answer is Madison; this is the field's reference test and the corpus is now set up

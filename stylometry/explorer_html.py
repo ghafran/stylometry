@@ -106,6 +106,21 @@ text-transform:uppercase;color:var(--faint);margin-bottom:4px}
 .rtrack{height:8px;background:var(--panel);border-radius:2px;overflow:hidden}
 .rfill{display:block;height:100%;border-radius:0 2px 2px 0;min-width:2px}
 .rval{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.modebar{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin:0 0 11px}
+.mb{font:inherit;font-size:13px;padding:6px 13px;border:1px solid var(--line);border-radius:999px;
+background:var(--card);color:var(--muted);cursor:pointer}
+.mb.on{background:var(--clay);border-color:var(--clay);color:var(--paper);font-weight:600}
+.modebar .small{flex-basis:100%;margin-top:1px}
+.actl{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 11px}
+.actl label{font-size:13px;color:var(--muted)}.actl label b{color:var(--ink);font-variant-numeric:tabular-nums}
+.actl input[type=range]{flex:1;min-width:130px;accent-color:var(--clay)}
+.actl .small{flex-basis:100%}
+.fit{font-size:12.5px;color:var(--muted);background:var(--panel);border-left:3px solid var(--clay);
+border-radius:0 7px 7px 0;padding:8px 11px;margin:0 0 12px}
+.fit b{color:var(--ink);font-weight:600}
+.kn{grid-column:1/-1;font-size:12px;color:var(--muted);margin-top:2px}
+.kn::before{content:'known author: ';color:var(--faint)}
+.gb.au i{border-radius:3px}
 .row{border-left:3px solid transparent}
 .vtext.grouped{padding-left:9px;border-left:3px solid var(--line)}
 """
@@ -197,13 +212,14 @@ function groupLegend(node) {
 // How the units divide between the groups. A1 is always the largest: the clustering ranks them by
 // size before naming them, so a long tail of one-member groups is visible at a glance rather than
 // hidden inside a count of "5 style groups".
-function barChart(sizes, unit, heading, note, mark) {
+function barChart(sizes, unit, heading, note, mark, lab) {
+  lab = lab || A;
   if (!sizes.length) return '';
   const max = Math.max(...sizes), total = sizes.reduce((a, b) => a + b, 0);
   if (!total) return '';
   return `<h2>${heading}</h2>` + (note || '') + `<div class="bars">` + sizes.map((c, i) => `
     <div class="brow${mark === i + 1 ? ' mine' : ''}">
-      <span class="blab">${A(i + 1)}</span>
+      <span class="blab">${lab(i + 1)}</span>
       <span class="btrack"><span class="bfill" style="width:${(c / max * 100).toFixed(1)}%;background:${G(i + 1)}"></span></span>
       <span class="bval">${c.toLocaleString()} · ${(c / total * 100).toFixed(0)}%</span>
     </div>`).join('') + `</div><p class="small">${total.toLocaleString()} ${unit}.</p>`;
@@ -227,7 +243,8 @@ function acrossChart(node, label) {
 
 // A chart small enough to sit inside a row, so a list can be read for how each entry divides without
 // selecting it first. Same bars as the side panel, tighter.
-function rowBars(sizes, caption) {
+function rowBars(sizes, caption, lab) {
+  lab = lab || A;
   const total = sizes.reduce((a, b) => a + b, 0);
   // One occupied group is an answer - "all nineteen of them in A2" - not an absence. Requiring two
   // left the whole noncanonical collection with no chart at all under the default strategy.
@@ -235,7 +252,7 @@ function rowBars(sizes, caption) {
   const max = Math.max(...sizes);
   return `<span class="rbars"><span class="rcap">${caption}</span>` + sizes.map((c, i) => c ? `
     <span class="rrow">
-      <span class="rlab" style="color:${G(i + 1)}">${A(i + 1)}</span>
+      <span class="rlab" style="color:${G(i + 1)}">${lab(i + 1)}</span>
       <span class="rtrack"><span class="rfill" style="width:${(c / max * 100).toFixed(1)}%;background:${G(i + 1)}"></span></span>
       <span class="rval">${c.toLocaleString()}</span>
     </span>` : '').join('') + `</span>`;
@@ -276,6 +293,115 @@ const langBadge = (n, language) => langOf(n)
 
 // The row itself is tinted, so a list of text can be read down the left edge for where a group changes.
 const groupEdge = (node, g) => groupsOf(node).k > 1 ? ` style="border-left-color:${G(g)}"` : '';
+
+// ---- the author view -----------------------------------------------------------------------------
+// The same books under a different question. A style group asks "is a split supported"; an assumed
+// author asks "if there are N hands, whose is this". `al` carries one partition per count, because
+// the count cannot be read off the text: on the English corpus, where the authors are known,
+// selecting it by silhouette returned 2 whether the truth was 3, 5 or 13. So it is the reader's to
+// set, and everything below is "under an assumption of N", never "there are N".
+let mode = (qs.get('m') === 'authors') ? 'authors' : 'style';
+const AU = i => 'Author ' + i;
+const assumed = {};
+
+const authorsOf = node => ({
+  n: (node && node.an) || 0,
+  range: (node && node.arange) || [],
+  labels: node && node.al ? node.al[idx()] : null,
+  fit: node && node.af ? node.af[idx()] : null,
+  known: (node && node.aknown) || [],
+});
+
+function authorCount(node, key) {
+  const a = authorsOf(node);
+  if (!a.range.length) return 0;
+  const lo = a.range[0], hi = a.range[1];
+  if (assumed[key] != null) return Math.min(Math.max(assumed[key], lo), hi);
+  // Where the authors are known, open at the truth, so the page shows what the procedure does when
+  // it is given every advantage. Where they are not, open at the number of style groups the
+  // conservative test supports - the only count the text itself offers.
+  const start = a.fit ? a.fit.true_k : Math.max(2, groupsOf(node).k || 2);
+  return Math.min(Math.max(start, lo), hi);
+}
+
+const authorLabels = (node, key) => {
+  const a = authorsOf(node);
+  return a.labels ? (a.labels[String(authorCount(node, key))] || null) : null;
+};
+
+function authorSizes(node, key) {
+  const l = authorLabels(node, key);
+  if (!l) return [];
+  const n = authorCount(node, key), out = new Array(n).fill(0);
+  l.forEach(g => { if (g >= 1 && g <= n) out[g - 1]++; });
+  return out;
+}
+
+// The slider. Its range runs to as many hands as there are books, because nothing in the text rules
+// out any of them; the only stop is how much fits in the page.
+function authorControl(node, key) {
+  const a = authorsOf(node);
+  if (!a.range.length) return '';
+  const n = authorCount(node, key);
+  return `<div class="actl">
+    <label for="an-${key}">Assume <b id="anv-${key}">${n}</b> authors</label>
+    <input type="range" id="an-${key}" min="${a.range[0]}" max="${a.range[1]}" value="${n}">
+    <span class="small">${a.range[0]}–${a.range[1]} over ${a.n} books</span></div>`;
+}
+
+function bindAuthorControl(key, onChange) {
+  const el = document.getElementById('an-' + key);
+  if (!el) return;
+  el.addEventListener('input', e => {
+    assumed[key] = +e.target.value;
+    const v = document.getElementById('anv-' + key);
+    if (v) v.textContent = e.target.value;
+  });
+  el.addEventListener('change', onChange);
+}
+
+// What this view is worth, measured where it can be. Everywhere else it says so instead.
+function authorFitNote(node, key) {
+  const f = authorsOf(node).fit;
+  if (!f) {
+    return `<div class="caveat">No author here is known, so nothing on this page can be checked.
+      Where the authors <i>are</i> known - the English corpus - this same procedure, handed the right
+      number of hands, put most authors in a group that was not mostly theirs. Read the labels below
+      as the shape of an assumption, not as attributions.</div>`;
+  }
+  const n = authorCount(node, key);
+  const at = n === f.true_k ? '' :
+    `<br><span class="small">You are looking at ${n}; the figures above are for the true ${f.true_k}.</span>`;
+  return `<div class="fit"><b>Checked: ${f.n_known} of these works have a known author.</b>
+    Given the true count of ${f.true_k}, this strategy puts <b>${f.recovered} of ${f.true_k}</b>
+    in a group that is both mostly theirs and mostly no one else's — adjusted Rand ${f.ari}.${at}</div>`;
+}
+
+const authorBadge = (node, key, i) => {
+  const l = authorLabels(node, key);
+  return l && l[i] ? `<span class="gb au"><i style="background:${G(l[i])}"></i>${AU(l[i])}</span>` : '';
+};
+
+// The name, where it is actually known. This is the only thing on any of these pages that is not an
+// inference, which is why it is marked differently from everything around it.
+const knownAuthor = w => w && w.author
+  ? `<span class="kn">${w.author}${w.genre ? ' · ' + w.genre : ''}</span>` : '';
+
+function modeToggle(onChange) {
+  const el = document.getElementById('mode');
+  if (!el) return;
+  el.innerHTML = ['style', 'authors'].map(m =>
+    `<button class="mb${m === mode ? ' on' : ''}" data-m="${m}">${
+      m === 'style' ? 'Style groups' : 'Assumed authors'}</button>`).join('')
+    + `<span class="small">${mode === 'style'
+      ? 'Splits kept only where they survive resampling. One group means no split was supported.'
+      : 'One style, one hand — assumed, not shown. You set how many hands; the text cannot say.'}</span>`;
+  el.querySelectorAll('.mb').forEach(b => b.addEventListener('click', () => {
+    mode = b.dataset.m;
+    const u = new URL(location); u.searchParams.set('m', mode); history.replaceState(null, '', u);
+    modeToggle(onChange); onChange();
+  }));
+}
 
 function plot(points, holder, onPick) {
   const W = 420, H = 300, P = 26;
@@ -332,10 +458,12 @@ def write(data: dict, out_dir: str | Path) -> Path:
               "group_reasons": data["group_reasons"], "reliable_tokens": data["reliable_tokens"]}
 
     # --- overview: collections, their works, and the chapters of each --------------------------------
-    keep = ("gk", "gr", "gari", "gn", "gtok", "gsz", "g", "gl", "glsz")
+    keep = ("gk", "gr", "gari", "gn", "gtok", "gsz", "g", "gl", "glsz",
+            "an", "arange", "al", "af", "aknown", "bi", "author", "genre")
     slim = {
         **shared,
         "book_groups": data["book_groups"], "collection_groups": data["collection_groups"],
+        "author_groups": data["author_groups"],
         "tree": [{"label": c["label"], "xy": c["xy"], "markers": c["markers"],
                   "n_verses": c["n_verses"], "n_tokens": c["n_tokens"],
                   **{f: c[f] for f in keep if f in c},
@@ -355,6 +483,7 @@ def write(data: dict, out_dir: str | Path) -> Path:
         page += f" · no data for: {', '.join(data['unavailable'])}"
     page += """</p>
 <div class="bar" id="bar"></div>
+<div class="modebar" id="mode"></div>
 <div class="headline" id="head"></div>
 <div class="cols"><div id="list"></div><div><div class="card" id="side"></div></div></div>
 <script>const DATA = """ + json.dumps(slim, ensure_ascii=False) + ";\nconst LANG = " \
@@ -371,7 +500,13 @@ function render() {
   const unit = top ? 'collections' : 'books';
 
   const books = groupsOf(DATA.book_groups);
-  document.getElementById('head').innerHTML = books.k > 1
+  const acount = authorCount(DATA.author_groups, 'lang');
+  document.getElementById('head').innerHTML = mode === 'authors'
+    ? `Assuming one style is one hand, the <b>${DATA.author_groups.an} books</b> of this language
+       divide among <b>${acount} assumed authors</b>:
+       ${authorSizes(DATA.author_groups, 'lang').map((c, i) => `${AU(i + 1)} ${c}`).join(' · ')}.
+       The count is yours to set: nothing in the text supplies it.`
+    : books.k > 1
     ? `Under this strategy the <b>${books.n} books</b> of this language fall into
        <b>${books.k} style groups</b>${books.ari != null ? ` (stable to ARI ${books.ari})` : ''}:
        ${books.sizes.map((c, i) => `${A(i + 1)} ${c}`).join(' · ')}. ${groupStack(DATA.book_groups)}
@@ -387,14 +522,25 @@ function render() {
     + nodes.map((n, i) => {
         // On the books list the edge follows the language-wide group: it is always defined, and it
         // is the only one that means the same thing in another collection.
-        const edge = top ? groupEdge(parent, groupOf(n))
-                         : (langOf(n) ? ` style="border-left-color:${G(langOf(n))}"` : '');
+        const alang = authorLabels(DATA.author_groups, 'lang');
+        const mine = (!top && alang && n.bi != null) ? alang[n.bi] : 0;
+        const edge = mode === 'authors'
+          ? (mine ? ` style="border-left-color:${G(mine)}"` : '')
+          : top ? groupEdge(parent, groupOf(n))
+                : (langOf(n) ? ` style="border-left-color:${G(langOf(n))}"` : '');
+        // In the author view the row carries the language-wide assumed hand, for the same reason the
+        // style view carries the language-wide group: a label fitted inside one collection cannot be
+        // compared with another collection's, because both start at 1.
+        const badge = mode === 'authors'
+          ? (mine ? `<span class="gb au"><i style="background:${G(mine)}"></i>${AU(mine)} in ${LANG}</span>` : '')
+          : (top ? groupBadge(parent, n) : langBadge(n, LANG));
         return `<button class="row" data-i="${i}"${edge}>
         <span class="t">${n.label}</span>
-        <span class="n">${top ? n.n_verses.toLocaleString() + ' verses' : langBadge(n, LANG)}</span>
+        <span class="n">${top ? n.n_verses.toLocaleString() + ' verses' : badge}</span>
         <span class="s">${n.code ? n.code + ' · ' + n.n_chapters + ' chapters · ' : ''}${n.n_tokens.toLocaleString()} tokens${top ? '' : ' · ' + n.n_verses.toLocaleString() + ' verses'}</span>
-        ${groupBadge(parent, n)}
-        ${top ? acrossLanguage(n) + ownBars(n, 'books') : ownBars(n, 'chapters')}
+        ${knownAuthor(n)}
+        ${mode === 'authors' ? (top ? rowBars(collectionAcrossAuthors(n), `its ${n.children ? n.children.length : 0} books across the language's assumed authors`, AU) : '')
+                             : groupBadge(parent, n) + (top ? acrossLanguage(n) + ownBars(n, 'books') : ownBars(n, 'chapters'))}
       </button>`;}).join('');
   if (!top) document.getElementById('up').addEventListener('click', () => { collection = null; render(); });
   list.querySelectorAll('.row[data-i]').forEach(b => b.addEventListener('click', () => {
@@ -406,21 +552,46 @@ function render() {
   side.innerHTML = '';
   side.appendChild(holder);
   const many = groupsOf(parent).k > 1;
-  plot(nodes.map(n => ({ label: n.label, xy: xyOf(n), g: many ? groupOf(n) : 0 })), holder, null);
+  const alang2 = authorLabels(DATA.author_groups, 'lang');
+  plot(nodes.map(n => ({
+    label: n.label, xy: xyOf(n),
+    g: mode === 'authors' ? ((!top && alang2 && n.bi != null) ? alang2[n.bi] : 0)
+                          : (many ? groupOf(n) : 0) })), holder, null);
   const bars = document.createElement('div');
   side.appendChild(bars);
   // At the top the list is three collections, which is too few to partition and says so; the chart
   // worth showing there is the one the headline reports, every book of the language.
+  if (mode === 'authors') {
+    const node = top ? DATA.author_groups : here, key = top ? 'lang' : 'c' + collection;
+    bars.innerHTML = authorControl(node, key) + authorFitNote(node, key)
+      + barChart(authorSizes(node, key), top ? 'books of this language' : `books of ${here.label}`,
+                 top ? 'Assumed authors across the language' : `Assumed authors within ${here.label}`,
+                 '', 0, AU)
+      + (top ? '' : `<p class="small">Fitted among ${here.label}'s books alone, so these numbers
+          cannot be compared with another collection's — both start at Author 1. The label on each
+          row is the language-wide one, which can.</p>`);
+    bindAuthorControl(key, render);
+  } else {
   bars.innerHTML = top
     ? groupBars(DATA.book_groups, 'books of this language', 'Style groups across the language')
     : groupBars(parent, `books of ${here.label}`, `Style groups within ${here.label}`)
       + acrossChart(here, here.label);
+  }
   const mk = document.createElement('div');
   side.appendChild(mk);
   markerList(here || { markers: {} }, mk);
   if (!here) mk.insertAdjacentHTML('afterbegin', '<p class="small">Each point is a collection. Open one to see its books.</p>');
 }
-strategyBar(render); render();
+// How a collection's books fall across the language's assumed authors, for the collections list.
+function collectionAcrossAuthors(c) {
+  const l = authorLabels(DATA.author_groups, 'lang');
+  const n = authorCount(DATA.author_groups, 'lang');
+  if (!l || !c.children) return [];
+  const out = new Array(n).fill(0);
+  c.children.forEach(w => { const g = l[w.bi]; if (g >= 1 && g <= n) out[g - 1]++; });
+  return out;
+}
+strategyBar(render); modeToggle(render); render();
 </script></div></body></html>"""
     (out / "index.html").write_text(page, encoding="utf-8")
 
@@ -448,6 +619,7 @@ strategyBar(render); render();
 <h1>{work['label']}</h1>
 <p class="small">{work['code']} · {work['n_verses']:,} verses · {len(work['children'])} chapters</p>
 <div class="bar" id="bar"></div>
+<div class="modebar" id="mode"></div>
 <div class="headline" id="head"></div>
 <div class="cols"><div id="list"></div><div><div class="card" id="side"></div></div></div>
 <script>const DATA = """ + json.dumps(payload, ensure_ascii=False) + ";\n" + JS_COMMON + f"""
@@ -556,5 +728,10 @@ strategyBar(render); render();
                    for i, key in enumerate(data["keys"])},
         "strategies": data["strategies"],
         "group_reasons": data["group_reasons"],
+        # How well the assumed-author view does here, where it can be checked at all. Null for every
+        # scripture corpus, which is why the front page can say what the procedure is worth only on
+        # the one language that carries known authors.
+        "authors": {key: data["author_groups"]["af"][i]
+                    for i, key in enumerate(data["keys"]) if data["author_groups"]["af"][i]},
     }, ensure_ascii=False), encoding="utf-8")
     return out
