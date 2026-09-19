@@ -21,7 +21,7 @@ from stylometry.corpus.build import load_corpus
 
 PROCESSED = Path(__file__).resolve().parent.parent / "data" / "processed"
 # work.chapter.verse, where the verse part may itself be dotted (Hermas numbers as 1.1.2).
-ID_RE = re.compile(r"^(grc|hbo|arb):[^.]+\.[^.]+\..+$")
+ID_RE = re.compile(r"^(grc|hbo|arb|eng):[^.]+\.[^.]+\..+$")
 REQUIRED_VERSE_KEYS = {
     "id", "language", "witness", "work", "work_title", "chapter", "verse", "ref",
     "text", "text_bare", "n_tokens", "group", "duplicate_of",
@@ -84,7 +84,7 @@ def test_stored_corpus_matches_the_verse_schema(path: Path | None) -> None:
         assert ID_RE.match(v["id"]), f"{path.name}: malformed verse id {v['id']!r}"
         assert isinstance(v["text_bare"], str) and v["text_bare"].strip()
         assert v["n_tokens"] == len(v["text_bare"].split()), f"{path.name}: {v['id']} n_tokens disagrees with text_bare"
-        assert v["language"] in ("grc", "hbo", "arb")
+        assert v["language"] in ("grc", "hbo", "arb", "eng")
 
 
 def test_primary_corpus_ids_are_unique() -> None:

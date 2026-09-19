@@ -5,6 +5,7 @@ Supported languages (ISO 639-3 codes used as keys throughout the corpus):
     grc  Greek (Koine, uncial manuscripts and critical editions)
     hbo  Hebrew (Biblical Hebrew and Aramaic in Hebrew script; Masoretic, Qumran, Samaritan)
     arb  Arabic (Quranic Arabic, Uthmani orthography)
+    eng  English (modern prose, held as a validation corpus with known authorship)
 
 Every language exposes the same four operations: ``bare`` (a diacritic-free, case-folded,
 letter-variant-neutral form for statistics), ``tokenize`` (bare word tokens), ``split_sentences``
@@ -71,6 +72,47 @@ ARABIC_FUNCTION_WORDS = (
 ARABIC_SUFFIXES = ["ون", "ين", "ات", "ان", "ها", "هم", "هن", "كم", "كن", "نا", "ني", "وا", "تم", "تن", "ية", "ة", "ه", "ك", "ي", "ت", "ا"]
 
 
+# --- English ------------------------------------------------------------------------------------------
+# Not a scripture language. English is here because the other three have no ground truth: nobody can
+# say who wrote Isaiah, so nothing measured on it can be scored. The English corpus is chosen so that
+# every text has a known author, which makes it the only place a strategy can be shown to work before
+# it is pointed at something that matters.
+_ENG_TOKEN_RE = re.compile(r"[a-z]+(?:'[a-z]+)*")
+_ENG_SENT_RE = re.compile(r"(?<=[.!?])[\"'\u201d\u2019)\]]*\s+")
+_ENG_APOSTROPHE = str.maketrans({"\u2019": "'", "\u2018": "'", "\u02bc": "'"})
+
+# Closed-class words plus the highest-frequency auxiliaries and adverbs: the words an author uses
+# without choosing them, which is what makes them carry style rather than subject.
+ENGLISH_FUNCTION_WORDS = (
+    "the a an this that these those such same other another each every either neither any some all "
+    "both half no none one two first last next own very much many few little more most less least "
+    "i me my mine myself we us our ours ourselves you your yours yourself yourselves he him his "
+    "himself she her hers herself it its itself they them their theirs themselves who whom whose "
+    "which what whatever whoever whichever someone somebody something anyone anybody anything "
+    "everyone everybody everything no-one nobody nothing one's oneself "
+    "of in to for with on at by from up down out off over under above below between among through "
+    "during before after since until till while within without against toward towards upon into "
+    "onto about across behind beyond beside besides around near past along amid amongst despite "
+    "except inside outside per than unto via "
+    "and or but nor yet so because although though unless whereas whether if lest however therefore "
+    "thus hence moreover furthermore nevertheless nonetheless otherwise meanwhile besides also "
+    "is are was were be been being am do does did doing done have has had having "
+    "will would shall should can could may might must ought need dare used "
+    "not no never nothing none neither nor hardly scarcely barely seldom rarely always often "
+    "sometimes usually already still yet again ever once twice then now here there where when why "
+    "how whence whither thence hither thither "
+    "as so too quite rather almost enough just only even indeed perhaps maybe certainly surely "
+    "well thus above below likewise accordingly consequently"
+).split()
+
+ENGLISH_SUFFIXES = [
+    "ation", "ition", "ness", "ment", "ance", "ence", "able", "ible", "ical", "ously", "fully",
+    "less", "ship", "hood", "ward", "wise", "ing", "ion", "ity", "ous", "ive", "ful", "ise", "ize",
+    "ish", "ism", "ist", "est", "ary", "ory", "ent", "ant", "ial", "ual", "ly", "ed", "er", "or",
+    "al", "ic", "es", "ty", "cy", "e", "s", "d", "y", "n", "t",
+]
+
+
 def _strip_marks(s: str) -> str:
     return "".join(ch for ch in unicodedata.normalize("NFD", s) if unicodedata.category(ch) != "Mn")
 
@@ -85,6 +127,9 @@ def bare(s: str, lang: str) -> str:
     if lang == "arb":
         s = _ARB_DIACRITICS_RE.sub("", unicodedata.normalize("NFC", s))
         return s.translate(_ARB_NORMALISE)
+    if lang == "eng":
+        # Fold accents, fold case, and settle the apostrophe, so "don't" and "don\u2019t" are one word.
+        return _strip_marks(s.translate(_ENG_APOSTROPHE)).lower()
     raise ValueError(f"unsupported language {lang!r}")
 
 
@@ -95,23 +140,27 @@ def tokenize(s: str, lang: str) -> list[str]:
         return _HEB_TOKEN_RE.findall(bare(s, lang))
     if lang == "arb":
         return _ARB_TOKEN_RE.findall(bare(s, lang))
+    if lang == "eng":
+        return _ENG_TOKEN_RE.findall(bare(s, lang))
     raise ValueError(f"unsupported language {lang!r}")
 
 
 def split_sentences(s: str, lang: str) -> list[str]:
     if lang == "grc":
         return greek.split_sentences(s)
-    rx = _HEB_SENT_RE if lang == "hbo" else _ARB_SENT_RE
+    rx = {"hbo": _HEB_SENT_RE, "arb": _ARB_SENT_RE, "eng": _ENG_SENT_RE}[lang]
     return [p.strip() for p in rx.split(s) if p.strip()]
 
 
 def function_words(lang: str) -> list[str]:
-    words = {"grc": greek.FUNCTION_WORDS, "hbo": HEBREW_FUNCTION_WORDS, "arb": ARABIC_FUNCTION_WORDS}[lang]
+    words = {"grc": greek.FUNCTION_WORDS, "hbo": HEBREW_FUNCTION_WORDS,
+             "arb": ARABIC_FUNCTION_WORDS, "eng": ENGLISH_FUNCTION_WORDS}[lang]
     return list(dict.fromkeys(words))  # vectorizer vocabularies must not repeat a term
 
 
 def suffixes(lang: str) -> list[str]:
-    return list(dict.fromkeys({"grc": greek.SUFFIXES, "hbo": HEBREW_SUFFIXES, "arb": ARABIC_SUFFIXES}[lang]))
+    return list(dict.fromkeys({"grc": greek.SUFFIXES, "hbo": HEBREW_SUFFIXES,
+                               "arb": ARABIC_SUFFIXES, "eng": ENGLISH_SUFFIXES}[lang]))
 
 
 def clean_display(s: str, lang: str) -> str:
@@ -126,6 +175,9 @@ INITIAL_CONNECTIVES = {
     "grc": {"first": {"και"}, "second": {"δε"}, "any": {"και", "δε", "γαρ", "ουν", "αλλα", "τε", "διο", "οθεν"}},
     "hbo": {"first": set(), "second": set(), "any": set()},  # waw is a prefix; handled by the prefix feature below
     "arb": {"first": {"و", "ف", "ثم"}, "second": set(), "any": {"و", "ف", "ثم", "بل", "لكن"}},
+    "eng": {"first": {"and", "but", "so"}, "second": set(),
+            "any": {"and", "but", "so", "for", "yet", "or", "nor", "then", "however", "therefore",
+                    "thus", "still", "now", "besides", "moreover", "nevertheless"}},
 }
 
 

@@ -33,6 +33,7 @@ SOURCE_LICENCES = {
     "quran": ("Tanzil terms: verbatim copy with attribution", "Tanzil.net Uthmani text"),
     "bukhari": ("Unlicense (public domain dedication)", "hadith-api, Fawaz Ahmed; Sahih al-Bukhari, Arabic"),
     "qudsi": ("Unlicense (public domain dedication)", "hadith-api, Fawaz Ahmed; Forty Hadith Qudsi, Arabic"),
+    "english": ("Public domain in the United States", "Project Gutenberg texts; PG front and back matter stripped by the loader"),
 }
 
 # Manuscripts the project is organised around, as the earliest witness per tradition.

@@ -52,7 +52,7 @@ def _corpus_for(args):
     return load_corpus(path)
 
 
-LANGS = ["grc", "hbo", "arb"]
+LANGS = ["grc", "hbo", "arb", "eng"]
 
 
 def _select(args, verses):
@@ -509,7 +509,7 @@ def cmd_explore(args) -> None:
     from .explorer_html import write
 
     corpus = _corpus_for(args)
-    languages = [args.language] if args.language else ["grc", "hbo", "arb"]
+    languages = [args.language] if args.language else LANGS
     out = Path(args.out) if args.out else OUTPUT / "explorer"
     built = []
     for language in languages:
@@ -531,7 +531,7 @@ def cmd_explore(args) -> None:
     print(f"start at {out / 'index.html'}")
 
 
-LANGUAGE_ORDER = ["grc", "hbo", "arb"]
+LANGUAGE_ORDER = ["grc", "hbo", "arb", "eng"]
 
 
 def _write_explorer_index(out: Path, built: list) -> None:

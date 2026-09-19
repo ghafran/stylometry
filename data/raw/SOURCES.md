@@ -24,6 +24,7 @@ the people and institutions named. The only files this project generates are und
 | `quran/` | Quran, Uthmani text and sura metadata | Tanzil terms | Tanzil.net. The terms require a verbatim copy with attribution; this copy is unmodified. |
 | `bukhari/` | Sahih al-Bukhari, Arabic, with book divisions | Unlicense (public domain dedication) | hadith-api, Fawaz Ahmed. The text itself is 9th-century and long out of copyright; the Unlicense covers the digital edition. |
 | `qudsi/` | Forty Hadith Qudsi, Arabic | Unlicense (public domain dedication) | hadith-api, Fawaz Ahmed. Text long out of copyright; the Unlicense covers the digital edition. |
+| `english/` | Federalist Papers, 15 novels, 20 cross-genre works | Public domain in the United States | Project Gutenberg. The texts are out of copyright; PG's own licence covers its trademark and its front and back matter, which the loader strips and this project does not redistribute. |
 | `benchmarks/` | Reference works by catalogued authors | per-manifest, recorded with each entry | See `benchmarks/*_manifest.json` in the repository root |
 
 ## What the Bukhari loader keeps
@@ -39,6 +40,19 @@ The same treatment as Bukhari — matn only, chain dropped — plus the closing 
 this edition appends to 39 of its 40 reports. The collection is small on purpose and is labelled so:
 40 reports, about 2,400 tokens, one work. It is there as a third category beside the Qur'an and
 Bukhari, not as something to cluster.
+
+## Why there is English here
+
+The other three languages have no ground truth. Nobody can say who wrote Isaiah, so nothing measured
+on it can be scored, and a strategy that looks convincing there might be measuring genre, length or
+the editor's punctuation. Every English text has a settled author. Three collections test three
+things: the Federalist papers hold genre and period constant across three authors, the novels give
+several long works per author for whole-work holdout, and the cross-genre set has the same hand
+writing fiction and essays, which is where a strategy that tracks genre rather than authorship shows
+itself.
+
+Each work contributes 20,000 words taken from a sixth of the way in, which steps over the front
+matter and avoids making the corpus a study of how these authors open books.
 
 ## Non-commercial terms
 

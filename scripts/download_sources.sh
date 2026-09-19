@@ -18,6 +18,8 @@
 #   quran/              Quran, Tanzil Uthmani text + sura metadata                       Tanzil terms (verbatim, attribution)
 #   bukhari/            Sahih al-Bukhari, Arabic, with book divisions (hadith-api)      Unlicense (public domain)
 #   qudsi/              Forty Hadith Qudsi, Arabic (hadith-api)                         Unlicense (public domain)
+#  English (validation corpus: every text has a known author)
+#   english/            Federalist Papers, 15 novels, 20 cross-genre works (Gutenberg)  public domain in the US
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 RAW="$ROOT/data/raw"
@@ -81,3 +83,11 @@ fetch "https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/ara-bukhari
 fetch "https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/ara-qudsi.json" "$RAW/qudsi/ara-qudsi.json"
 
 echo "sources ready under $RAW"
+
+# --- English --------------------------------------------------------------------------------------
+# A validation corpus: unlike the scripture, every text here has a settled author, so a strategy can
+# be scored. The list is the catalogue in stylometry/corpus/english.py; keep the two in step.
+for id in 1404 1342 161 158 1400 98 730 1260 9182 30486 145 550 6688 110 27 153 \
+          74 76 245 3176 1695 204 470 16769 120 43 535 386 36 35 19229 7058 1661 2852 3069 5317; do
+  fetch "https://www.gutenberg.org/cache/epub/$id/pg$id.txt" "$RAW/english/pg$id.txt"
+done

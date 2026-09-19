@@ -252,6 +252,88 @@ out of the same 7,274 records, so a classifier separating *those* two cannot be 
 transmission history, redaction or collection — which is the closest thing to a control this corpus
 offers.
 
+## 6c. English: a corpus where the answer is known — done
+
+The other three languages have no ground truth. Nobody can say who wrote Isaiah, so nothing measured
+on it can be scored, and a strategy that looks convincing there might be measuring genre, length or
+the editor's punctuation. Every English text here has a settled author. 11,722 units, 120 works,
+884,045 tokens, from Project Gutenberg; each work contributes 20,000 words taken a sixth of the way
+in, which steps over the front matter without having to recognise it and stops the corpus being a
+study of how these authors open books.
+
+| collection | works | authors | what it tests |
+|---|---:|---:|---|
+| **Federalist** | 85 | 3 | genre, period and purpose held constant. 70 papers are ground truth; the disputed twelve (49–58, 62, 63) and the three joint ones (18–20) are labelled as such, not given an author |
+| **Novels** | 15 | 5 | several long works per author, for whole-work holdout |
+| **Cross-genre** | 20 | 5 | the same hand in fiction and in essays — where a strategy that tracks genre shows itself |
+
+### 6c.1 Every strategy alone, scored against the known author
+
+1,000-token passages, whole-work holdout, SVM. Majority baseline 70.1% / 20.2% / 20.2%.
+
+| strategy | Federalist | Novels | Cross-genre |
+|---|---:|---:|---:|
+| function_words | 91.5% | 58.2% | **69.0%** |
+| word_frequency | 93.2% | **58.9%** | 58.3% |
+| embeddings | **94.0%** | 44.6% | 61.7% |
+| char_ngrams | 90.6% | 53.3% | 58.3% |
+| word_ngrams | 83.8% | 48.8% | 52.8% |
+| topics | 70.1% | 44.9% | 25.5% |
+| richness | 76.1% | 38.3% | 30.7% |
+| morphology | 65.0% | 38.3% | 38.1% |
+| clause | 71.8% | 11.5% | 25.7% |
+| length | 70.1% | 3.5% | 18.9% |
+| hapax | 70.1% | 3.8% | 6.8% |
+| punctuation | 70.1% | 3.1% | 9.4% |
+| rhythm | 70.1% | 0.0% | 0.0% |
+
+**Three results this corpus was built to get.**
+
+1. **Function words are the only strategy that survives a change of genre.** On Cross-genre they are
+   the best single strategy at 69.0%, ahead of word frequency and embeddings, which both beat them
+   elsewhere. That is the theoretical expectation and this is the first time this project has been
+   able to show it rather than assume it.
+2. **`topics` collapses across genre, 44.9% → 25.5%.** Within one genre, subject matter correlates
+   with author well enough to pass for attribution. Put the same author in two genres and it falls to
+   chance. This is the genre confound, measured against a known answer.
+3. **The controls behave as controls.** `rhythm` 0.0%, `punctuation` 3.1%, `hapax` 3.8%, `length`
+   3.5% on Novels — at or below chance. The project labels those as not authorial; the label now has
+   evidence under it.
+
+### 6c.2 The best mix, chosen honestly
+
+A greedy search over combinations reports the accuracy it was chosen to maximise, so that number is
+inflated by construction — the same error as fitting a threshold in place (§11.5). Both figures:
+
+| | greedy, in sample | chosen without seeing the scored text | function words alone | all 13 together |
+|---|---:|---:|---:|---:|
+| Federalist | 95.7% | **91.5% / 87.9%** (split-half) | 81.4% / 82.8% | 86.4% / 79.3% |
+| Novels | 69.3% | **62.0%** (nested) | 58.2% | 62.7% |
+| Cross-genre | 74.5% | **71.7%** (nested) | 69.0% | 68.5% |
+
+The inflation is 7.3 points on Novels and 2.8 on Cross-genre. Quote the middle column.
+
+**Selecting a mix is worth it only across genre.** On Novels the honestly-chosen mix (62.0%) is no
+better than simply using everything (62.7%). On Cross-genre it beats both everything (68.5%) and
+function words alone (69.0%), and that is the harder task. **Throwing every strategy in is not the
+answer anywhere**: all 13 together loses to function words alone on Cross-genre.
+
+**What gets chosen, across the outer folds:**
+
+- Cross-genre: **function_words 20/20** — picked in every single fold — then length 15/20,
+  richness 12/20, morphology 11/20.
+- Novels: richness 12/15, morphology 12/15, word_frequency 11/15, function_words only 6/15.
+
+Function words being unanimous on the cross-genre task and optional on the within-genre one is the
+same finding twice: inside one genre other things can stand in for authorship, and across genres only
+function words hold.
+
+- [ ] 6c.3 Attribute the disputed twelve Federalist papers with the honest mix and report it. The
+      published answer is Madison; this is the field's reference test and the corpus is now set up
+      for it.
+- [ ] 6c.4 Re-run the scripture strategy choices against these results: the Greek, Hebrew and Arabic
+      runs use a panel chosen on no evidence at all.
+
 ## 7. Quran against hadith: a discrimination test, declared before it is run
 
 - [ ] 7.1 Write the hypothesis, the statistic and the threshold into a file **before** running anything,

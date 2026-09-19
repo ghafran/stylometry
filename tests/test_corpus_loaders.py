@@ -527,3 +527,182 @@ def test_qudsi_returns_nothing_without_the_edition(tmp_path: Path) -> None:
     from stylometry.corpus import qudsi
 
     assert qudsi.load(tmp_path / "absent") == []
+
+
+# --- English: the validation corpus, where the author is known -------------------------------------
+
+GUTENBERG = """The Project Gutenberg eBook of Something
+
+Title: Something
+Author: A Writer
+
+*** START OF THE PROJECT GUTENBERG EBOOK SOMETHING ***
+
+Produced by a volunteer and the Online Distributed Proofreading Team.
+
+CONTENTS
+
+CHAPTER I. The Beginning
+
+CHAPTER II. The Middle
+
+CHAPTER I
+
+{body}
+
+CHAPTER II
+
+{more}
+
+*** END OF THE PROJECT GUTENBERG EBOOK SOMETHING ***
+
+This eBook is for the use of anyone anywhere at no cost and with almost no
+restrictions whatsoever. Project Gutenberg-tm License applies.
+"""
+
+
+def _gutenberg(tmp_path: Path, gid: int, body: str, more: str = "") -> Path:
+    d = tmp_path / "english"
+    d.mkdir(exist_ok=True)
+    (d / f"pg{gid}.txt").write_text(GUTENBERG.format(body=body, more=more or body), encoding="utf-8")
+    return d
+
+
+def test_english_strips_project_gutenbergs_own_front_and_back_matter() -> None:
+    from stylometry.corpus import english
+
+    body = english.strip_gutenberg(GUTENBERG.format(body="Real prose here.", more="More prose."))
+    assert "Real prose here." in body
+    assert "START OF THE PROJECT GUTENBERG" not in body
+    assert "restrictions whatsoever" not in body, "the licence notice is not the author's prose"
+    assert "Title: Something" not in body
+
+
+def test_english_rejects_matter_the_author_did_not_write() -> None:
+    from stylometry.corpus import english
+
+    assert english.is_front_matter("Produced by a volunteer and the Online Distributed Proofreading Team.")
+    assert english.is_front_matter("This electronic text is derived from the 1905 edition.")
+    assert english.is_front_matter("[Illustration: The garden at dusk.]")
+    assert english.is_front_matter("I. LOCOMOTION 1 II. DIFFUSION 33 III. DEVELOPING 68 IV. CITIES 99")
+    assert not english.is_front_matter(
+        "It is a truth universally acknowledged, that a single man in possession of a good "
+        "fortune, must be in want of a wife.")
+
+
+def test_english_takes_its_sample_from_past_the_front_matter(tmp_path: Path) -> None:
+    """Front matter is always at the top of these files, so the sample starts a sixth of the way in.
+
+    Recognising it instead was tried and lost: every rule that caught a contents list also threw away
+    Pride and Prejudice's first chapter, whose paragraphs are too short to look like prose.
+    """
+    from stylometry.corpus import english
+
+    blocks = ["front matter"] * 10 + ["real prose"] * 90
+    assert english.body_start(blocks) == 15
+    assert blocks[english.body_start(blocks)] == "real prose"
+
+
+def test_english_caps_each_work_and_labels_it_with_its_author(tmp_path: Path) -> None:
+    from stylometry.corpus import english
+
+    paragraph = " ".join(["the quick brown fox jumps over the lazy dog again"] * 12)
+    body = "\n\n".join([paragraph] * 400)
+    d = _gutenberg(tmp_path, 1342, body)
+    rows = english._work((d / "pg1342.txt").read_text(encoding="utf-8"),
+                         "Jane Austen", "AUSTEN-PP", "Pride and Prejudice", "Novels", "fiction", 0)
+    assert rows, "the work produced units"
+    assert {r["group"] for r in rows} == {"Jane Austen"}, "the label is the author"
+    assert all(r["known_author"] for r in rows)
+    assert {r["language"] for r in rows} == {"eng"}
+    total = sum(r["n_tokens"] for r in rows)
+    assert english.WORD_BUDGET <= total < english.WORD_BUDGET + 200, total
+
+
+FEDERALIST = """*** START OF THE PROJECT GUTENBERG EBOOK THE FEDERALIST PAPERS ***
+
+FEDERALIST No. 1
+
+General Introduction
+
+For the Independent Journal.
+
+HAMILTON
+
+To the People of the State of New York:
+
+AFTER an unequivocal experience of the inefficacy of the subsisting federal
+government, you are called upon to deliberate on a new Constitution.
+
+FEDERALIST No. 2
+
+Concerning Dangers from Foreign Force
+
+JAY
+
+To the People of the State of New York:
+
+WHEN the people of America reflect that they are now called upon to decide a
+question which must prove to be exceedingly momentous.
+
+FEDERALIST No. 51
+
+The Structure of the Government
+
+MADISON
+
+To the People of the State of New York:
+
+TO WHAT expedient, then, shall we finally resort, for maintaining in practice
+the necessary partition of power among the several departments.
+
+FEDERALIST No. 18
+
+The Same Subject Continued
+
+MADISON
+
+To the People of the State of New York:
+
+AMONG the confederacies of antiquity, the most considerable was that of the
+Grecian republics, associated under the Amphictyonic council.
+
+*** END OF THE PROJECT GUTENBERG EBOOK THE FEDERALIST PAPERS ***
+"""
+
+
+def test_federalist_keeps_the_disputed_papers_out_of_the_ground_truth() -> None:
+    """No. 51 is one of the twelve the field argued over for a century.
+
+    The Gutenberg text prints MADISON for every disputed and joint paper. Taking that at face value
+    would score the benchmark on its own open question, so the disputed twelve and the three joint
+    papers are labelled as such and the other seventy are the ground truth.
+    """
+    from stylometry.corpus import english
+
+    rows = english._federalist(FEDERALIST, 0)
+    by_work = {r["work"]: r for r in rows}
+    assert by_work["FED01"]["group"] == "Alexander Hamilton" and by_work["FED01"]["known_author"]
+    assert by_work["FED02"]["group"] == "John Jay" and by_work["FED02"]["known_author"]
+    # 51 is disputed and 18 is joint: both print MADISON, and neither is ground truth.
+    assert by_work["FED51"]["group"] == "disputed"
+    assert by_work["FED51"]["printed_attribution"] == "Madison"
+    assert not by_work["FED51"]["known_author"]
+    assert by_work["FED18"]["group"] == "joint"
+    assert not by_work["FED18"]["known_author"]
+
+
+def test_federalist_drops_the_salutation_printed_on_every_paper() -> None:
+    """Identical text repeated 85 times is nobody's style, and as its own unit it would put 85
+    indistinguishable paragraphs into the corpus."""
+    from stylometry.corpus import english
+
+    for row in english._federalist(FEDERALIST, 0):
+        assert "people of the state of new york" not in row["text_bare"]
+    assert any("unequivocal" in r["text_bare"] for r in english._federalist(FEDERALIST, 0))
+
+
+def test_english_returns_nothing_without_the_texts(tmp_path: Path) -> None:
+    from stylometry.corpus import english
+
+    assert english.load(tmp_path / "absent") == []

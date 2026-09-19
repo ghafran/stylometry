@@ -10,7 +10,8 @@ import json
 import re
 from pathlib import Path
 
-LANGUAGE_NAMES = {"grc": "Koine Greek", "hbo": "Biblical Hebrew", "arb": "Quranic Arabic"}
+LANGUAGE_NAMES = {"grc": "Koine Greek", "hbo": "Biblical Hebrew", "arb": "Quranic Arabic",
+                  "eng": "English (known authors)"}
 RTL = {"hbo", "arb"}
 
 CSS = """

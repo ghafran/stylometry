@@ -33,7 +33,7 @@ def _metadata(rows, *, text_required=False):
             raise ValueError("one canonical work cannot have multiple author labels")
         works[row["work_id"]] = row["author"]
         if text_required or "language" in row:
-            if row.get("language") not in ("grc", "hbo", "arb"):
+            if row.get("language") not in ("grc", "hbo", "arb", "eng"):
                 raise ValueError("rows need a supported language")
             languages.add(row["language"])
         if text_required and (not isinstance(row.get("text_bare"), str) or not row["text_bare"].strip()):

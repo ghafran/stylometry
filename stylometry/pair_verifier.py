@@ -40,7 +40,7 @@ def _validate(rows, *, language=None, unique_ids=False, unique_text=False):
             not isinstance(row.get(key), str) or not row[key].strip() for key in _REQUIRED
         ):
             raise ValueError("passages need nonempty " + ", ".join(_REQUIRED))
-        if row["language"] not in ("grc", "hbo", "arb"):
+        if row["language"] not in ("grc", "hbo", "arb", "eng"):
             raise ValueError("unsupported language")
         languages.add(row["language"])
         author = works.setdefault(row["work_id"], row["author"])

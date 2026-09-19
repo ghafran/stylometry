@@ -33,7 +33,7 @@ def _validate_rows(rows, language=None):
             for key in ("author", "work_id", "text_bare", "language")
         ):
             raise ValueError("rows need nonempty author, work_id, text_bare, and language strings")
-        if row["language"] not in ("grc", "hbo", "arb"):
+        if row["language"] not in ("grc", "hbo", "arb", "eng"):
             raise ValueError("unsupported language")
         languages.add(row["language"])
         if row["work_id"] in works and works[row["work_id"]] != row["author"]:
