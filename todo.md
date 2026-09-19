@@ -274,6 +274,7 @@ study of how these authors open books.
 | strategy | Federalist | Novels | Cross-genre |
 |---|---:|---:|---:|
 | function_words | 91.5% | 58.2% | **69.0%** |
+| lexical_preference | 86.3% | 39.7% | 36.5% |
 | word_frequency | 93.2% | **58.9%** | 58.3% |
 | embeddings | **94.0%** | 44.6% | 61.7% |
 | char_ngrams | 90.6% | 53.3% | 58.3% |
@@ -299,6 +300,21 @@ study of how these authors open books.
 3. **The controls behave as controls.** `rhythm` 0.0%, `punctuation` 3.1%, `hapax` 3.8%, `length`
    3.5% on Novels — at or below chance. The project labels those as not authorial; the label now has
    evidence under it.
+
+**Lexical preference had no English pairs until this corpus asked for them.** The strategy compares
+near-equivalent choices — *while* against *whilst*, *among* against *amongst*, *shall* against *will* —
+and the pair lists existed for Greek, Hebrew and Arabic only, so the validation corpus could not score
+the one strategy nothing was known about. Fifteen pairs, thirty features, and it reaches **86.3% on
+the Federalist** against a 70.1% baseline. It is also genre-robust, which is the rarer property:
+
+| | Novels | Cross-genre | change |
+|---|---:|---:|---|
+| lexical_preference | 39.7% | 36.5% | −3.2 points |
+| topics | 44.9% | 25.5% | **−19.4 points** |
+| function_words | 58.2% | 69.0% | +10.8 points |
+
+Thirty features doing that well is the argument for the strategy: it is not measuring vocabulary
+size or subject, it is measuring which of two words a writer reaches for without thinking.
 
 ### 6c.2 The best mix, chosen honestly
 

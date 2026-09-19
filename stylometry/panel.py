@@ -245,6 +245,27 @@ SYNONYM_PAIRS = {
         ("indeed", ["ان"], ["انما"]),
         ("people", ["الناس"], ["القوم"]),
     ],
+    # English pairs are the well-worn ones of the discipline: near-equivalent choices where the
+    # author is picking without deliberating, which is what makes the choice habitual rather than
+    # meant. Without these, lexical preference was the one strategy the validation corpus could not
+    # score, which is the wrong strategy to have no evidence about.
+    "eng": [
+        ("while", ["while"], ["whilst"]),
+        ("among", ["among"], ["amongst"]),
+        ("amid", ["amid"], ["amidst"]),
+        ("toward", ["toward", "towards"], ["to"]),
+        ("upon", ["upon"], ["on"]),
+        ("perhaps", ["perhaps"], ["maybe", "possibly"]),
+        ("although", ["although"], ["though"]),
+        ("cannot", ["cannot"], ["can't"]),
+        ("shall", ["shall"], ["will"]),
+        ("must", ["must"], ["ought"]),
+        ("begin", ["begin", "began", "begun"], ["start", "started"]),
+        ("seem", ["seem", "seemed", "seems"], ["appear", "appeared", "appears"]),
+        ("very", ["very"], ["quite", "rather"]),
+        ("big", ["big", "large"], ["great"]),
+        ("said", ["said"], ["replied", "answered"]),
+    ],
 }
 
 
