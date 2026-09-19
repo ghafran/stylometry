@@ -16,8 +16,8 @@ import json
 from collections import Counter, defaultdict
 from pathlib import Path
 
-from . import (apostolic, bukhari, cntr, dss, first1k, inscriptions, mam, oshb, quran, samaritan,
-               sinaiticus, vaticanus)
+from . import (apostolic, bukhari, cntr, dss, first1k, inscriptions, mam, oshb, qudsi, quran,
+               samaritan, sinaiticus, vaticanus)
 
 # (subdirectory under data/raw, loader)
 LOADERS = [
@@ -33,13 +33,14 @@ LOADERS = [
     ("inscriptions", inscriptions.load),
     ("quran", quran.load),
     ("bukhari", bukhari.load),
+    ("qudsi", qudsi.load),
 ]
 
 
 # Preferred witness order when several carry a work at comparable length: the manuscripts the project
 # is about first, then the editions.  A witness only wins on priority if it has at least COVERAGE of
 # the fullest witness's tokens, so a fragmentary manuscript never displaces a complete edition.
-WITNESS_PRIORITY = ["S", "B", "L", "A", "SP", "Swete", "Lake", "Bonnet", "T", "H"]
+WITNESS_PRIORITY = ["S", "B", "L", "A", "SP", "Swete", "Lake", "Bonnet", "T", "H", "Q"]
 COVERAGE = 0.9
 
 

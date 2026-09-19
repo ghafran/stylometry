@@ -23,6 +23,7 @@ the people and institutions named. The only files this project generates are und
 | `inscriptions/` | Ketef Hinnom amulets, Nash Papyrus | Published readings | Editors' published readings, transcribed here |
 | `quran/` | Quran, Uthmani text and sura metadata | Tanzil terms | Tanzil.net. The terms require a verbatim copy with attribution; this copy is unmodified. |
 | `bukhari/` | Sahih al-Bukhari, Arabic, with book divisions | Unlicense (public domain dedication) | hadith-api, Fawaz Ahmed. The text itself is 9th-century and long out of copyright; the Unlicense covers the digital edition. |
+| `qudsi/` | Forty Hadith Qudsi, Arabic | Unlicense (public domain dedication) | hadith-api, Fawaz Ahmed. Text long out of copyright; the Unlicense covers the digital edition. |
 | `benchmarks/` | Reference works by catalogued authors | per-manifest, recorded with each entry | See `benchmarks/*_manifest.json` in the repository root |
 
 ## What the Bukhari loader keeps
@@ -31,6 +32,13 @@ the people and institutions named. The only files this project generates are und
 only the *matn*, the body of each report, and drops the *isnad*, the chain of transmitters prefixed to
 it — 28% of the text. That is a judgement made in code, in `stylometry/corpus/bukhari.py`, not an edit
 to the file on disk: the raw text stays complete so the decision can be checked or reversed.
+
+## What the Hadith Qudsi loader keeps
+
+The same treatment as Bukhari — matn only, chain dropped — plus the closing "narrated by X" citation
+this edition appends to 39 of its 40 reports. The collection is small on purpose and is labelled so:
+40 reports, about 2,400 tokens, one work. It is there as a third category beside the Qur'an and
+Bukhari, not as something to cluster.
 
 ## Non-commercial terms
 

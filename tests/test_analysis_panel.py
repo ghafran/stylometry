@@ -348,7 +348,7 @@ def test_the_explorer_places_every_level_under_every_available_strategy():
             for chapter in work["children"]:
                 assert len(chapter["xy"]) == 2 * len(data["keys"])
                 for verse in chapter["v"]:
-                    ref, text, tokens, xy, group = verse
+                    ref, text, tokens, xy, group, attribution = verse
                     assert text and tokens > 0
                     assert len(xy) == 2 * len(data["keys"]), "a verse is placed under every strategy"
                     assert len(group) == len(data["keys"]), "and grouped under every strategy"
@@ -779,3 +779,34 @@ def test_the_front_page_keeps_a_stable_language_order(tmp_path):
     _write_explorer_index(tmp_path, _cards(tmp_path, built))
     page = (tmp_path / "index.html").read_text(encoding="utf-8")
     assert page.index("Koine Greek") < page.index("Quranic Arabic"), "Greek, Hebrew, Arabic"
+
+
+def test_a_collection_with_every_book_in_one_group_still_draws_its_chart(tmp_path):
+    """"All nineteen of them in A2" is an answer, not an absence.
+
+    Requiring two occupied groups left Greek's noncanonical collection with no chart at all under the
+    default strategy, because its nineteen books are all in the same language-wide group.
+    """
+    from stylometry.explorer_html import CSS, JS_COMMON  # noqa: F401
+    import stylometry.explorer_html as eh
+
+    source = eh.JS_COMMON
+    assert "if (!total) return ''" in source, "the only thing that suppresses a chart is no data"
+    assert "sizes.filter(c => c > 0).length < 2" not in source
+
+
+def test_verses_carry_who_is_speaking_where_the_source_says(tmp_path):
+    from stylometry.explorer import build
+    from stylometry.explorer_html import write
+
+    data = build(_explorer_verses(), "grc", progress=lambda m: None, workers=1)
+    assert data["verse_fields"] == ["ref", "text", "n_tokens", "xy", "group", "attribution"]
+    for collection in data["tree"]:
+        for work in collection["children"]:
+            for chapter in work["children"]:
+                for verse in chapter["v"]:
+                    assert len(verse) == 6
+                    assert verse[5] == "", "Greek carries no attribution"
+    book = sorted((write(data, tmp_path / "grc") / "works").glob("*.html"))[0].read_text(encoding="utf-8")
+    assert "speakerTag(v[5])" in book
+    assert "quote of the Prophet" in book and "speech of God" in book

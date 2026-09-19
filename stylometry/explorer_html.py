@@ -73,6 +73,10 @@ border-radius:9px;padding:9px 13px;margin-bottom:7px;font:inherit;color:inherit;
 .vrow .vbody{grid-row:1/span 2;grid-column:3}
 .vhead{display:grid;grid-template-columns:78px 40px minmax(0,1fr);gap:11px;padding:0 13px 5px;
 font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint)}
+.sp{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.03em;
+padding:1px 6px;border-radius:3px;background:var(--panel);color:var(--muted);white-space:nowrap}
+.sp.sp-p{background:color-mix(in srgb,var(--g1) 18%,transparent);color:var(--g1)}
+.sp.sp-d{background:color-mix(in srgb,var(--g4) 22%,transparent);color:var(--g4)}
 .gin{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);margin-left:7px;font-weight:400}
 .gin i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;vertical-align:-1px}
 .gb.lg{grid-row:1;grid-column:2;align-self:start;color:var(--ink);font-weight:600}
@@ -148,6 +152,18 @@ const groupsOf = n => ({ k: n.gk ? n.gk[idx()] : 1, reason: n.gr ? n.gr[idx()] :
                          sizes: (n.gsz ? n.gsz[idx()] : null) || [] });
 const groupOf = c => (c.g ? c.g[idx()] : 1);
 
+// Who is speaking, where the source says. Only the Arabic hadith collections carry this.
+const SPEAKER = {
+  prophet: ['quote of the Prophet', 'sp-p'],
+  other: ['quoted, another speaker', 'sp-o'],
+  report: ["narrator's report", 'sp-r'],
+  divine: ['speech of God, related by the Prophet', 'sp-d'],
+};
+const speakerTag = code => {
+  const s = SPEAKER[code];
+  return s ? `<span class="sp ${s[1]}">${s[0]}</span>` : '';
+};
+
 function groupSummary(node, unit) {
   const g = groupsOf(node);
   if (!g.n) return '';
@@ -212,7 +228,9 @@ function acrossChart(node, label) {
 // selecting it first. Same bars as the side panel, tighter.
 function rowBars(sizes, caption) {
   const total = sizes.reduce((a, b) => a + b, 0);
-  if (sizes.filter(c => c > 0).length < 2 || !total) return '';
+  // One occupied group is an answer - "all nineteen of them in A2" - not an absence. Requiring two
+  // left the whole noncanonical collection with no chart at all under the default strategy.
+  if (!total) return '';
   const max = Math.max(...sizes);
   return `<span class="rbars"><span class="rcap">${caption}</span>` + sizes.map((c, i) => c ? `
     <span class="rrow">
@@ -489,7 +507,8 @@ function render() {{
         <span class="vtok">${{v[2]}} tok</span>
         <span class="vgrp" style="color:${{many ? G(vGroupOf(v)) : 'var(--faint)'}}">${{many ? A(vGroupOf(v)) : '—'}}
           ${{many ? `<i style="background:${{G(vGroupOf(v))}}"></i>` : ''}}</span>
-        <span class="vbody vtext ${{RTL ? 'rtl' : ''}}">${{v[1]}}</span>
+        <span class="vbody">${{speakerTag(v[5])}}
+          <span class="vtext ${{RTL ? 'rtl' : ''}}">${{v[1]}}</span></span>
       </button>`).join('');
   document.getElementById('up').addEventListener('click', () => {{ chapter = null; verse = null; render(); }});
   list.querySelectorAll('.vrow[data-i]').forEach(b => b.addEventListener('click', () => {{
@@ -503,6 +522,7 @@ function render() {{
   if (verse !== null) {{
     const v = ch.v[verse], xy = vxyOf(v);
     mk.innerHTML = `<h2>${{ch.label}}:${{v[0]}}</h2>
+      ${{speakerTag(v[5])}}
       <div class="vtext ${{RTL ? 'rtl' : ''}}">${{v[1]}}</div>
       ${{many ? `<div class="mk"><span>style group in this chapter</span>
         <span><i style="display:inline-block;width:9px;height:9px;border-radius:2px;

@@ -17,6 +17,7 @@
 #  Arabic
 #   quran/              Quran, Tanzil Uthmani text + sura metadata                       Tanzil terms (verbatim, attribution)
 #   bukhari/            Sahih al-Bukhari, Arabic, with book divisions (hadith-api)      Unlicense (public domain)
+#   qudsi/              Forty Hadith Qudsi, Arabic (hadith-api)                         Unlicense (public domain)
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 RAW="$ROOT/data/raw"
@@ -75,5 +76,8 @@ fetch "https://tanzil.net/pub/download/index.php?quranType=uthmani&outType=txt-2
 fetch "https://tanzil.net/res/text/metadata/quran-data.xml" "$RAW/quran/quran-data.xml"
 # Sahih al-Bukhari: the Arabic edition carries `reference.book`, so each kitab becomes a work.
 fetch "https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/ara-bukhari.json" "$RAW/bukhari/ara-bukhari.json"
+# Hadith Qudsi: reports in which the Prophet relates the speech of God - the Quran's claimed
+# source, transmitted the way a hadith is.
+fetch "https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/ara-qudsi.json" "$RAW/qudsi/ara-qudsi.json"
 
 echo "sources ready under $RAW"

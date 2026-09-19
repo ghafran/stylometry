@@ -423,3 +423,107 @@ def test_bukhari_drops_the_records_the_edition_files_under_no_book(tmp_path: Pat
     assert "BUKH00" not in {r["work"] for r in rows}
     bodies = [r["text_bare"] for r in rows]
     assert len(bodies) == len(set(bodies)), "and nothing is counted twice"
+
+
+def test_bukhari_labels_the_prophets_own_quoted_words(tmp_path: Path) -> None:
+    """Which reports quote him, and which quote somebody else inside a report about him.
+
+    The edition marks direct speech but not whose it is. In a long report the marked spans belong to
+    several mouths, so a span counts as his only when he is named as its speaker just before it.
+    """
+    from stylometry.corpus import bukhari
+
+    rows = bukhari.load(_bukhari_dir(tmp_path))
+    by = {r["verse"]: r for r in rows}
+
+    # "I heard the Messenger of God say: ..." - his, although this record never closes its quotation
+    # mark, which is why the span finder has to handle that case.
+    assert by["1"]["attribution"] == "prophet"
+    # text_prophet keeps the vowel points for display; compare on the bare form.
+    from stylometry.lang import tokenize
+    assert "الاعمال" in tokenize(by["1"]["text_prophet"], "arb")
+    assert by["1"]["n_prophet_tokens"] > 0
+
+    # "... the Messenger of God said: 'every joint ...'" - his.
+    assert by["2"]["attribution"] == "prophet"
+    # "the women said to the Prophet ..." - a report with no quoted speech at all.
+    assert by["3"]["attribution"] == "report"
+    assert by["3"]["text_prophet"] == ""
+
+
+def test_bukhari_does_not_call_a_span_his_when_someone_else_is_speaking(tmp_path: Path) -> None:
+    """Only 56% of the collection's quoted spans are preceded by him named as the speaker."""
+    from stylometry.corpus import bukhari
+
+    # A quoted span whose speaker is a Companion, not the Prophet.
+    text = ("حَدَّثَنَا آدَمُ، عَنْ أَبِي سَعِيدٍ، قَالَ عُمَرُ \" لَا أَدْرِي \" ثُمَّ انْصَرَفَ")
+    assert bukhari.prophet_spans(text) == []
+    assert bukhari.attribution_of(text, ["لَا أَدْرِي"], []) == "other"
+
+
+# --- Forty Hadith Qudsi ---------------------------------------------------------------------------
+
+QUDSI_EDITION = {
+    "metadata": {"name": "Forty Hadith Qudsi", "sections": {"1": "Forty Hadith Qudsi"}},
+    "hadiths": [
+        {"hadithnumber": 1, "arabicnumber": 1, "reference": {"book": 1, "hadith": 1}, "grades": [],
+         "text": "عَنْ أَبِي هُرَيْرَةَ قَالَ: قَالَ رَسُولُ اللَّهِ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ: "
+                 "إِنَّ رَحْمَتِي تَغْلِبُ غَضَبِي رواه مسلم (وكذلك البخاري والنسائي وابن ماجه)"},
+        {"hadithnumber": 2, "arabicnumber": 2, "reference": {"book": 1, "hadith": 2}, "grades": [],
+         "text": "عَنْ أَبِي هُرَيْرَةَ رَضِيَ اللَّهُ عَنْهُ، عَنْ النَّبِيِّ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ قَالَ:<br>"
+                 "قَالَ اللَّهُ تَعَالَى: كَذَّبَنِي ابْنُ آدَمَ وَلَمْ يَكُنْ لَهُ ذَلِكَ رواه البخاري"},
+    ],
+}
+
+
+def _qudsi_dir(tmp_path: Path) -> Path:
+    d = tmp_path / "qudsi"
+    d.mkdir()
+    (d / "ara-qudsi.json").write_text(json.dumps(QUDSI_EDITION, ensure_ascii=False), encoding="utf-8")
+    return d
+
+
+def test_qudsi_drops_the_chain_the_markup_and_the_closing_citation(tmp_path: Path) -> None:
+    from stylometry.corpus import qudsi
+
+    rows = qudsi.load(_qudsi_dir(tmp_path))
+    assert len(rows) == 2
+    for row in rows:
+        assert "رواه" not in row["text_bare"], "the 'narrated by X' citation is not the report"
+        assert "مسلم" not in row["text_bare"] and "البخاري" not in row["text_bare"]
+        assert "<br" not in row["text"], "this edition carries markup"
+        assert "هريرة" not in row["text_bare"], "the transmitter is not the report"
+    assert "رحمتي" in rows[0]["text_bare"] and "غضبي" in rows[0]["text_bare"]
+    assert "كذبني" in rows[1]["text_bare"]
+
+
+def test_qudsi_is_one_work_labelled_as_the_speech_of_god(tmp_path: Path) -> None:
+    """Its whole point is the category: God's speech in the Prophet's wording."""
+    from stylometry.corpus import qudsi
+
+    rows = qudsi.load(_qudsi_dir(tmp_path))
+    assert {r["collection"] for r in rows} == {"Hadith Qudsi"}
+    assert {r["work"] for r in rows} == {"QUDSI"}, "too small to be more than one work"
+    assert {r["attribution"] for r in rows} == {"divine"}
+    assert {r["language"] for r in rows} == {"arb"}
+    assert {r["witness"] for r in rows} == {"Q"}
+    assert [r["ref"] for r in rows] == ["Hadith Qudsi 1", "Hadith Qudsi 2"]
+
+
+def test_qudsi_keeps_a_citation_word_that_is_not_a_closing_note(tmp_path: Path) -> None:
+    """A citation is a short list of names. The same word with a paragraph after it is the report."""
+    from stylometry.corpus import qudsi
+
+    followed_by_a_report = ["a"] * 10 + ["رواه"] + ["b"] * 40
+    _, kept = qudsi.strip_source_note(list(followed_by_a_report), list(followed_by_a_report))
+    assert len(kept) == 51, "too much follows it to be a citation"
+
+    followed_by_names = ["a"] * 10 + ["رواه"] + ["b"] * 4
+    _, cut = qudsi.strip_source_note(list(followed_by_names), list(followed_by_names))
+    assert len(cut) == 10, "a short tail of names is the citation"
+
+
+def test_qudsi_returns_nothing_without_the_edition(tmp_path: Path) -> None:
+    from stylometry.corpus import qudsi
+
+    assert qudsi.load(tmp_path / "absent") == []

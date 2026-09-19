@@ -211,6 +211,47 @@ that tracks the kitab is tracking genre.
 **Check:** ✓ counts reproduce from a fresh clone via `scripts/download_sources.sh`; ✓ spot-checked
 reports show matn without isnad.
 
+## 6b. Hadith Qudsi, and labelling whose words a report carries — done
+
+**A third Arabic category.** The Qur'an is, in the tradition's own account, God's speech verbatim.
+Bukhari is the Prophet's. A *hadith qudsi* is God's speech in the Prophet's wording: the Qur'an's
+claimed source, transmitted the way a hadith is. Whatever separates the first two, this sits across
+it, which makes it the most informative 2,481 tokens in the Arabic corpus.
+
+- [x] Forty Hadith Qudsi from the same Unlicense edition, same matn extraction, plus the closing
+      "narrated by X" citation this edition appends to 39 of its 40 reports.
+- [x] One work, `QUDSI`. 40 reports and 2,481 tokens is one work's worth of text; carrying it as
+      forty works would inject forty 60-token books into the language-wide partition, where they
+      would group on length. Nothing at collection level can be measured from it and the explorer
+      says so.
+- [x] Residual: 2 of the 40 keep a citation inside them, because those records carry two variants of
+      the same report, each attributed separately. About 20 words in 2,481.
+
+**Whose words each report carries.** Every Bukhari record is now labelled, and the label is on the
+verse in the explorer:
+
+| label | reports | what it means |
+|---|---:|---|
+| `prophet` | 3,278 (45%) | carries quoted speech with him named as the speaker |
+| `other` | 1,232 (17%) | carries quoted speech, somebody else's |
+| `report` | 2,764 (38%) | a narrator's report with no direct speech at all |
+
+His quoted words come to **60,492 tokens, 18% of the matn**. They are kept separately in
+`text_prophet`, so §7 can be run on his words alone rather than on reports about him.
+
+The label is earned rather than assumed: a span counts as his only when he is named as its speaker in
+the nine words before it. In a long report the marked spans belong to several mouths — at Hira the
+angel speaks, then Muhammad, then Khadija, then Waraqa, all inside one hadith — and 44% of the
+collection's quoted spans fail that test. Hadith 1 forced a fix: the edition never closes its
+quotation mark there, so the most famous saying in the collection was being labelled a narrator's
+report.
+
+**This gives §7 four things to compare, not two**: the Qur'an, the Prophet's quoted words, the
+narrator's prose around them, and the divine speech of the qudsi collection. The second and third come
+out of the same 7,274 records, so a classifier separating *those* two cannot be explained by
+transmission history, redaction or collection — which is the closest thing to a control this corpus
+offers.
+
 ## 7. Quran against hadith: a discrimination test, declared before it is run
 
 - [ ] 7.1 Write the hypothesis, the statistic and the threshold into a file **before** running anything,

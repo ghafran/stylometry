@@ -32,6 +32,7 @@ SOURCE_LICENCES = {
     "inscriptions": ("Public domain readings", "Ketef Hinnom and Nash Papyrus, published readings"),
     "quran": ("Tanzil terms: verbatim copy with attribution", "Tanzil.net Uthmani text"),
     "bukhari": ("Unlicense (public domain dedication)", "hadith-api, Fawaz Ahmed; Sahih al-Bukhari, Arabic"),
+    "qudsi": ("Unlicense (public domain dedication)", "hadith-api, Fawaz Ahmed; Forty Hadith Qudsi, Arabic"),
 }
 
 # Manuscripts the project is organised around, as the earliest witness per tradition.
@@ -47,7 +48,8 @@ REQUIRED_WITNESSES = {
         "P45": "P45 Chester Beatty I", "P47": "P47", "03": "Codex Vaticanus (New Testament)",
         "02": "Codex Alexandrinus",
     },
-    "Islam": {"T": "Quran, Tanzil Uthmani text", "H": "Sahih al-Bukhari, matn only"},
+    "Islam": {"T": "Quran, Tanzil Uthmani text", "H": "Sahih al-Bukhari, matn only",
+              "Q": "Forty Hadith Qudsi, matn only"},
 }
 
 # Requested material with no openly licensed transcription; recorded so it is not rediscovered.
