@@ -1,259 +1,241 @@
-"""Render output/report.md from the clustering outputs."""
+"""Self-contained, dependency-free exploration of inferred authorship results."""
 from __future__ import annotations
 
 import csv
 import json
-from collections import Counter
 from pathlib import Path
-from urllib.parse import quote
+from typing import Any
 
-from .cluster import author_key
-
-
-def _read_csv(path: Path) -> list[dict]:
-    if not path.exists() or path.stat().st_size == 0:
-        return []
-    with path.open(encoding="utf-8") as fh:
-        return list(csv.DictReader(fh))
-
-
-def _table(headers: list[str], rows: list[list]) -> str:
-    out = ["| " + " | ".join(headers) + " |", "|" + "|".join("---" for _ in headers) + "|"]
-    for r in rows:
-        out.append("| " + " | ".join(str(c) for c in r) + " |")
-    return "\n".join(out)
+_VERSE_FIELDS = (
+    "id", "language", "collection", "book", "book_title", "chapter", "verse",
+    "text", "author_id", "status", "evidence_tokens", "passage_id",
+    "distance_margin", "reference_author", "token_count", "has_gap",
+)
+_ROLLUP_FIELDS = (
+    "level", "language", "collection", "book", "book_title", "chapter", "verse", "id",
+    "verse_count", "assigned_verse_count", "insufficient_verse_count", "low_evidence_verse_count",
+    "author_count", "dominant_author", "author_ids", "author_counts",
+)
+_UI_VERSE_FIELDS = _VERSE_FIELDS + ("source_reference",)
 
 
-def _fmt_marker(name: str, eff: float) -> str:
-    return f"`{name}` {eff:+.2f}σ"
+def _html_payload(result: dict) -> dict:
+    """Retain visible results without duplicating every verse as a rollup.
+
+    A shared field list removes repeated property names from the largest table.
+    This is a display-only projection: report.json and CSV exports remain full.
+    """
+    payload = {key: result[key] for key in (
+        "schema_version", "config", "languages", "authors", "benchmark",
+        "discovery_validation", "source_coverage",
+    ) if key in result}
+    payload["verse_fields"] = list(_UI_VERSE_FIELDS)
+    payload["verse_rows"] = [
+        [row.get(field) for field in _UI_VERSE_FIELDS]
+        for row in result.get("verses", [])
+    ]
+    payload["rollups"] = [
+        row for row in result.get("rollups", []) if row.get("level") != "verse"
+    ]
+    return payload
 
 
-def render(out_dir: str | Path) -> str:
+def _csv_value(value: Any) -> Any:
+    if value is None:
+        return ""
+    if isinstance(value, (dict, list, tuple)):
+        return json.dumps(value, ensure_ascii=False, separators=(",", ":"))
+    # Text is exported verbatim so that references and original text stay intact.
+    return value
+
+
+def _write_csv(path: Path, fields: tuple[str, ...], rows: list[dict]) -> None:
+    with path.open("w", encoding="utf-8-sig", newline="") as stream:
+        writer = csv.DictWriter(stream, fieldnames=fields)
+        writer.writeheader()
+        for row in rows:
+            writer.writerow({field: _csv_value(row.get(field)) for field in fields})
+
+
+def write_report(result: dict, out_dir: Path) -> Path:
+    """Write a portable report and machine-readable exports; return index.html.
+
+    JSON is streamed to avoid creating additional full-corpus strings in memory.
+    The HTML embeds a compact display projection directly and works from a local
+    file without a web server. Full scientific results remain in report.json.
+    """
     out_dir = Path(out_dir)
-    summary = json.loads((out_dir / "summary.json").read_text())
-    authors = json.loads((out_dir / "authors.json").read_text())
-    ktable = _read_csv(out_dir / "k_selection.csv")
-    crosstab = _read_csv(out_dir / "work_by_author.csv")
-    segs = _read_csv(out_dir / "segments.csv")
-    outliers = _read_csv(out_dir / "outliers.csv")
-    author_ids = sorted(authors, key=author_key)
-    val = summary["validation"]
-    passage_mode = summary.get("input_unit") == "pooled_token_passage"
-    unit, units = ("passage", "passages") if passage_mode else ("verse", "verses")
+    out_dir.mkdir(parents=True, exist_ok=True)
+    encoder = json.JSONEncoder(ensure_ascii=False, separators=(",", ":"), allow_nan=False)
+    with (out_dir / "report.json").open("w", encoding="utf-8") as stream:
+        for chunk in encoder.iterencode(result):
+            stream.write(chunk)
+        stream.write("\n")
+    _write_csv(out_dir / "verses.csv", _VERSE_FIELDS, result.get("verses", []))
+    _write_csv(out_dir / "rollups.csv", _ROLLUP_FIELDS, result.get("rollups", []))
+    return write_html_report(result, out_dir)
 
-    md: list[str] = []
-    md.append(f"# Exploratory {unit}-level style analysis\n")
-    if passage_mode:
-        smoothing = ("without additional smoothing" if not summary['alpha'] or not summary['window'] else
-                     f"with smoothing over a ±{summary['window']}-passage window (α={summary['alpha']})")
-        feature_description = "lexical statistics plus AI style profiles" if summary['used_ai_profiles'] else "lexical statistics only"
-        md.append(f"{summary['n_verses']} non-overlapping {summary['passage_tokens']}-token passages from "
-                  f"{summary['n_works']} works were pooled before feature extraction, measured with {feature_description} "
-                  "and analysed "
-                  f"{smoothing}, reduced to {summary['pca_dims']} principal components "
-                  f"({summary['pca_explained_variance']:.0%} of variance) and clustered with k-means.\n")
-        mapping_file = quote(Path(summary.get('source_mapping_file', 'passages.json')).name)
-        md.append(f"[Source mappings and exclusions]({mapping_file}) record the original verse IDs, "
-                  "normalized token offsets, and excluded material. Labels describe whole passages, "
-                  "not the authorship of individual source verses.\n")
-    else:
-        md.append(
-            f"{summary['n_verses']} verse units from {summary['n_works']} works were profiled with "
-            f"{'lexical statistics plus AI style profiles' if summary['used_ai_profiles'] else 'lexical statistics only (no AI profiles found)'}, "
-            f"smoothed over a ±{summary['window']}-verse window (α={summary['alpha']}), reduced to {summary['pca_dims']} principal components "
-            f"({summary['pca_explained_variance']:.0%} of variance) and clustered with k-means.\n"
-        )
-    selected = summary.get("k_selected", summary.get("k_selected_by_silhouette"))
-    md.append(f"**Result: {summary['k_used']} exploratory style groups (A1–A{summary['k_used']}).** "
-              f"Selection criterion: {summary.get('k_criterion', 'silhouette')}; preferred k={selected}. "
-              + ("The number of groups was forced. " if summary.get("k_forced") else "")
-              + "These are not identified authors.")
-    status = summary.get("selection_status", "legacy_unvalidated")
-    md.append(f"Selection status: **{status.replace('_', ' ')}**. One group means no supported split, not one proven author.")
-    stability = summary.get("stability", {})
-    if stability.get("available"):
-        md.append(f"Partition tested at k={stability.get('tested_k', summary['k_used'])}: passage subsampling mean ARI {stability['mean_ari']:.3f}, minimum {stability['min_ari']:.3f} "
-                  f"over {stability['repeats']} repeats. The feature map is fixed; this is partition sensitivity, not held-out accuracy.")
-    if summary.get("profile_metadata", {}).get("unverified_profiles"):
-        md.append("**Legacy/unverified AI profiles:** blinding and input provenance are not verified; regenerate profiles before using these results for validation.")
-    if summary.get("n_missing_profiles"):
-        md.append(f"{summary['n_missing_profiles']} input {units} had no profile and were excluded; missing passages break continuity.")
-    md.append("Assignment margins measure distance to cluster centers, not probabilities of authorship; single-group margins are zero.")
-    hdb = summary.get("hdbscan", {})
-    if hdb.get("available"):
-        md.append(f"Density clustering (HDBSCAN, min cluster {hdb['min_cluster_size']}) found {hdb['n_clusters']} dense groups with {hdb['noise_fraction']:.0%} of {units} unassigned, as a second opinion.\n")
 
-    md.append("\n## How many style groups? (k selection)\n")
-    if "selection_thresholds" in summary:
-        fit_description = ("For each k the partition is fitted and scored on unsmoothed passage vectors. "
-                           if passage_mode and (not summary['alpha'] or not summary['window']) else
-                           "For each k the partition is fitted on smoothed vectors and scored on unsmoothed vectors. ")
-        md.append(fit_description +
-                  "Higher silhouette / Calinski-Harabasz and lower Davies-Bouldin / BIC are better. "
-                  "Automatic splits must improve BIC over a single Gaussian by at least 10 on a fixed sample of unsmoothed vectors, "
-                  "have positive raw silhouette, and retain ARI of at least 0.8 in all five passage subsamples. "
-                  "These are diagnostic thresholds, not a significance test or proof of authorship.\n")
-    else:
-        md.append("Legacy output: single-group BIC and passage-resampling checks were not recorded. "
-                  "Regenerate this analysis with the current pipeline before interpreting cluster support.\n")
-    def _num(value, places: int) -> str:
-        """Round a k-selection cell. The table is read back from CSV, so every cell is text, and
-        k=1 has no silhouette or separation scores at all: those cells arrive empty and stay empty."""
-        try:
-            return f"{float(value):.{places}f}"
-        except (TypeError, ValueError):
-            return ""
+def write_html_report(result: dict, out_dir: Path) -> Path:
+    """Refresh only index.html, preserving existing scientific export files."""
+    out_dir = Path(out_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    encoder = json.JSONEncoder(ensure_ascii=False, separators=(",", ":"), allow_nan=False)
+    path = out_dir / "index.html"
+    with path.open("w", encoding="utf-8") as stream:
+        stream.write(_HTML_START)
+        for chunk in encoder.iterencode(_html_payload(result)):
+            stream.write(chunk.replace("&", "\\u0026").replace("<", "\\u003c")
+                         .replace(">", "\\u003e").replace("\u2028", "\\u2028")
+                         .replace("\u2029", "\\u2029"))
+        stream.write(_HTML_END)
+    return path
 
-    md.append(_table(["k", "silhouette", "Calinski-Harabasz", "Davies-Bouldin", "GMM BIC"],
-                     [[r["k"], _num(r["silhouette"], 3), _num(r["calinski_harabasz"], 1),
-                       _num(r["davies_bouldin"], 3), _num(r["gmm_bic"], 0)] for r in ktable]))
 
-    md.append("\n\n## Style groups at a glance\n")
-    rows = []
-    for a in author_ids:
-        e = authors[a]
-        top_works = ", ".join(f"{w} ({n})" for w, n in list(e["works"].items())[:5])
-        ai = e.get("ai_profile_means")
-        ai_s = (f"reg {ai['register']:.2f} · sem {ai['semitic_interference']:.2f} · hyp {ai['hypotaxis']:.2f} · "
-                f"lex {ai['lexical_richness']:.2f} · rhet {ai['rhetorical_polish']:.2f}") if ai else "—"
-        rows.append([a, e["n_verses"], f"{e['share']:.1%}", f"{e['mean_confidence']:.2f}", top_works, ai_s])
-    md.append(_table(["style group", units, "share", "mean margin", "main works", "AI style means"], rows))
+_HTML_START = r'''<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Authorship Atlas · Text analysis</title>
+<style>
+:root{color-scheme:light;--ink:#172d35;--muted:#60747b;--line:#dce5e6;--bg:#f3f6f5;--paper:#fff;--teal:#076d69;--soft:#e2f2ee;--amber:#866415}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input,select{font:inherit}button,select,a{touch-action:manipulation}button{cursor:pointer}button:disabled{cursor:default;opacity:.45}button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid #3b9db7;outline-offset:3px}header{padding:32px 42px 26px;border-bottom:1px solid var(--line);background:var(--paper);display:flex;align-items:center;justify-content:space-between;gap:24px}.eyebrow{font-size:11px;font-weight:750;letter-spacing:.18em;text-transform:uppercase;color:var(--teal)}h1{font-size:32px;font-weight:650;letter-spacing:-1.2px;line-height:1.2;margin:7px 0}h2{font-size:21px;letter-spacing:-.5px;margin:0 0 8px}h3{font-size:15px;margin:0 0 8px}p{margin:0 0 12px}.muted{color:var(--muted)}.downloads{display:flex;gap:8px;flex-wrap:wrap}.button,.downloads a{border:1px solid var(--line);background:white;color:var(--ink);border-radius:8px;padding:8px 12px;text-decoration:none;white-space:nowrap}.button:hover,.downloads a:hover{background:#f0f6f4;border-color:#abcac2}.layout{display:grid;grid-template-columns:245px minmax(0,1fr);min-height:calc(100vh - 143px)}aside{padding:28px 22px;border-right:1px solid var(--line);background:#f9fbfa}aside h2{font-size:14px;margin-bottom:16px}label{display:block;font-size:12px;font-weight:600;margin-bottom:6px;color:var(--muted)}select,input[type=search]{width:100%;padding:9px 10px;border:1px solid #c9d6d7;border-radius:7px;background:white;color:var(--ink);min-width:0}.field{margin-bottom:17px}aside .button{width:100%}.scope-note{font-size:12px;margin-top:20px;color:var(--muted)}main{min-width:0;padding:28px 34px 48px;max-width:1800px}.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;margin-bottom:18px}.metric{border:1px solid var(--line);background:var(--paper);border-radius:12px;padding:17px 19px}.metric .value{font-size:29px;letter-spacing:-1px;line-height:1.2;margin:5px 0}.metric .label{font-size:12px;color:var(--muted)}.metric .hint{font-size:11px;color:var(--muted)}.notice{background:#e8f1ef;border-left:3px solid #5b9e90;padding:12px 15px;border-radius:0 7px 7px 0;font-size:12px;color:#385c58;margin:0 0 23px}.tabs{display:flex;gap:23px;border-bottom:1px solid #cbdada;margin-bottom:22px;overflow:auto}.tab{background:none;border:0;color:var(--muted);padding:10px 0 13px;white-space:nowrap;border-bottom:3px solid transparent;font-weight:600}.tab[aria-selected=true]{color:var(--teal);border-bottom-color:var(--teal)}.panel[hidden]{display:none}.panel-heading{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:17px}.panel-heading p{margin:0;font-size:12px}.count{font-size:12px;color:var(--muted)}.toolbar{display:flex;align-items:end;gap:12px;margin-bottom:17px}.toolbar .search{flex:1}.toolbar .size{width:100px}.panelbox{border:1px solid var(--line);background:white;border-radius:11px;overflow:hidden}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;text-align:left;font-size:13px}th{padding:12px 16px;font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);background:#f9fbfa;border-bottom:1px solid var(--line);white-space:nowrap}td{padding:14px 16px;border-bottom:1px solid #e8eeee;vertical-align:top}tbody tr:last-child td{border-bottom:0}.text-table .ref{min-width:185px;width:24%}.text-table .tag{min-width:170px;width:19%}.text-table .content{min-width:260px}.ref-title{font-weight:600}.ref-meta{font-size:11px;color:var(--muted);margin-top:3px;overflow-wrap:anywhere}.badge{display:inline-flex;border-radius:5px;padding:3px 7px;font-size:11px;color:#205e52;background:#e8f4ef;white-space:nowrap}.badge.low{background:#faf1d9;color:#7b5d19}.badge.none{background:#edf0f1;color:#647078}.author-link{color:var(--teal);border:0;background:none;padding:0;font:inherit;font-weight:600;text-align:left;overflow-wrap:anywhere}.author-link:hover{text-decoration:underline}.tiny{font-size:11px;color:var(--muted);margin-top:5px}.verse-text{font-family:Georgia,"Times New Roman",serif;font-size:15px;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere}.excerpt{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.verse-detail{margin-top:7px}.verse-detail summary{font-size:11px;color:var(--teal);cursor:pointer}.verse-detail[open] .full{margin-top:8px}.truth{font-family:inherit;font-size:11px;border-top:1px dashed var(--line);padding-top:7px;margin-top:9px;color:var(--muted)}.pagination{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;background:#fcfdfc;gap:12px}.page-buttons{display:flex;gap:8px}.empty{text-align:center;padding:54px 20px;color:var(--muted)}.empty strong{display:block;font-size:17px;color:var(--ink);margin-bottom:7px}.hierarchy-level{width:165px}.trail{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);flex-wrap:wrap;margin-bottom:14px}.trail button{background:none;border:0;color:var(--teal);padding:2px;font-size:12px}.author-pills{display:flex;gap:5px;flex-wrap:wrap}.pill{font-size:11px;padding:2px 6px;background:var(--soft);border-radius:4px}.language-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(225px,1fr));gap:15px}.language-card,.method-card{border:1px solid var(--line);border-radius:10px;background:white;padding:20px}.language-card .number{font-size:32px;line-height:1.2;letter-spacing:-1px;margin:10px 0 3px}.language-card details{font-size:12px;color:var(--muted);margin-top:12px}.language-card summary{cursor:pointer}.method-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0}.method-card p{font-size:13px;color:var(--muted)}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f1f5f4;padding:15px;border-radius:7px;font:12px/1.6 ui-monospace,monospace;color:#34515a;max-height:480px;overflow:auto}.benchmark-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin:17px 0}.benchmark-value{font-size:27px;line-height:1.4}.footer-note{font-size:11px;color:var(--muted);margin-top:22px}noscript{display:block;padding:30px}.loading{padding:40px;color:var(--muted)}@media(max-width:1100px){header{padding:25px}.layout{grid-template-columns:205px minmax(0,1fr)}main{padding:25px 20px}.metrics{grid-template-columns:repeat(2,1fr)}.method-grid{grid-template-columns:1fr}}@media(max-width:740px){header{display:block;padding:22px}.downloads{margin-top:17px}.layout{display:block}aside{border-right:0;border-bottom:1px solid var(--line);padding:18px;display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}aside h2,aside .scope-note{grid-column:1/-1;margin:0}.field{margin:0}aside .button{align-self:end}main{padding:20px 16px}.metric{padding:12px}.metric .value{font-size:25px}.tabs{gap:17px}.panel-heading{align-items:start}.toolbar{flex-wrap:wrap}.pagination{flex-wrap:wrap}.method-grid{grid-template-columns:1fr}h1{font-size:28px}}
+</style>
+</head>
+<body>
+<header><div><div class="eyebrow">Stylometry workspace</div><h1>Authorship Atlas</h1><p class="muted">Explore the voices behind the text.</p></div><nav class="downloads" aria-label="Download analysis"><a href="verses.csv" download>Verse tags ↓</a><a href="rollups.csv" download>Rollups ↓</a><a href="report.json" download>Full analysis ↓</a></nav></header>
+<div class="layout">
+<aside aria-label="Filter the corpus"><h2>Explore your corpus</h2>
+<div class="field"><label for="language">Language</label><select id="language"></select></div>
+<div class="field"><label for="collection">Collection</label><select id="collection"></select></div>
+<div class="field"><label for="book">Book</label><select id="book"></select></div>
+<div class="field"><label for="chapter">Chapter</label><select id="chapter"></select></div>
+<div class="field"><label for="author">Inferred author</label><select id="author"></select></div>
+<div class="field"><label for="status">Evidence status</label><select id="status"><option value="">All evidence</option value="assigned">Assigned</option><option value="low_evidence">Low evidence</option><option value="insufficient_text">Insufficient text</option></select></div>
+<button type="button" class="button" id="reset">Reset filters</button><p class="scope-note">Author groups are compared within a language. Choose an author tag to find its other text across books and collections.</p>
+</aside>
+<main><noscript>This report needs JavaScript for interactive exploration. Download the CSV files or report.json to read every result.</noscript>
+<div class="metrics" id="metrics" aria-live="polite"></div>
+<p class="muted" id="source-scope" hidden></p>
+<div class="notice">These are <strong>estimated style groups</strong>, not verified identities. Tags are inferred from passages and inherited by their verses or paragraphs. Low evidence and insufficient text remain visible. Reference authors are used only for validation.</div>
+<div id="estimate-warnings" aria-live="polite"></div>
+<nav class="tabs" role="tablist" aria-label="Analysis views"><button type="button" class="tab" id="tab-text" role="tab" aria-controls="panel-text" aria-selected="true" data-tab="text">Text explorer</button><button type="button" class="tab" id="tab-hierarchy" role="tab" aria-controls="panel-hierarchy" aria-selected="false" data-tab="hierarchy">Hierarchy</button><button type="button" class="tab" id="tab-authors" role="tab" aria-controls="panel-authors" aria-selected="false" data-tab="authors">Author groups</button><button type="button" class="tab" id="tab-benchmark" role="tab" aria-controls="panel-benchmark" aria-selected="false" data-tab="benchmark">English validation</button><button type="button" class="tab" id="tab-method" role="tab" aria-controls="panel-method" aria-selected="false" data-tab="method">About the analysis</button></nav>
+<section class="panel" id="panel-text" role="tabpanel" aria-labelledby="tab-text"><div class="panel-heading"><div><h2>Every text, an attribution</h2><p class="muted">Inspect verse tags, supporting evidence, and matching voices.</p></div></div><div class="toolbar"><div class="search"><label for="search">Search text, title, reference, or inferred author</label><input id="search" type="search" placeholder="Search the selected corpus…"></div><div class="size"><label for="page-size">Per page</label><select id="page-size"><option>25</option><option selected>50</option><option>100</option></select></div></div><div class="panelbox"><div class="table-wrap"><table class="text-table"><thead><tr><th>Text reference</th><th>Inferred author</th><th>Verse / paragraph</th></tr></thead><tbody id="verse-rows"></tbody></table></div><div id="verse-empty" hidden class="empty"><strong>No matching text</strong>Try a broader filter or a different search.</div><div class="pagination"><span class="count" id="verse-count" aria-live="polite"></span><div class="page-buttons"><button type="button" class="button" id="previous">← Previous</button><button type="button" class="button" id="next">Next →</button></div></div></div></section>
+<section class="panel" id="panel-hierarchy" role="tabpanel" aria-labelledby="tab-hierarchy" hidden><div class="panel-heading"><div><h2>From language to verse</h2><p class="muted">Open a row to move down the hierarchy. Counts describe the complete selected unit.</p></div><div class="hierarchy-level"><label for="level">Rollup level</label><select id="level"><option value="language">Language</option><option value="collection">Collection</option><option value="book">Book</option><option value="chapter">Chapter</option><option value="verse">Verse / paragraph</option></select></div></div><div id="trail" class="trail"></div><div class="panelbox"><div class="table-wrap"><table><thead><tr><th>Text unit</th><th>Verses / paragraphs</th><th>Tagged</th><th>Authors</th><th>Dominant group</th></tr></thead><tbody id="rollup-rows"></tbody></table></div><div id="rollup-empty" hidden class="empty"><strong>No rollups at this level</strong>Choose another level or broaden the filters.</div><div class="pagination"><span class="count" id="rollup-count"></span><div class="page-buttons"><button type="button" class="button" id="rollup-previous">← Previous</button><button type="button" class="button" id="rollup-next">Next →</button></div></div></div></section>
+<section class="panel" id="panel-authors" role="tabpanel" aria-labelledby="tab-authors" hidden><div class="panel-heading"><div><h2>Follow an inferred voice</h2><p class="muted">Corpus-wide coverage within each language. Select a group to see all its text.</p></div></div><div class="panelbox"><div class="table-wrap"><table><thead><tr><th>Inferred author</th><th>Language</th><th>Verses / paragraphs</th><th>Books</th><th>Collections</th><th>Evidence tokens</th></tr></thead><tbody id="author-rows"></tbody></table></div><div id="author-empty" hidden class="empty"><strong>No inferred author groups</strong>The corpus may not contain enough usable text for an estimate.</div><div class="pagination"><span class="count" id="author-count"></span><div class="page-buttons"><button type="button" class="button" id="author-previous">← Previous</button><button type="button" class="button" id="author-next">Next →</button></div></div></div><p class="footer-note">Book, collection, and evidence filters apply to the text explorer. This view shows the selected language’s complete author groups.</p></section>
+<section class="panel" id="panel-benchmark" role="tabpanel" aria-labelledby="tab-benchmark" hidden><h2>The English reference test</h2><p class="muted">Compare inferred groups with the known English author labels. The reference corpus has 13 expected authors when complete.</p><div id="benchmark-content"></div></section>
+<section class="panel" id="panel-method" role="tabpanel" aria-labelledby="tab-method" hidden><h2>Estimates, with evidence</h2><p class="muted">A separate authorship model is fitted for each language.</p><div id="source-coverage"></div><div id="language-cards" class="language-grid"></div><div class="method-grid"><article class="method-card"><h3>How to read a tag</h3><p>An author tag identifies an inferred writing-style group. It does not establish a historical author’s identity. The same tag in one language points to text assigned to the same group, including across collections.</p><p>Short verses and English paragraphs borrow evidence from their surrounding passage. A passage can contain several writers; its inherited tag can miss a change within that passage.</p></article><article class="method-card"><h3>How to read uncertainty</h3><p>“Low evidence” marks an attribution that needs caution. “Insufficient text” has no supported attribution. A distance margin compares a passage’s distance to its assigned group’s center with its nearest alternative center; it is not a probability of authorship.</p><p>Genre, translation, period, editing, and shared quotations can produce style differences or similarities. Estimated group counts therefore need external validation.</p></article></div><details class="method-card"><summary>Analysis configuration</summary><pre id="configuration"></pre></details></section>
+<p class="footer-note">Portable report · Works offline · Use the CSV exports for complete verse-level and hierarchy results.</p>
+</main></div>
+<script type="application/json" id="report-data">'''
 
-    single_group = len(author_ids) == 1
-    md.append("\n\n## Style-group markers\n")
-    if single_group:
-        md.append("A marker is how far a group's mean sits from the corpus mean. With one group the two are the "
-                  "same text, so every marker is 0.00σ by construction and the contrast is omitted. What remains "
-                  "below describes the corpus as a whole, not anything that distinguishes a group within it.\n")
-    else:
-        md.append("Markers are the features whose mean inside the cluster differs most from the corpus mean (in standard deviations). "
-                  "`fw:` predefined function/common-word rate, `sfx:` word-ending rate, `misc:` length/connective habits, `cng:` character n-gram axis, "
-                  "`ai:` model-rated style scale, `cat:` model-assigned category, `tag:` model-assigned device tag.\n")
-    for a in author_ids:
-        e = authors[a]
-        md.append(f"\n### {a} — {e['n_verses']} {units} ({e['share']:.1%})\n")
-        md.append("**Works:** " + ", ".join(f"{w} {n}" for w, n in e["works"].items()) + "\n")
-        if e.get("copyists"):
-            md.append("**Sinaiticus scribes:** " + ", ".join(f"{s} {n}" for s, n in sorted(e["copyists"].items())) + "\n")
-        if not single_group:
-            md.append("**Over-represented:** " + ", ".join(_fmt_marker(n, x) for n, x in e["markers_high"][:10]) + "\n")
-            md.append("**Under-represented:** " + ", ".join(_fmt_marker(n, x) for n, x in e["markers_low"][:8]) + "\n")
-        if e.get("tag_lift"):
-            # Lift is also measured against the corpus, so it too is 1.0 for a single group; the
-            # counts still say which devices the model saw most often, so they are kept.
-            md.append(("**Device tags (count):** " + ", ".join(f"{t} ({c})" for t, _, c in e["tag_lift"][:10])
-                       if single_group else
-                       "**Device tags (lift ×, count):** " + ", ".join(f"{t} ×{l} ({c})" for t, l, c in e["tag_lift"][:10])) + "\n")
-        if e.get("phrases"):
-            md.append("**Diagnostic phrases:** " + ", ".join(f"«{p}» ({c})" for p, c in e["phrases"][:8]) + "\n")
-        if e.get("discourse_modes"):
-            md.append("**Discourse modes:** " + ", ".join(f"{m} {n}" for m, n in e["discourse_modes"].items()) + "\n")
-        md.append("**Closest to centroid:**\n")
-        for r in e["representative"][:3]:
-            md.append(f"- {r['ref']}: {r['text']}")
-        md.append("")
-
-    single_work = summary["n_works"] == 1
-    # A passage carries only its first source verse's chapter, so a chapter table would misreport it.
-    chapter_breakdown = single_work and not passage_mode
-    if chapter_breakdown:
-        assigns = _read_csv(out_dir / "verse_assignments.csv")
-        md.append("\n## Chapters × style groups\n")
-        md.append(f"One work only, so the informative breakdown is by chapter. Each row is a chapter; columns count "
-                  f"how many of its {units} were assigned to each style group.\n")
-        by_chapter: dict[str, Counter] = {}
-        for r in assigns:
-            by_chapter.setdefault(r["chapter"], Counter())[r["author"]] += 1
-        rows = []
-        for ch, c in sorted(by_chapter.items(), key=lambda kv: int(kv[0]) if kv[0].isdigit() else 0):
-            tot = sum(c.values())
-            maj, majn = c.most_common(1)[0]
-            rows.append([ch, tot] + [c.get(a, "") for a in author_ids] + [maj, f"{majn / tot:.0%}"])
-        md.append(_table(["chapter", "n"] + author_ids + ["main style group", "purity"], rows))
-        md.append("")
-
-    md.append("\n## Works × style groups\n")
-    md.append(f"Each row is a work; columns count how many of its {units} were assigned to each style group. "
-              "`purity` is the share assigned to the work's main style group.\n")
-    headers = ["work", "traditional group", "n"] + author_ids + ["main style group", "purity"]
-    md.append(_table(headers, [[r["work"], r["group"], r["n"]] + [r[a] for a in author_ids] + [r["majority"], r["purity"]] for r in crosstab]))
-
-    md.append("\n\n## Agreement with traditional attributions\n")
-    if single_work:
-        md.append("Only one work is in this run, so the adjusted Rand index against work boundaries and the purity "
-                  "figure are degenerate and are omitted."
-                  + (" Compare the chapter table above with whatever source division you want to test."
-                     if chapter_breakdown else ""))
-    else:
-        md.append(f"- Adjusted Rand index of style groups vs. work: **{val['ari_vs_work']}**; vs. traditional attribution groups: **{val['ari_vs_group']}** "
-                  "(1 = identical partition, 0 = chance).")
-        md.append(f"- Mean purity across works: **{val['mean_purity']}**.")
-    group_ct: dict[str, Counter] = {}
-    for r in ([] if single_work else crosstab):
-        c = group_ct.setdefault(r["group"], Counter())
-        for a in author_ids:
-            c[a] += int(r[a])
-    if group_ct:
-        rows = []
-        for g, c in sorted(group_ct.items(), key=lambda kv: -sum(kv[1].values())):
-            tot = sum(c.values())
-            rows.append([g, tot] + [f"{c[a] / tot:.0%}" if c[a] else "" for a in author_ids])
-        md.append("\n" + _table(["traditional group", "n"] + author_ids, rows))
-    if val.get("author_by_scribe"):
-        md.append("\n\nThe table below compares style groups with recorded Sinaiticus scribes. "
-                  "Alignment may indicate scribal effects; a mixed table alone cannot rule out scribal or edition effects.\n")
-        scribes = sorted({s for c in val["author_by_scribe"].values() for s in c})
-        md.append(_table(["style group"] + scribes, [[a] + [val["author_by_scribe"].get(a, {}).get(s, 0) for s in scribes] for a in author_ids]))
-
-    dn = val.get("author_by_divine_name")
-    if dn:
-        md.append("\n\n## Divine names by style group\n")
-        md.append("The alternation of יהוה (YHWH) and אלהים (Elohim) is the oldest marker of source division in the "
-                  "Torah, shown here for comparison with the style groups. It is **not** an independent check: no "
-                  "feature counts the names directly, but the character n-grams are built from the same text and AI "
-                  f"style tags may name them, so the grouping can see them. Counts are {units}; a skew is consistent "
-                  "with a source division without being evidence of one, let alone of authorship.\n")
-        cols = ["YHWH", "Elohim", "both", "neither"]
-        rows = []
-        for a in author_ids:
-            c = dn.get(a, {})
-            named = sum(c.get(x, 0) for x in ("YHWH", "Elohim", "both"))
-            rows.append([a, sum(c.values())] + [c.get(x, 0) for x in cols]
-                        + [f"{c.get('YHWH', 0) / named:.0%}" if named else "—"])
-        md.append(_table(["style group", units] + cols + [f"YHWH share of named {units}"], rows))
-
-    md.append("\n\n## Passages that break from their work's main style group\n")
-    md.append(f"Runs of at least three consecutive {units} assigned to a style group other than the work's main style group. "
-              "These warrant close reading but do not by themselves establish interpolation, embedded sources, or a change of author.\n")
-    minority = [s for s in segs if s["is_majority"] == "False" and int(s["n"]) >= 3]
-    minority.sort(key=lambda s: -int(s["n"]))
-    md.append(_table(["work", "from", "to", units, "style group"], [[s["work"], s["start"], s["end"], s["n"], s["author"]] for s in minority[:60]]))
-    if len(minority) > 60:
-        md.append(f"\n… {len(minority) - 60} more in `segments.csv`.")
-
-    md.append(f"\n\n## Individual outlier {units}\n")
-    md.append(f"{units.capitalize()} whose own (unsmoothed) style is more than 2.5 SD from their assigned style group's centre.\n")
-    md.append(_table(["ref", "style group", "z", "text"], [[o["ref"], o["author"], o["z"], o["text"][:90]] for o in outliers[:40]]))
-
-    md.append("\n\n## Caveats\n")
-    md.append("- Unsupervised clusters are exploratory style groups, not proven persons. Genre and topic may explain the groups; the works × style groups table does not distinguish those effects from authorship.")
-    md.append("- The number of style groups depends on the selection criterion; the k-selection table shows how sharp (or flat) the optimum is.")
-    if passage_mode:
-        md.append("- Fixed token windows can cross a change of style within an uninterrupted source passage. "
-                  "A group label applies to the pooled text; locating a change more precisely requires separate analysis. "
-                  "Quotations, topic, and genre shifts can explain minority runs.")
-    else:
-        md.append("- Single verses are short; per-verse labels inherit their neighbourhood through smoothing. Treat minority runs as hypotheses for further study; smoothing itself induces runs, and quotations or genre shifts can explain them.")
-    lang = summary.get("language", "grc")
-    if passage_mode:
-        md.append("- Results apply to the supplied texts. Language labels alone do not establish comparable periods, "
-                  "genres, translations, or manuscript traditions; reference-text results do not establish scripture authorship.")
-    elif lang == "grc":
-        md.append("- Greek manuscript and translated texts can reflect translators, editors, scribes, and transmission history as well as composition. A style group in an LXX translation cannot by itself identify its translator or the author of the underlying work.")
-    elif lang == "hbo":
-        md.append("- The Masoretic text is the primary witness; Qumran and Samaritan copies are witnesses of the same works unless the corpus was built with duplicates. Non-biblical scrolls are fragmentary and partly reconstructed; units that are mostly reconstruction were dropped.")
-    elif lang == "arb":
-        md.append("- Each sura is treated as a work; the Meccan/Medinan column is the traditional classification, not a stylistic result.")
-    text = "\n".join(md) + "\n"
-    (out_dir / "report.md").write_text(text, encoding="utf-8")
-    return text
+_HTML_END = r'''</script>
+<script>
+'use strict';
+const data = JSON.parse(document.getElementById('report-data').textContent);
+document.getElementById('report-data').remove();
+const verses = (data.verse_rows || []).map(values => {const row={};data.verse_fields.forEach((field,index)=>{row[field]=values[index];});return row;});
+delete data.verse_rows;
+const rollups = data.rollups || [], authors = data.authors || [], languages = data.languages || [];
+const $ = id => document.getElementById(id);
+const count = value => new Intl.NumberFormat().format(value || 0);
+const str = value => value == null ? '' : String(value);
+const state = {language:'', collection:'', book:'', chapter:'', author:'', status:'', query:'', focusId:'', page:0, rollupPage:0, authorPage:0, size:50, level:'language', tab:'text'};
+let filtered = verses, filteredRollups = [], filteredAuthors = [];
+function el(tag, text, cls) { const node = document.createElement(tag); if(text != null) node.textContent = str(text); if(cls) node.className = cls; return node; }
+function unique(rows, key) { return Array.from(new Set(rows.map(row => str(row[key])).filter(Boolean))).sort((a,b) => a.localeCompare(b,undefined,{numeric:true})); }
+function selectOptions(id, values, label, display) { const select = $(id); select.replaceChildren(); const all = el('option', label); all.value=''; select.append(all); for(const value of values){ const option=el('option',display ? display(value) : value); option.value=value; select.append(option); } if(!values.includes(state[id])) state[id]=''; select.value=state[id]; }
+function scope(row, through='chapter') { const keys=['language','collection','book','chapter']; for(const key of keys){ if(state[key] && str(row[key])!==state[key]) return false; if(key===through) break; } return true; }
+function refreshOptions(){
+ selectOptions('language',unique(verses,'language'),'All languages');
+ const inLanguage=verses.filter(row => !state.language || str(row.language)===state.language);
+ selectOptions('collection',unique(inLanguage,'collection'),'All collections');
+ const inCollection=inLanguage.filter(row => !state.collection || str(row.collection)===state.collection);
+ const titles=new Map(inCollection.map(row=>[str(row.book),str(row.book_title || row.book)]));
+ selectOptions('book',unique(inCollection,'book'),'All books',value => titles.get(value) || value);
+ const inBook=inCollection.filter(row=> !state.book || str(row.book)===state.book);
+ selectOptions('chapter',unique(inBook,'chapter'),'All chapters');
+ selectOptions('author',unique(inLanguage,'author_id'),'All inferred authors');
+ $('status').value=state.status;
+}
+function authorButton(author,language){ if(!author) return el('span','Unassigned','muted'); const button=el('button',author,'author-link'); button.type='button'; button.title='Find all text assigned to this group in '+language; button.addEventListener('click',()=>{state.language=str(language);state.collection='';state.book='';state.chapter='';state.author=str(author);state.status='';state.query='';state.focusId='';$('search').value='';refreshOptions();resetPages();refresh();activate('text');}); return button; }
+function metric(value,label,hint){const node=el('div',null,'metric');node.append(el('div',label,'label'),el('div',value,'value'),el('div',hint,'hint'));return node;}
+function renderMetrics(){ const groups=new Set(filtered.filter(row=>row.author_id).map(row=>str(row.language)+'\u0000'+row.author_id));const tagged=filtered.filter(row=>row.author_id).length; const insufficient=filtered.filter(row=>row.status==='insufficient_text').length; const langCount=new Set(filtered.map(row=>row.language)).size;$('metrics').replaceChildren(metric(count(filtered.length),'Verses / paragraphs','In the current text selection'),metric(count(groups.size),'Estimated authors',langCount>1?'Language-specific groups, summed':'Groups represented in this selection'),metric(count(tagged),'Tagged text units',filtered.length ? (100*tagged/filtered.length).toFixed(1)+'% of selected text' : 'No text in this selection'),metric(count(insufficient),'Insufficient text','Text without enough supporting evidence')); }
+function reference(row){const english=/^(en|eng|english)$/i.test(str(row.language));return (row.book_title || row.book || row.collection || row.language || 'Text')+' · '+(row.chapter == null ? '' : str(row.chapter)+':')+(english?'¶ ':'')+str(row.verse);}
+function verseRow(row){const tr=el('tr');const ref=el('td',null,'ref');ref.append(el('div',reference(row),'ref-title'),el('div',str(row.language)+' / '+str(row.collection),'ref-meta'),el('div',row.id,'ref-meta'));const tag=el('td',null,'tag');tag.append(authorButton(row.author_id,row.language));const status=row.status || (row.author_id?'assigned':'insufficient_text');tag.append(el('div',null,'tiny'));tag.lastChild.append(el('span',status==='low_evidence'?'Low evidence':status==='insufficient_text'?'Insufficient text':'Assigned','badge '+(status==='low_evidence'?'low':status==='insufficient_text'?'none':'')));tag.append(el('div',count(row.evidence_tokens)+' passage tokens','tiny'));if(row.distance_margin!=null)tag.append(el('div','Distance margin: '+Number(row.distance_margin).toFixed(3),'tiny'));const content=el('td',null,'content');const preview=el('div',row.text || '','verse-text excerpt');preview.dir='auto';content.append(preview);const details=el('details',null,'verse-detail');details.append(el('summary','Full text & evidence'));const full=el('div',row.text || '','verse-text full');full.dir='auto';details.append(full,el('div','Passage: '+(row.passage_id || 'No passage assigned'),'tiny'));if(row.reference_author)details.append(el('div','Reference author (validation only): '+row.reference_author,'truth'));content.append(details);tr.append(ref,tag,content);return tr;}
+function pageInfo(total,page,size){return total ? count(page*size+1)+'–'+count(Math.min((page+1)*size,total))+' of '+count(total) : '0 results';}
+function renderVerses(){ const start=state.page*state.size;const fragment=document.createDocumentFragment();filtered.slice(start,start+state.size).forEach(row=>fragment.append(verseRow(row)));$('verse-rows').replaceChildren(fragment);$('verse-empty').hidden=filtered.length>0;$('verse-count').textContent=pageInfo(filtered.length,state.page,state.size);$('previous').disabled=state.page===0;$('next').disabled=(state.page+1)*state.size>=filtered.length;}
+function resetPages(){state.page=0;state.rollupPage=0;state.authorPage=0;}
+function renderEstimateWarnings(){
+ const target=$('estimate-warnings');target.replaceChildren();
+ const limited=[],unstable=[],unestablished=[];
+ for(const language of languages){if(state.language && str(language.language)!==state.language)continue;const selection=language.selection || {};if(selection.at_search_limit)limited.push(language.language);if(selection.stable===false)unstable.push(language.language);if(selection.stable==null && language.estimated_authors)unestablished.push(language.language);}
+ const notes=[];
+ if(limited.length)notes.push('Author-count search limit reached: '+limited.join(', ')+'. Counts remain unresolved.');
+ if(unstable.length)notes.push('Unstable group assignments: '+unstable.join(', ')+'. Treat tags as uncertain.');
+ if(unestablished.length)notes.push('Estimate stability not established: '+unestablished.join(', ')+'. More evidence is needed.');
+ if(notes.length)target.append(el('p',notes.join(' '),'notice'));
+}
+function refresh(){const q=state.query.trim().toLocaleLowerCase();filtered=verses.filter(row=>(!state.focusId || str(row.id)===state.focusId)&&scope(row)&&(!state.author || str(row.author_id)===state.author)&&(!state.status || row.status===state.status)&&(!q || [row.text,row.book_title,row.book,row.id,row.author_id].some(value=>str(value).toLocaleLowerCase().includes(q))));renderMetrics();renderEstimateWarnings();renderVerses();renderRollups();renderAuthors();}
+function activate(tab){state.tab=tab;for(const button of document.querySelectorAll('[data-tab]')){const selected=button.dataset.tab===tab;button.setAttribute('aria-selected',str(selected));button.tabIndex=selected?0:-1;$('panel-'+button.dataset.tab).hidden=!selected;}}
+function drill(row){for(const key of ['language','collection','book','chapter'])state[key]=str(row[key]);state.author='';state.status='';state.query='';state.focusId='';$('search').value='';const levels=['language','collection','book','chapter','verse'];if(row.level==='verse'){refreshOptions();resetPages();refresh();activate('text');if(row.id){state.query=str(row.id);state.focusId=str(row.id);$('search').value=state.query;refresh();}return;}state.level=levels[levels.indexOf(row.level)+1] || 'verse';$('level').value=state.level;refreshOptions();resetPages();refresh();}
+function rollupTitle(row){if(row.level==='language')return row.language;if(row.level==='collection')return row.collection;if(row.level==='book'){const found=bookTitles.get(str(row.language)+'\u0000'+str(row.collection)+'\u0000'+str(row.book));return found || row.book;}if(row.level==='chapter')return 'Chapter '+str(row.chapter);return reference(row);}
+const bookTitles=new Map(verses.map(row=>[str(row.language)+'\u0000'+str(row.collection)+'\u0000'+str(row.book),row.book_title || row.book]));
+function verseRollup(row){const assigned=Boolean(row.author_id);return {level:'verse',language:row.language,collection:row.collection,book:row.book,book_title:row.book_title,chapter:row.chapter,verse:row.verse,id:row.id,verse_count:1,assigned_verse_count:assigned?1:0,insufficient_verse_count:assigned?0:1,low_evidence_verse_count:row.status==='low_evidence'?1:0,author_count:assigned?1:0,dominant_author:row.author_id,author_ids:assigned?[row.author_id]:[],author_counts:assigned?{[row.author_id]:1}:{}};}
+function renderRollups(){const rank={language:0,collection:1,book:2,chapter:3,verse:4};const keys=['language','collection','book','chapter'];filteredRollups=state.level==='verse'?verses.filter(row=>scope(row)&&(!state.author || str(row.author_id)===state.author)):rollups.filter(row=>row.level===state.level&&keys.every((key,index)=>!state[key] || index>rank[row.level] || str(row[key])===state[key])&&(!state.author || (row.author_ids || []).includes(state.author)));const start=state.rollupPage*state.size;const fragment=document.createDocumentFragment();for(const source of filteredRollups.slice(start,start+state.size)){const row=state.level==='verse'?verseRollup(source):source;const tr=el('tr'),title=el('td');const button=el('button',rollupTitle(row),'author-link');button.type='button';button.addEventListener('click',()=>drill(row));title.append(button,el('div',[row.language,row.collection,row.book,row.level==='verse' ? row.chapter : null].filter(value=>value!=null).map(str).join(' / '),'tiny'));tr.append(title,el('td',count(row.verse_count)),el('td',count(row.assigned_verse_count)),el('td',count(row.author_count)));const dominant=el('td');dominant.append(authorButton(row.dominant_author,row.language));if(row.insufficient_verse_count)dominant.append(el('div',count(row.insufficient_verse_count)+' insufficient text','tiny'));tr.append(dominant);fragment.append(tr);}$('rollup-rows').replaceChildren(fragment);$('rollup-empty').hidden=filteredRollups.length>0;$('rollup-count').textContent=pageInfo(filteredRollups.length,state.rollupPage,state.size);$('rollup-previous').disabled=state.rollupPage===0;$('rollup-next').disabled=(state.rollupPage+1)*state.size>=filteredRollups.length;const trail=$('trail');trail.replaceChildren();const root=el('button','All languages');root.type='button';root.addEventListener('click',()=>resetAll());trail.append(root);for(const [index,key] of keys.entries()){if(!state[key])continue;trail.append(el('span','›'));const button=el('button',state[key]);button.type='button';button.addEventListener('click',()=>{for(const child of keys.slice(index+1))state[child]='';state.level=['collection','book','chapter','verse'][index];$('level').value=state.level;refreshOptions();resetPages();refresh();});trail.append(button);}}
+function renderAuthors(){filteredAuthors=authors.filter(row=>(!state.language || str(row.language)===state.language)&&(!state.author || str(row.author_id)===state.author));const start=state.authorPage*state.size,fragment=document.createDocumentFragment();for(const row of filteredAuthors.slice(start,start+state.size)){const tr=el('tr'),tag=el('td');tag.append(authorButton(row.author_id,row.language));tr.append(tag,el('td',row.language),el('td',count(row.verse_count)),el('td',count(row.book_count)),el('td',count(row.collection_count)),el('td',count(row.token_count)));fragment.append(tr);}$('author-rows').replaceChildren(fragment);$('author-empty').hidden=filteredAuthors.length>0;$('author-count').textContent=pageInfo(filteredAuthors.length,state.authorPage,state.size);$('author-previous').disabled=state.authorPage===0;$('author-next').disabled=(state.authorPage+1)*state.size>=filteredAuthors.length;}
+function humanize(key){return key.replace(/_/g,' ').replace(/\b\w/g,letter=>letter.toUpperCase());}
+function renderDiscovery(container){
+ const validation=data.discovery_validation;
+ if(!validation || !validation.known_author_count)return;
+ container.append(el('h3','Blind discovery versus reference authors'));
+ const grid=el('div',null,'benchmark-grid');
+ const decimal=value=>value==null?'Unavailable':Number(value).toFixed(3);
+ const error=validation.count_error;
+ grid.append(metric(count(validation.discovered_groups_on_labelled_text),'Discovered groups','On text with reference labels'),metric(error==null?'Unavailable':(error>0?'+':'')+error,'Author count difference','Compared with '+count(validation.known_author_count)+' loaded reference authors'),metric(decimal(validation.adjusted_rand_index),'Adjusted Rand index','1 = perfect group agreement; 0 ≈ chance'),metric(decimal(validation.normalized_mutual_information),'Normalized mutual information','1 = perfect group agreement; 0 = none'));
+ container.append(grid,el('p',validation.interpretation || 'Reference authors are checked after discovery. These are clustering agreement metrics, not held-out prediction accuracy.','notice'));
+ container.append(el('p',count(validation.evaluated_verses)+' labeled text units evaluated · '+(100*(validation.coverage || 0)).toFixed(1)+'% coverage. Nearby verses inherit the same passage tag.','muted'));
+ const groups=Object.entries(validation.group_reference_counts || {});
+ if(groups.length){const detail=el('details',null,'method-card');detail.style.marginBottom='20px';detail.append(el('summary','Compare inferred groups with reference authors'));const wrap=el('div',null,'table-wrap'),table=el('table'),head=el('thead'),tr=el('tr');for(const label of ['Inferred group','Reference-author composition'])tr.append(el('th',label));head.append(tr);const body=el('tbody');for(const [author,counts] of groups){const row=el('tr'),tag=el('td'),composition=el('td');tag.append(authorButton(author,(authors.find(item=>item.author_id===author) || {}).language || 'eng'));composition.textContent=Object.entries(counts).sort((a,b)=>b[1]-a[1]).map(([name,n])=>name+': '+count(n)).join(' · ');row.append(tag,composition);body.append(row);}table.append(head,body);wrap.append(table);detail.append(wrap);container.append(detail);}
+}
+function renderBenchmark(){
+ const container=$('benchmark-content'),benchmark=data.benchmark;
+ renderDiscovery(container);
+ if(!benchmark || Object.keys(benchmark).length===0){const note=el('div',null,'empty');note.append(el('strong',data.discovery_validation && data.discovery_validation.known_author_count ? 'Held-out attribution test not run' : 'No English validation results'),'No held-out attribution test is available. Run the analysis with a labeled English collection to compare its inferred groups with known authors.');container.append(note);return;}
+ const percent=value=>value==null?'Unavailable':(100*value).toFixed(1)+'%';
+ const grid=el('div',null,'benchmark-grid');
+ const english=languages.filter(row=>/^(en|eng|english)$/i.test(str(row.language)));
+ const metrics=[['Expected authors',benchmark.expected_author_count,'Known reference corpus'],['Reference authors loaded',benchmark.known_author_count,'Coverage in this analysis'],['Estimated style groups',english.length?english.reduce((n,row)=>n+(row.estimated_authors || 0),0):null,'Unsupervised English discovery'],['Authors evaluated',benchmark.evaluated_author_count,'Eligible for held-out book testing']];
+ for(const [label,value,hint] of metrics)grid.append(metric(value==null?'Unavailable':count(value),label,hint));
+ container.append(grid);
+ const completeness=benchmark.source_completeness || {};
+ if((completeness.missing_authors || []).length)container.append(el('p','Missing reference authors: '+completeness.missing_authors.join(', ')+'. The 13-author reference set is incomplete.','notice'));
+ if(benchmark.reason)container.append(el('p',benchmark.reason,'notice'));
+ if(benchmark.status==='evaluated'){
+  container.append(el('h3','Held-out book attribution'));
+  const scores=el('div',null,'benchmark-grid');
+  scores.append(metric(percent(benchmark.accuracy),'Passage accuracy','Correct labels on held-out passages'),metric(percent(benchmark.balanced_accuracy),'Balanced passage accuracy','Equal weight for each evaluated author'),metric(percent(benchmark.book_accuracy),'Book accuracy','Correct labels after aggregating passages'),metric(percent(benchmark.book_balanced_accuracy),'Balanced book accuracy','Equal weight for each evaluated author'));
+  container.append(scores);
+  if(benchmark.split)container.append(el('p',count((benchmark.split.train_books || []).length)+' training books · '+count((benchmark.split.test_books || []).length)+' held-out books · '+count(benchmark.split.test_passages)+' test passages. Whole books are held out from training.','muted'));
+ }
+ container.append(el('p',benchmark.caveat || 'Reference labels evaluate the result; they are separate from inferred author tags. A matching author count alone does not mean the attributions are correct.','notice'));
+ if((benchmark.per_author || []).length){
+  container.append(el('h3','Results by reference author'));
+  const wrap=el('div',null,'panelbox table-wrap'),table=el('table'),head=el('thead'),headrow=el('tr'),body=el('tbody');
+  for(const label of ['Reference author','Train books','Test books','Test passages','Accuracy'])headrow.append(el('th',label));head.append(headrow);
+  for(const row of benchmark.per_author){const tr=el('tr');for(const value of [row.author,count(Array.isArray(row.train_books)?row.train_books.length:row.train_books),count(Array.isArray(row.test_books)?row.test_books.length:row.test_books),count(row.test_passages),percent(row.accuracy)])tr.append(el('td',value));body.append(tr);}
+  table.append(head,body);wrap.append(table);container.append(wrap);
+ }
+ const details=el('details',null,'method-card');details.style.marginTop='18px';details.append(el('summary','Complete validation results'),el('pre',JSON.stringify(benchmark,null,2)));container.append(details);
+}
+function renderSourceCoverage(){const coverage=data.source_coverage;if(!coverage)return;const values=[['Parsed units',coverage.parsed_units],['Primary source units',coverage.primary_units],['Units in this analysis',coverage.analyzed_units],['Alternate witness units',coverage.alternate_witness_units]];const present=values.filter(([,value])=>value!=null);$('source-scope').hidden=false;$('source-scope').textContent=present.map(([label,value])=>count(value)+' '+label.toLowerCase()).join(' · ');const details=el('details',null,'method-card');details.style.marginBottom='18px';details.append(el('summary','Corpus scope and source policy'));if(coverage.source_policy)details.append(el('p',coverage.source_policy));for(const [label,value] of present)details.append(el('p',label+': '+count(value)));if(coverage.alternate_witness_units)details.append(el('p','Alternate manuscript witnesses are preserved in the raw data and excluded from the primary corpus analyzed here.'));$('source-coverage').append(details);}
+function renderMethod(){const container=$('language-cards');for(const language of languages){const card=el('article',null,'language-card');card.append(el('h3',language.language),el('div',count(language.estimated_authors),'number'),el('div','estimated author groups','muted'),el('div',count(language.verse_count)+' text units · '+count(language.passage_count)+' passages','tiny'));if(language.selection){if(language.selection.at_search_limit)card.append(el('p','Search limit reached: author count unresolved.','notice'));if(language.selection.stable===false)card.append(el('p','Unstable across repeat fits: attribution is uncertain.','notice'));const details=el('details');details.append(el('summary','Why this estimate?'));if(language.selection.reason)details.append(el('p',language.selection.reason));details.append(el('pre',JSON.stringify(language.selection,null,2)));card.append(details);}container.append(card);}if(!languages.length)container.append(el('p','No language estimates are available.','empty'));$('configuration').textContent=JSON.stringify(data.config || {},null,2);}
+function resetAll(){for(const key of ['language','collection','book','chapter','author','status','query','focusId'])state[key]='';state.level='language';$('level').value='language';$('search').value='';refreshOptions();resetPages();refresh();}
+for(const key of ['language','collection','book','chapter','author','status'])$(key).addEventListener('change',()=>{state[key]=$(key).value;state.focusId='';const keys=['language','collection','book','chapter'];if(keys.includes(key)){for(const child of keys.slice(keys.indexOf(key)+1))state[child]='';if(key==='language')state.author='';}refreshOptions();resetPages();refresh();});
+let searchTimer;$('search').addEventListener('input',()=>{clearTimeout(searchTimer);searchTimer=setTimeout(()=>{state.query=$('search').value;state.focusId='';resetPages();refresh();},200);});
+$('page-size').addEventListener('change',()=>{state.size=Number($('page-size').value);resetPages();refresh();});$('reset').addEventListener('click',resetAll);$('previous').addEventListener('click',()=>{state.page--;renderVerses();});$('next').addEventListener('click',()=>{state.page++;renderVerses();});$('level').addEventListener('change',()=>{state.level=$('level').value;state.rollupPage=0;renderRollups();});$('rollup-previous').addEventListener('click',()=>{state.rollupPage--;renderRollups();});$('rollup-next').addEventListener('click',()=>{state.rollupPage++;renderRollups();});$('author-previous').addEventListener('click',()=>{state.authorPage--;renderAuthors();});$('author-next').addEventListener('click',()=>{state.authorPage++;renderAuthors();});for(const button of document.querySelectorAll('[data-tab]')){button.addEventListener('click',()=>activate(button.dataset.tab));button.addEventListener('keydown',event=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();const tabs=Array.from(document.querySelectorAll('[data-tab]'));const current=tabs.indexOf(button);const index=event.key==='Home'?0:event.key==='End'?tabs.length-1:(current+(event.key==='ArrowRight'?1:tabs.length-1))%tabs.length;activate(tabs[index].dataset.tab);tabs[index].focus();});}
+refreshOptions();renderBenchmark();renderSourceCoverage();renderMethod();refresh();activate('text');
+</script>
+</body>
+</html>
+'''

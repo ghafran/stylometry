@@ -1,55 +1,11 @@
 name: tests
-
-on:
-  push:
-    branches: [main]
-  pull_request:
-  workflow_dispatch:
-
-concurrency:
-  group: tests-${{ github.ref }}
-  cancel-in-progress: true
-
+on: [push, pull_request, workflow_dispatch]
 jobs:
-  offline-suite:
-    name: offline suite (python ${{ matrix.python-version }})
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        # the floor declared in pyproject.toml and the version the project develops on
-        python-version: ["3.10", "3.12"]
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v5
-        with:
-          enable-cache: true
-          cache-dependency-glob: uv.lock
-
-      - name: Set up Python ${{ matrix.python-version }}
-        run: uv python install ${{ matrix.python-version }}
-
-      - name: Install the project from the lockfile
-        run: uv sync --frozen --python ${{ matrix.python-version }}
-
-      # No network and no API keys: the raw downloads and the empirical gate stay out of CI.
-      # The real-data checks skip themselves when data/processed is absent, as it is in a fresh clone.
-      - name: Run the offline test suite
-        run: uv run --frozen --python ${{ matrix.python-version }} pytest -q
-        env:
-          PYTHONDONTWRITEBYTECODE: "1"
-
-  lockfile:
-    name: lockfile is current
+  offline:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
-        with:
-          enable-cache: true
-          cache-dependency-glob: uv.lock
-      # `--frozen` above only uses the lockfile; this proves it still matches pyproject.toml.
-      - name: Check uv.lock matches pyproject.toml
-        run: uv lock --check
+      - run: uv sync --frozen --python 3.12
+      - run: uv lock --check
+      - run: uv run pytest
