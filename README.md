@@ -66,7 +66,12 @@ also shows this scope. A custom JSONL corpus analyzes every supplied row directl
 
 In the explorer, choose a language and drill into collections, books and chapters.
 Search verse text or filter by an inferred author to find related passages across
-books in that language. English prose uses paragraphs as verse-like text units;
+books in that language. Text explorer, Hierarchy, and Author groups share the
+corpus filters and search. Their counts are recomputed from matching text, even
+when viewing a parent rollup with a chapter or evidence filter selected. Opening
+an author or hierarchy row keeps existing filters; hierarchy breadcrumbs change
+the displayed level without broadening the selection. Use the sidebar or Reset
+filters to broaden the corpus. English prose uses paragraphs as verse-like text units;
 the input adapter preserves chapter headings where available.
 
 The **Contributions** tab charts each inferred author's share of the selected
