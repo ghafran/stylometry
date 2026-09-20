@@ -778,7 +778,7 @@ def test_the_front_page_keeps_a_stable_language_order(tmp_path):
              ("grc", build(_explorer_verses(), "grc", progress=lambda m: None, workers=1))]
     _write_explorer_index(tmp_path, _cards(tmp_path, built))
     page = (tmp_path / "index.html").read_text(encoding="utf-8")
-    assert page.index("Koine Greek") < page.index("Quranic Arabic"), "Greek, Hebrew, Arabic"
+    assert page.index("Koine Greek") < page.index('"label": "Arabic"'), "Greek, Hebrew, Arabic"
 
 
 def test_a_collection_with_every_book_in_one_group_still_draws_its_chart(tmp_path):
