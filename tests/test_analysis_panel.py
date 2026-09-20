@@ -536,7 +536,7 @@ def test_the_pages_show_the_group_counts_and_never_colour_alone(tmp_path):
     book = sorted((out / "works").glob("*.html"))[0].read_text(encoding="utf-8")
 
     for page in (overview, book):
-        assert "groupSummary" in page and "style group" in page
+        assert "groupSummary" in page and "inferred from style" in page
         # The lighter hues fall below 3:1 against the page, so the group name is always written out.
         assert "${A(groupOf(child))}" in page or "${A(vGroupOf(v))}" in page
     assert "book_groups" in overview and "collection_groups" in overview
@@ -605,7 +605,7 @@ def test_groups_are_named_and_sized_the_way_the_rest_of_the_project_names_them(t
     book = sorted((out / "works").glob("*.html"))[0].read_text(encoding="utf-8")
     for page in (overview, book):
         assert "groupBars" in page, "a bar chart of the group sizes"
-        assert "const A = i => 'A' + i" in page, "groups are named A1, A2 ..."
+        assert "const A = i => 'Author ' + i" in page, "hands are named Author 1, Author 2 ..."
         assert '"gsz"' in page
     # The verse list carries the label on the text itself, not only in a side panel.
     assert "A(vGroupOf(v))" in book
@@ -621,7 +621,7 @@ def test_the_front_page_shows_how_each_language_divides(tmp_path):
     _write_explorer_index(tmp_path, _cards(tmp_path, [("grc", greek)]))
     page = (tmp_path / "index.html").read_text(encoding="utf-8")
     assert '"sizes"' in page and 'class="stack"' in page
-    assert "A${i + 1}" in page
+    assert "Author&nbsp;${i + 1}" in page
 
 
 def test_a_book_carries_its_group_among_all_books_not_only_within_its_collection(tmp_path):
@@ -665,11 +665,11 @@ def test_the_bar_chart_is_shown_at_every_level_and_verses_get_a_group_column(tmp
     overview = (out / "index.html").read_text(encoding="utf-8")
     book = sorted((out / "works").glob("*.html"))[0].read_text(encoding="utf-8")
 
-    assert "Style groups across the language" in overview
-    assert "Style groups within" in overview
-    assert "acrossLanguage" in overview and '"glsz"' in overview
-    assert "Style groups among the chapters" in book
-    assert "Style groups among the verses" in book
+    assert "Authors across the language" in overview
+    assert "Authors within" in overview
+    assert "collectionAcrossAuthors" in overview, "a collection's books are placed among the language's authors"
+    assert "Authors among the chapters" in book
+    assert "Authors among the verses" in book
     # The verse list is a table: reference, group, text.
     assert 'class="vhead"' in book and 'class="vrow"' in book and 'class="vgrp"' in book
     # A chart with one bar still renders, so the level is never simply blank: the only thing that
@@ -690,8 +690,8 @@ def test_every_row_carries_its_own_bar_chart(tmp_path):
     book = sorted((out / "works").glob("*.html"))[0].read_text(encoding="utf-8")
 
     assert "function rowBars" in overview and "function ownBars" in overview
-    # A collection shows both: its books among themselves, and its books across the whole language.
-    assert "acrossLanguage(n) + ownBars(n, 'books')" in overview
+    # A collection row shows its books placed across the whole language's authors.
+    assert "collectionAcrossAuthors(n)" in overview
     assert "ownBars(n, 'chapters')" in overview, "a book row shows how its chapters divide"
     assert "ownBars(c, 'verses')" in book, "a chapter row shows how its verses divide"
     assert ".rbars" in overview and ".rfill" in overview
@@ -706,11 +706,11 @@ def test_a_book_shows_its_group_across_the_language_even_when_its_collection_doe
     data = build(_explorer_verses(n_works=12, n_chapters=2, per_chapter=9),
                  "grc", progress=lambda m: None, workers=1)
     overview = (write(data, tmp_path / "grc") / "index.html").read_text(encoding="utf-8")
-    assert "const langOf" in overview and "langBadge(n, LANG)" in overview
+    assert "${A(mine)} in ${LANG}" in overview, "a book row carries its author among every book of the language"
     assert "const LANG = " in overview, "the badge names the language it is comparing across"
-    assert "acrossChart(here, here.label)" in overview, "and the side panel charts the same thing"
-    # The row is tinted by the language-wide group there, so the list reads across collections.
-    assert "border-left-color:${G(langOf(n))}" in overview
+    assert "authorLabels(ag, 'lang')" in overview, "and it is read off the language-wide partition"
+    # The row is tinted by the language-wide author there, so the list reads across collections.
+    assert "border-left-color:${G(mine)}" in overview
 
 
 def test_a_book_page_says_where_the_book_itself_sits(tmp_path):
@@ -745,7 +745,7 @@ def test_the_placement_line_does_not_invent_a_group_where_there_is_none(tmp_path
     data = build(_explorer_verses(n_works=3, n_chapters=2, per_chapter=6),
                  "grc", progress=lambda m: None, workers=1)
     book = sorted((write(data, tmp_path / "grc") / "works").glob("*.html"))[0].read_text(encoding="utf-8")
-    assert "do not divide under this strategy" in book
+    assert "fall to one author under this strategy" in book
     assert "do not divide among themselves" in book
 
 
@@ -852,7 +852,7 @@ def test_recovering_an_author_needs_the_group_to_be_mostly_theirs_not_only_mostl
 
 
 def test_the_author_view_offers_more_hands_than_the_style_grouping_will_ever_report():
-    """The style grouping stops at eight by a rule we invented; the author count is the reader's."""
+    """The inferred count stops at eight by a rule we invented; the reader's count does not."""
     from stylometry.explorer import GROUP_MAX_K, build
 
     data = build(_authored_verses(n_authors=5, works_each=3), "grc",
@@ -860,7 +860,7 @@ def test_the_author_view_offers_more_hands_than_the_style_grouping_will_ever_rep
     groups = data["author_groups"]
     assert groups["an"] == 15
     low, high = groups["arange"]
-    assert low == 2 and high > GROUP_MAX_K, "the offer is not capped at the style-group ceiling"
+    assert low == 1 and high > GROUP_MAX_K, "one hand is offered, and the top is not the old ceiling"
     for key_labels in groups["al"]:
         for count, labels in key_labels.items():
             assert len(labels) == 15, "every book is placed at every offered count"
@@ -901,7 +901,7 @@ def test_a_unit_is_pooled_by_length_so_a_long_verse_is_not_one_vote_among_many()
     assert _profiles(Z, [[0, 1, 2]], tokens)[0][0] == pytest.approx(9.8), "weighted follows the text"
 
 
-def test_the_page_offers_the_author_view_and_never_calls_an_assumed_hand_a_finding(tmp_path):
+def test_the_page_speaks_of_authors_and_lets_the_reader_set_how_many(tmp_path):
     from stylometry.explorer import build
     from stylometry.explorer_html import write
 
@@ -909,7 +909,8 @@ def test_the_page_offers_the_author_view_and_never_calls_an_assumed_hand_a_findi
                  progress=lambda m: None, workers=1)
     write(data, tmp_path)
     page = (tmp_path / "index.html").read_text(encoding="utf-8")
-    assert "Assumed authors" in page and "Style groups" in page, "both views are offered"
-    assert "Assume <b" in page and "authors</label>" in page, "the count is a control, not a result"
-    assert "nothing in the text supplies it" in page
+    assert "style group" not in page.lower(), "the page speaks of authors, inferred from style"
+    assert 'type="range"' in page and "assume a different number of hands" in page, \
+        "the count is a control, not a result"
+    assert "inferred from style" in page
     assert "known author: " in page, "a real attribution is marked as different from an inferred one"

@@ -106,13 +106,9 @@ text-transform:uppercase;color:var(--faint);margin-bottom:4px}
 .rtrack{height:8px;background:var(--panel);border-radius:2px;overflow:hidden}
 .rfill{display:block;height:100%;border-radius:0 2px 2px 0;min-width:2px}
 .rval{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--muted);font-variant-numeric:tabular-nums}
-.modebar{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin:0 0 11px}
-.mb{font:inherit;font-size:13px;padding:6px 13px;border:1px solid var(--line);border-radius:999px;
-background:var(--card);color:var(--muted);cursor:pointer}
-.mb.on{background:var(--clay);border-color:var(--clay);color:var(--paper);font-weight:600}
-.modebar .small{flex-basis:100%;margin-top:1px}
 .actl{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 11px}
-.actl label{font-size:13px;color:var(--muted)}.actl label b{color:var(--ink);font-variant-numeric:tabular-nums}
+.actl label{font-size:13px;color:var(--muted)}.actl label b{color:var(--ink);font-variant-numeric:tabular-nums;font-size:15px}
+.actl .st{color:var(--faint);margin-left:4px}
 .actl input[type=range]{flex:1;min-width:130px;accent-color:var(--clay)}
 .actl .small{flex-basis:100%}
 .fit{font-size:12.5px;color:var(--muted);background:var(--panel);border-left:3px solid var(--clay);
@@ -158,15 +154,17 @@ function strategyBar(onChange) {
   paint();
 }
 
-// A style group is a partition of whatever the level lists. `gk` is how many groups the node's
-// children fall into under each strategy, `g` is which group a child is in, both flat in `keys` order.
+// Authors are inferred from style. `gk` is how many the node's children fall to under each strategy
+// and `g` which one a child is in, both flat in `keys` order. The inferred count is the largest that
+// survives resampling; where the authors are actually known - English - the known count is used.
 const G = i => (i >= 1 && i <= 8) ? `var(--g${i})` : 'var(--gx)';
-// The same names the rest of this project uses for a style group, largest first: A1, A2, ...
-const A = i => 'A' + i;
+const A = i => 'Author ' + i;
+const AU = A;
 const groupsOf = n => ({ k: n.gk ? n.gk[idx()] : 1, reason: n.gr ? n.gr[idx()] : null,
                          ari: n.gari ? n.gari[idx()] : null, n: n.gn || 0, tokens: n.gtok || 0,
                          sizes: (n.gsz ? n.gsz[idx()] : null) || [] });
 const groupOf = c => (c.g ? c.g[idx()] : 1);
+const why = g => (DATA.group_reasons || {})[g.reason] || 'no division is supported';
 
 // Who is speaking, where the source says. Only the Arabic hadith collections carry this.
 const SPEAKER = {
@@ -180,26 +178,26 @@ const speakerTag = code => {
   return s ? `<span class="sp ${s[1]}">${s[0]}</span>` : '';
 };
 
+// The inferred count for a level that has no override: chapters of a book, verses of a chapter.
 function groupSummary(node, unit) {
   const g = groupsOf(node);
   if (!g.n) return '';
   const head = g.k > 1
-    ? `<span class="gsum"><b>${g.k} style groups</b> among ${g.n} ${unit}` +
+    ? `<span class="gsum"><b>${g.k} authors</b> among ${g.n} ${unit}, inferred from style` +
       (g.ari != null ? ` · survives resampling at ARI ${g.ari}` : '') + `</span>`
-    : `<span class="gsum"><b>1 style group</b> among ${g.n} ${unit} — ` +
-      `${(DATA.group_reasons || {})[g.reason] || 'no split is supported'}</span>`;
+    : `<span class="gsum"><b>1 author</b> among ${g.n} ${unit} — ${why(g)}</span>`;
   return head + shortUnitWarning(g, unit);
 }
 
-// A split of units this short can be perfectly stable and still be arithmetic: a hapax ratio over
+// A division of units this short can be perfectly stable and still be arithmetic: a hapax ratio over
 // eighteen tokens takes few distinct values, so it clusters cleanly. Say so where it applies.
 function shortUnitWarning(g, unit) {
   const floor = DATA.reliable_tokens || 1000;
   if (g.k < 2 || !g.tokens || g.tokens >= floor) return '';
   return `<div class="caveat">These ${unit} run about <b>${g.tokens.toLocaleString()} tokens</b> each.
     This project measured that units below ${floor.toLocaleString()} cannot support attribution, which is
-    why the analysis pools text into passages first. Read this split as a property of the measure at
-    this length, not as a hand.</div>`;
+    why the analysis pools text into passages first. Read this division as a property of the measure at
+    this length, not as different hands.</div>`;
 }
 
 function groupLegend(node) {
@@ -209,9 +207,8 @@ function groupLegend(node) {
     `<span><i style="background:${G(i + 1)}"></i>${A(i + 1)}</span>`).join('') + '</div>';
 }
 
-// How the units divide between the groups. A1 is always the largest: the clustering ranks them by
-// size before naming them, so a long tail of one-member groups is visible at a glance rather than
-// hidden inside a count of "5 style groups".
+// How the units divide between the authors. Author 1 is always the largest: the clustering ranks
+// them by size before naming them, so a long tail of one-member authors is visible at a glance.
 function barChart(sizes, unit, heading, note, mark, lab) {
   lab = lab || A;
   if (!sizes.length) return '';
@@ -227,18 +224,8 @@ function barChart(sizes, unit, heading, note, mark, lab) {
 
 function groupBars(node, unit, heading) {
   const g = groupsOf(node);
-  const why = g.k > 1 ? '' :
-    `<p class="small">${(DATA.group_reasons || {})[g.reason] || 'no split is supported'}.</p>`;
-  return barChart(g.sizes, unit, heading || 'Style groups', why);
-}
-
-// The same chart for a collection's books placed in the language-wide grouping, which is the only
-// grouping comparable between collections.
-function acrossChart(node, label) {
-  const sizes = (node.glsz ? node.glsz[idx()] : null) || [];
-  return barChart(sizes, `books of ${label}`, "Where its books sit in the language's groups",
-    `<p class="small">Groups fitted over every book of the language, so these are comparable
-     with the other collections. The chart above groups ${label}'s books among themselves.</p>`);
+  const note = g.k > 1 ? '' : `<p class="small">${why(g)}.</p>`;
+  return barChart(g.sizes, unit, heading || 'Authors', note);
 }
 
 // A chart small enough to sit inside a row, so a list can be read for how each entry divides without
@@ -246,8 +233,7 @@ function acrossChart(node, label) {
 function rowBars(sizes, caption, lab) {
   lab = lab || A;
   const total = sizes.reduce((a, b) => a + b, 0);
-  // One occupied group is an answer - "all nineteen of them in A2" - not an absence. Requiring two
-  // left the whole noncanonical collection with no chart at all under the default strategy.
+  // One occupied author is an answer - "all nineteen of them Author 2" - not an absence.
   if (!total) return '';
   const max = Math.max(...sizes);
   return `<span class="rbars"><span class="rcap">${caption}</span>` + sizes.map((c, i) => c ? `
@@ -258,50 +244,30 @@ function rowBars(sizes, caption, lab) {
     </span>` : '').join('') + `</span>`;
 }
 
-// A collection's books, placed in the grouping of *every* book of the language. This is the only
-// comparison that can show whether a grouping follows the collections or cuts across them; a book's
-// group within its own collection cannot, because every collection's labels start at A1.
-function acrossLanguage(node) {
-  const sizes = (node.glsz ? node.glsz[idx()] : null) || [];
-  return rowBars(sizes, `its ${sizes.reduce((a, b) => a + b, 0)} books across the language's groups`);
-}
-
-// How this node's own children divide: a collection's books among themselves, a book's chapters,
-// a chapter's verses.
+// How this node's own children divide: a book's chapters, a chapter's verses.
 function ownBars(node, unit) {
   const g = groupsOf(node);
-  return g.k > 1 ? rowBars(g.sizes, `its ${g.n} ${unit} in ${g.k} groups`) : '';
+  return g.k > 1 ? rowBars(g.sizes, `its ${g.n} ${unit} · ${g.k} authors`) : '';
 }
 
-const groupStack = node => {
-  const g = groupsOf(node);
-  if (g.k < 2 || !g.sizes.length) return '';
-  const total = g.sizes.reduce((a, b) => a + b, 0);
-  return '<span class="stack">' + g.sizes.map((c, i) =>
-    `<span style="flex:${c};background:${G(i + 1)}" title="${A(i + 1)}: ${c}"></span>`).join('') + '</span>';
+const groupStack = (sizes, lab) => {
+  lab = lab || A;
+  if (sizes.length < 2) return '';
+  return '<span class="stack">' + sizes.map((c, i) =>
+    `<span style="flex:${c};background:${G(i + 1)}" title="${lab(i + 1)}: ${c}"></span>`).join('') + '</span>';
 };
 
-// The number is on every row beside the swatch: the lighter hues fall under 3:1 against the page,
-// so colour is never the only thing carrying which group a unit is in.
+// The name is on every row beside the swatch: the lighter hues fall under 3:1 against the page, so
+// colour is never the only thing carrying which author a unit is.
 const groupBadge = (node, child) =>
   groupsOf(node).k > 1 ? `<span class="gb"><i style="background:${G(groupOf(child))}"></i>${A(groupOf(child))}</span>` : '';
-// A book's group among every book of the language. Always defined, and the one that can be compared
-// between collections, so it is on the row even when the collection does not split internally.
-const langOf = n => (n.gl ? n.gl[idx()] : 0);
-const langBadge = (n, language) => langOf(n)
-  ? `<span class="gb lg"><i style="background:${G(langOf(n))}"></i>${A(langOf(n))} in ${language}</span>` : '';
-
-// The row itself is tinted, so a list of text can be read down the left edge for where a group changes.
 const groupEdge = (node, g) => groupsOf(node).k > 1 ? ` style="border-left-color:${G(g)}"` : '';
 
-// ---- the author view -----------------------------------------------------------------------------
-// The same books under a different question. A style group asks "is a split supported"; an assumed
-// author asks "if there are N hands, whose is this". `al` carries one partition per count, because
-// the count cannot be read off the text: on the English corpus, where the authors are known,
-// selecting it by silhouette returned 2 whether the truth was 3, 5 or 13. So it is the reader's to
-// set, and everything below is "under an assumption of N", never "there are N".
-let mode = (qs.get('m') === 'authors') ? 'authors' : 'style';
-const AU = i => 'Author ' + i;
+// ---- books: the count can be set ------------------------------------------------------------------
+// `al` holds one partition per author count, from one up to the number of books, because the inferred
+// count is not to be trusted: on the English corpus, where the authors are known, inference returned
+// 2 whether the truth was 3, 5 or 13. So the page opens at the known count where there is one, at the
+// inferred count where there is not, and lets the reader move it.
 const assumed = {};
 
 const authorsOf = node => ({
@@ -312,17 +278,28 @@ const authorsOf = node => ({
   known: (node && node.aknown) || [],
 });
 
+function authorDefault(node) {
+  const a = authorsOf(node);
+  return a.fit ? a.fit.true_k : Math.max(1, groupsOf(node).k || 1);
+}
+
 function authorCount(node, key) {
   const a = authorsOf(node);
-  if (!a.range.length) return 0;
+  if (!a.range.length) return groupsOf(node).k || 1;
   const lo = a.range[0], hi = a.range[1];
-  if (assumed[key] != null) return Math.min(Math.max(assumed[key], lo), hi);
-  // Where the authors are known, open at the truth, so the page shows what the procedure does when
-  // it is given every advantage. Where they are not, open at the number of style groups the
-  // conservative test supports - the only count the text itself offers.
-  const start = a.fit ? a.fit.true_k : Math.max(2, groupsOf(node).k || 2);
-  return Math.min(Math.max(start, lo), hi);
+  const want = assumed[key] != null ? assumed[key] : authorDefault(node);
+  return Math.min(Math.max(want, lo), hi);
 }
+
+// 'known' - the real count; 'inferred' - what the text supported on its own; 'set' - the reader's.
+function authorStatus(node, key) {
+  const a = authorsOf(node), n = authorCount(node, key);
+  if (a.fit && n === a.fit.true_k) return 'known';
+  if (!a.fit && n === authorDefault(node)) return 'inferred';
+  return 'set';
+}
+const statusText = st => st === 'known' ? ' — the known count'
+                       : st === 'inferred' ? ', inferred from style' : ', as you have set it';
 
 const authorLabels = (node, key) => {
   const a = authorsOf(node);
@@ -331,10 +308,19 @@ const authorLabels = (node, key) => {
 
 function authorSizes(node, key) {
   const l = authorLabels(node, key);
-  if (!l) return [];
+  if (!l) return groupsOf(node).sizes;
   const n = authorCount(node, key), out = new Array(n).fill(0);
   l.forEach(g => { if (g >= 1 && g <= n) out[g - 1]++; });
   return out;
+}
+
+function authorSummary(node, key, unit) {
+  const a = authorsOf(node);
+  if (!a.range.length) return groupSummary(node, unit);
+  const n = authorCount(node, key), st = authorStatus(node, key), g = groupsOf(node);
+  const reason = (n === 1 && st === 'inferred') ? ` — ${why(g)}` : '';
+  return `<span class="gsum"><b>${n} author${n === 1 ? '' : 's'}</b> among ${a.n} ${unit}` +
+    statusText(st) + reason + `</span>` + shortUnitWarning(g, unit);
 }
 
 // The slider. Its range runs to as many hands as there are books, because nothing in the text rules
@@ -342,11 +328,12 @@ function authorSizes(node, key) {
 function authorControl(node, key) {
   const a = authorsOf(node);
   if (!a.range.length) return '';
-  const n = authorCount(node, key);
+  const n = authorCount(node, key), st = authorStatus(node, key);
   return `<div class="actl">
-    <label for="an-${key}">Assume <b id="anv-${key}">${n}</b> authors</label>
+    <label for="an-${key}"><b id="anv-${key}">${n}</b> author${n === 1 ? '' : 's'}
+      <span class="st" id="ast-${key}">${statusText(st).replace(/^[ ,—-]+/, '')}</span></label>
     <input type="range" id="an-${key}" min="${a.range[0]}" max="${a.range[1]}" value="${n}">
-    <span class="small">${a.range[0]}–${a.range[1]} over ${a.n} books</span></div>`;
+    <span class="small">move to assume a different number of hands, ${a.range[0]}–${a.range[1]}</span></div>`;
 }
 
 function bindAuthorControl(key, onChange) {
@@ -356,52 +343,33 @@ function bindAuthorControl(key, onChange) {
     assumed[key] = +e.target.value;
     const v = document.getElementById('anv-' + key);
     if (v) v.textContent = e.target.value;
+    const st = document.getElementById('ast-' + key);
+    if (st) st.textContent = 'as you have set it';
   });
   el.addEventListener('change', onChange);
 }
 
-// What this view is worth, measured where it can be. Everywhere else it says so instead.
+// What the inference is worth, measured where it can be. Everywhere else it says so instead.
 function authorFitNote(node, key) {
   const f = authorsOf(node).fit;
   if (!f) {
     return `<div class="caveat">No author here is known, so nothing on this page can be checked.
-      Where the authors <i>are</i> known - the English corpus - this same procedure, handed the right
-      number of hands, put most authors in a group that was not mostly theirs. Read the labels below
-      as the shape of an assumption, not as attributions.</div>`;
+      Where they are known — English — the same procedure, given the right number of hands, put most
+      authors in a group that was not mostly theirs (0 of 13 over the whole corpus; 6 of 13 fitting
+      each collection on its own). Read these labels as inferred from style, not as attributions.</div>`;
   }
   const n = authorCount(node, key);
   const at = n === f.true_k ? '' :
-    `<br><span class="small">You are looking at ${n}; the figures above are for the true ${f.true_k}.</span>`;
+    `<br><span class="small">You are looking at ${n}; the figures above are for the known ${f.true_k}.</span>`;
   return `<div class="fit"><b>Checked: ${f.n_known} of these works have a known author.</b>
-    Given the true count of ${f.true_k}, this strategy puts <b>${f.recovered} of ${f.true_k}</b>
+    At the known count of ${f.true_k}, this strategy puts <b>${f.recovered} of ${f.true_k}</b>
     in a group that is both mostly theirs and mostly no one else's — adjusted Rand ${f.ari}.${at}</div>`;
 }
-
-const authorBadge = (node, key, i) => {
-  const l = authorLabels(node, key);
-  return l && l[i] ? `<span class="gb au"><i style="background:${G(l[i])}"></i>${AU(l[i])}</span>` : '';
-};
 
 // The name, where it is actually known. This is the only thing on any of these pages that is not an
 // inference, which is why it is marked differently from everything around it.
 const knownAuthor = w => w && w.author
   ? `<span class="kn">${w.author}${w.genre ? ' · ' + w.genre : ''}</span>` : '';
-
-function modeToggle(onChange) {
-  const el = document.getElementById('mode');
-  if (!el) return;
-  el.innerHTML = ['style', 'authors'].map(m =>
-    `<button class="mb${m === mode ? ' on' : ''}" data-m="${m}">${
-      m === 'style' ? 'Style groups' : 'Assumed authors'}</button>`).join('')
-    + `<span class="small">${mode === 'style'
-      ? 'Splits kept only where they survive resampling. One group means no split was supported.'
-      : 'One style, one hand — assumed, not shown. You set how many hands; the text cannot say.'}</span>`;
-  el.querySelectorAll('.mb').forEach(b => b.addEventListener('click', () => {
-    mode = b.dataset.m;
-    const u = new URL(location); u.searchParams.set('m', mode); history.replaceState(null, '', u);
-    modeToggle(onChange); onChange();
-  }));
-}
 
 function plot(points, holder, onPick) {
   const W = 420, H = 300, P = 26;
@@ -447,6 +415,33 @@ def _head(title: str, extra: str = "") -> str:
             f"<style>{CSS}{extra}</style></head><body><div class=\"wrap\">")
 
 
+def _author_card(data: dict, i: int) -> dict | None:
+    """The assumed-author view of a whole language at the count the page opens on.
+
+    The same rule the page uses: where the authors are known, open at the truth; where they are not,
+    open at however many the conservative test inferred, because that is the only count the text
+    itself offers. Nothing here trusts that number - see `explorer.author_partitions`.
+    """
+    groups = data["author_groups"]
+    span = groups.get("arange") or []
+    if not span:
+        return None
+    fit = groups["af"][i]
+    k = fit["true_k"] if fit else max(2, data["book_groups"]["gk"][i])
+    k = min(max(k, span[0]), span[1])
+    labels = groups["al"][i].get(str(k)) or []
+    # Two different questions, and they get different answers. Fitting every book of the language at
+    # once asks one partition to hold every hand in it; fitting each collection on its own asks a
+    # much easier question and does better. Neither is the "real" number, so the page carries both -
+    # quoting only the higher one would be the flattering half of a measurement.
+    per = [c["af"][i] for c in data["tree"] if c["af"][i]]
+    apart = {"recovered": sum(f["recovered"] for f in per),
+             "true_k": sum(f["true_k"] for f in per),
+             "collections": len(per)} if per else None
+    return {"k": k, "range": span, "fit": fit, "apart": apart,
+            "sizes": [labels.count(g) for g in range(1, k + 1)] if labels else []}
+
+
 def write(data: dict, out_dir: str | Path) -> Path:
     """One overview page per language plus one page per book."""
     out = Path(out_dir)
@@ -475,7 +470,7 @@ def write(data: dict, out_dir: str | Path) -> Path:
                                for w in c["children"]]}
                  for c in data["tree"]],
     }
-    page = _head(f"{name} — style explorer")
+    page = _head(f"{name} — explorer")
     page += f"""<div class="crumb"><a href="../index.html">All languages</a></div>
 <h1>{name}</h1>
 <p class="small">{data['n_verses']:,} verses · {len(data['strategies'])} strategies available"""
@@ -483,106 +478,13 @@ def write(data: dict, out_dir: str | Path) -> Path:
         page += f" · no data for: {', '.join(data['unavailable'])}"
     page += """</p>
 <div class="bar" id="bar"></div>
-<div class="modebar" id="mode"></div>
 <div class="headline" id="head"></div>
 <div class="cols"><div id="list"></div><div><div class="card" id="side"></div></div></div>
 <script>const DATA = """ + json.dumps(slim, ensure_ascii=False) + ";\nconst LANG = " \
         + json.dumps(name, ensure_ascii=False) + ";\n" + JS_COMMON + """
 let collection = null;
-function render() {
-  const list = document.getElementById('list'), side = document.getElementById('side');
-  const top = collection === null;
-  const nodes = top ? DATA.tree : DATA.tree[collection].children;
-  const here = top ? null : DATA.tree[collection];
-  // At the top the page lists collections, so that is the partition it reports; the headline above
-  // it is the one worth quoting, every book of the language grouped together.
-  const parent = top ? DATA.collection_groups : here;
-  const unit = top ? 'collections' : 'books';
 
-  const books = groupsOf(DATA.book_groups);
-  const acount = authorCount(DATA.author_groups, 'lang');
-  document.getElementById('head').innerHTML = mode === 'authors'
-    ? `Assuming one style is one hand, the <b>${DATA.author_groups.an} books</b> of this language
-       divide among <b>${acount} assumed authors</b>:
-       ${authorSizes(DATA.author_groups, 'lang').map((c, i) => `${AU(i + 1)} ${c}`).join(' · ')}.
-       The count is yours to set: nothing in the text supplies it.`
-    : books.k > 1
-    ? `Under this strategy the <b>${books.n} books</b> of this language fall into
-       <b>${books.k} style groups</b>${books.ari != null ? ` (stable to ARI ${books.ari})` : ''}:
-       ${books.sizes.map((c, i) => `${A(i + 1)} ${c}`).join(' · ')}. ${groupStack(DATA.book_groups)}
-       Change the strategy and see whether that survives.`
-    : `Under this strategy the <b>${books.n} books</b> of this language do not split:
-       ${(DATA.group_reasons || {})[books.reason] || 'no split is supported'}.`;
-
-  list.innerHTML = (top
-      ? '<h2>Collections</h2>'
-      : `<h2>${DATA.tree[collection].label} — books</h2>`)
-    + groupSummary(parent, unit) + groupLegend(parent)
-    + (top ? '' : '<button class="row" id="up"><span class="t">← back to collections</span><span class="n"></span></button>')
-    + nodes.map((n, i) => {
-        // On the books list the edge follows the language-wide group: it is always defined, and it
-        // is the only one that means the same thing in another collection.
-        const alang = authorLabels(DATA.author_groups, 'lang');
-        const mine = (!top && alang && n.bi != null) ? alang[n.bi] : 0;
-        const edge = mode === 'authors'
-          ? (mine ? ` style="border-left-color:${G(mine)}"` : '')
-          : top ? groupEdge(parent, groupOf(n))
-                : (langOf(n) ? ` style="border-left-color:${G(langOf(n))}"` : '');
-        // In the author view the row carries the language-wide assumed hand, for the same reason the
-        // style view carries the language-wide group: a label fitted inside one collection cannot be
-        // compared with another collection's, because both start at 1.
-        const badge = mode === 'authors'
-          ? (mine ? `<span class="gb au"><i style="background:${G(mine)}"></i>${AU(mine)} in ${LANG}</span>` : '')
-          : (top ? groupBadge(parent, n) : langBadge(n, LANG));
-        return `<button class="row" data-i="${i}"${edge}>
-        <span class="t">${n.label}</span>
-        <span class="n">${top ? n.n_verses.toLocaleString() + ' verses' : badge}</span>
-        <span class="s">${n.code ? n.code + ' · ' + n.n_chapters + ' chapters · ' : ''}${n.n_tokens.toLocaleString()} tokens${top ? '' : ' · ' + n.n_verses.toLocaleString() + ' verses'}</span>
-        ${knownAuthor(n)}
-        ${mode === 'authors' ? (top ? rowBars(collectionAcrossAuthors(n), `its ${n.children ? n.children.length : 0} books across the language's assumed authors`, AU) : '')
-                             : groupBadge(parent, n) + (top ? acrossLanguage(n) + ownBars(n, 'books') : ownBars(n, 'chapters'))}
-      </button>`;}).join('');
-  if (!top) document.getElementById('up').addEventListener('click', () => { collection = null; render(); });
-  list.querySelectorAll('.row[data-i]').forEach(b => b.addEventListener('click', () => {
-    const n = nodes[+b.dataset.i];
-    if (top) { collection = +b.dataset.i; render(); }
-    else location.href = 'works/' + n.slug + '.html?s=' + encodeURIComponent(strategy);
-  }));
-  const holder = document.createElement('div');
-  side.innerHTML = '';
-  side.appendChild(holder);
-  const many = groupsOf(parent).k > 1;
-  const alang2 = authorLabels(DATA.author_groups, 'lang');
-  plot(nodes.map(n => ({
-    label: n.label, xy: xyOf(n),
-    g: mode === 'authors' ? ((!top && alang2 && n.bi != null) ? alang2[n.bi] : 0)
-                          : (many ? groupOf(n) : 0) })), holder, null);
-  const bars = document.createElement('div');
-  side.appendChild(bars);
-  // At the top the list is three collections, which is too few to partition and says so; the chart
-  // worth showing there is the one the headline reports, every book of the language.
-  if (mode === 'authors') {
-    const node = top ? DATA.author_groups : here, key = top ? 'lang' : 'c' + collection;
-    bars.innerHTML = authorControl(node, key) + authorFitNote(node, key)
-      + barChart(authorSizes(node, key), top ? 'books of this language' : `books of ${here.label}`,
-                 top ? 'Assumed authors across the language' : `Assumed authors within ${here.label}`,
-                 '', 0, AU)
-      + (top ? '' : `<p class="small">Fitted among ${here.label}'s books alone, so these numbers
-          cannot be compared with another collection's — both start at Author 1. The label on each
-          row is the language-wide one, which can.</p>`);
-    bindAuthorControl(key, render);
-  } else {
-  bars.innerHTML = top
-    ? groupBars(DATA.book_groups, 'books of this language', 'Style groups across the language')
-    : groupBars(parent, `books of ${here.label}`, `Style groups within ${here.label}`)
-      + acrossChart(here, here.label);
-  }
-  const mk = document.createElement('div');
-  side.appendChild(mk);
-  markerList(here || { markers: {} }, mk);
-  if (!here) mk.insertAdjacentHTML('afterbegin', '<p class="small">Each point is a collection. Open one to see its books.</p>');
-}
-// How a collection's books fall across the language's assumed authors, for the collections list.
+// How a collection's books fall across the language's authors, for the collections list.
 function collectionAcrossAuthors(c) {
   const l = authorLabels(DATA.author_groups, 'lang');
   const n = authorCount(DATA.author_groups, 'lang');
@@ -591,14 +493,92 @@ function collectionAcrossAuthors(c) {
   c.children.forEach(w => { const g = l[w.bi]; if (g >= 1 && g <= n) out[g - 1]++; });
   return out;
 }
-strategyBar(render); modeToggle(render); render();
+
+function render() {
+  const list = document.getElementById('list'), side = document.getElementById('side');
+  const top = collection === null;
+  const nodes = top ? DATA.tree : DATA.tree[collection].children;
+  const here = top ? null : DATA.tree[collection];
+  const ag = DATA.author_groups;
+
+  // The headline is the number worth quoting: every book of the language, and how many hands.
+  const acount = authorCount(ag, 'lang'), st = authorStatus(ag, 'lang');
+  const sizes = authorSizes(ag, 'lang'), inferred = groupsOf(DATA.book_groups);
+  document.getElementById('head').innerHTML =
+    `The <b>${ag.an} books</b> of this language fall to <b>${acount} author${acount === 1 ? '' : 's'}</b>` +
+    statusText(st) +
+    (acount > 1 ? `: ${sizes.map((c, i) => `${A(i + 1)} ${c}`).join(' · ')}. ${groupStack(sizes)}`
+                : (st === 'inferred' ? ` — ${why(inferred)}.` : '.')) +
+    ` Change the strategy and see whether that survives.`;
+
+  const alang = authorLabels(ag, 'lang');
+  list.innerHTML = (top
+      ? '<h2>Collections</h2>'
+      : `<h2>${here.label} — books</h2>` + authorSummary(here, 'c' + collection, 'books') + groupLegend(here))
+    + (top ? '' : '<button class="row" id="up"><span class="t">← back to collections</span><span class="n"></span></button>')
+    + nodes.map((n, i) => {
+        // A book's row carries its author among every book of the language, which is the only label
+        // comparable between collections: one fitted inside a collection starts at Author 1 whatever
+        // the neighbouring collection's does.
+        const mine = (!top && alang && n.bi != null) ? alang[n.bi] : 0;
+        const edge = mine ? ` style="border-left-color:${G(mine)}"` : '';
+        const badge = mine ? `<span class="gb au"><i style="background:${G(mine)}"></i>${A(mine)} in ${LANG}</span>` : '';
+        return `<button class="row" data-i="${i}"${edge}>
+        <span class="t">${n.label}</span>
+        <span class="n">${top ? n.n_verses.toLocaleString() + ' verses' : badge}</span>
+        <span class="s">${n.code ? n.code + ' · ' + n.n_chapters + ' chapters · ' : ''}${n.n_tokens.toLocaleString()} tokens${top ? '' : ' · ' + n.n_verses.toLocaleString() + ' verses'}</span>
+        ${knownAuthor(n)}
+        ${top ? rowBars(collectionAcrossAuthors(n), `its ${n.children ? n.children.length : 0} books across the language's ${acount} author${acount === 1 ? '' : 's'}`)
+              : ownBars(n, 'chapters')}
+      </button>`;}).join('');
+  if (!top) document.getElementById('up').addEventListener('click', () => { collection = null; render(); });
+  list.querySelectorAll('.row[data-i]').forEach(b => b.addEventListener('click', () => {
+    const n = nodes[+b.dataset.i];
+    if (top) { collection = +b.dataset.i; render(); }
+    else location.href = 'works/' + n.slug + '.html?s=' + encodeURIComponent(strategy);
+  }));
+
+  const holder = document.createElement('div');
+  side.innerHTML = '';
+  side.appendChild(holder);
+  plot(nodes.map(n => ({ label: n.label, xy: xyOf(n),
+                         g: (!top && alang && n.bi != null) ? alang[n.bi] : 0 })), holder, null);
+  const bars = document.createElement('div');
+  side.appendChild(bars);
+  const node = top ? ag : here, key = top ? 'lang' : 'c' + collection;
+  bars.innerHTML = authorControl(node, key) + authorFitNote(node, key)
+    + barChart(authorSizes(node, key), top ? 'books of this language' : `books of ${here.label}`,
+               top ? 'Authors across the language' : `Authors within ${here.label}`)
+    + (top ? '' : `<p class="small">Fitted among ${here.label}'s books alone, so these cannot be
+        compared with another collection's — both start at Author 1. The label on each row is the
+        language-wide one, which can.</p>`);
+  bindAuthorControl(key, render);
+  const mk = document.createElement('div');
+  side.appendChild(mk);
+  markerList(here || { markers: {} }, mk);
+  if (!here) mk.insertAdjacentHTML('afterbegin', '<p class="small">Each point is a collection. Open one to see its books.</p>');
+}
+strategyBar(render); render();
 </script></div></body></html>"""
     (out / "index.html").write_text(page, encoding="utf-8")
 
     # --- one page per book ---------------------------------------------------------------------------
+    cards = [_author_card(data, i) for i in range(len(data["keys"]))]
     for collection in data["tree"]:
         for work in collection["children"]:
+            # Where this book sits among the language's authors, at the count the language page opens
+            # on - the known count where there is one, the inferred count where there is not - so the
+            # two pages never disagree about how many hands there are.
+            lang_authors = []
+            for i, card in enumerate(cards):
+                if not card:
+                    lang_authors.append(None)
+                    continue
+                labels = data["author_groups"]["al"][i].get(str(card["k"])) or []
+                lang_authors.append({"k": card["k"], "sizes": card["sizes"], "known": bool(card["fit"]),
+                                     "mine": labels[work["bi"]] if work["bi"] < len(labels) else 0})
             payload = {
+                "lang_authors": lang_authors,
                 **shared,
                 "work": {"label": work["label"], "code": work["code"], "xy": work["xy"],
                          "markers": work["markers"], "n_verses": work["n_verses"],
@@ -613,32 +593,33 @@ strategyBar(render); modeToggle(render); render();
                               "n_verses": ch["n_verses"], "v": ch["v"],
                               **{f: ch[f] for f in keep if f in ch}} for ch in work["children"]],
             }
-            body = _head(f"{work['label']} — style explorer")
+            body = _head(f"{work['label']} — explorer")
             body += f"""<div class="crumb"><a href="../../index.html">All languages</a> ·
 <a href="../index.html">{name}</a> · {collection['label']}</div>
 <h1>{work['label']}</h1>
 <p class="small">{work['code']} · {work['n_verses']:,} verses · {len(work['children'])} chapters</p>
 <div class="bar" id="bar"></div>
-<div class="modebar" id="mode"></div>
 <div class="headline" id="head"></div>
 <div class="cols"><div id="list"></div><div><div class="card" id="side"></div></div></div>
 <script>const DATA = """ + json.dumps(payload, ensure_ascii=False) + ";\n" + JS_COMMON + f"""
 const RTL = {'true' if rtl else 'false'};
 const vGroupOf = v => v[4][idx()];
-const mineAcross = () => (DATA.work.gl ? DATA.work.gl[idx()] : 0);
+const langAuthor = () => (DATA.lang_authors || [])[idx()] || null;
+const mineAcross = () => {{ const la = langAuthor(); return la ? la.mine : (DATA.work.gl ? DATA.work.gl[idx()] : 0); }};
 const mineInCollection = () => (DATA.work.g ? DATA.work.g[idx()] : 0);
 
 // Where this book itself sits. Everything below is about its insides; this is the one line that
-// places the book among its peers, and without it the page never says which group the book is in.
+// places the book among its peers, and without it the page never says whose hand the book is in.
 function placement() {{
-  const across = groupsOf(DATA.book_groups), mine = mineAcross();
+  const la = langAuthor(), across = groupsOf(DATA.book_groups), mine = mineAcross();
   const within = groupsOf(DATA.collection_books), inner = mineInCollection();
-  let out = across.k > 1 && mine
-    ? `Under this strategy this book is <b>${{A(mine)}}</b> of the ${{across.k}} style groups fitted over
-       all <b>${{across.n}} books</b> of ${{DATA.language_name}} — a group holding
-       ${{across.sizes[mine - 1]}} of them.`
-    : `The ${{across.n}} books of ${{DATA.language_name}} do not divide under this strategy:
-       ${{(DATA.group_reasons || {{}})[across.reason] || 'no split is supported'}}.`;
+  const k = la ? la.k : across.k, sizes = la ? la.sizes : across.sizes;
+  let out = k > 1 && mine
+    ? `Under this strategy this book is <b>${{A(mine)}}</b> of the ${{k}} authors of
+       ${{DATA.language_name}}${{la && la.known ? ' — the known count' : ', inferred from style'}} —
+       a hand holding ${{sizes[mine - 1]}} of its <b>${{across.n}} books</b>.`
+    : `The ${{across.n}} books of ${{DATA.language_name}} fall to one author under this strategy:
+       ${{why(across)}}.`;
   out += within.k > 1 && inner
     ? ` Among the ${{within.n}} books of ${{DATA.collection}} alone it is <b>${{A(inner)}}</b>.`
     : ` The ${{within.n}} books of ${{DATA.collection}} do not divide among themselves.`;
@@ -662,9 +643,10 @@ function render() {{
     const many = groupsOf(DATA.work).k > 1;
     plot(DATA.chapters.map(c => ({{ label: 'Chapter ' + c.label, xy: xyOf(c), g: many ? groupOf(c) : 0 }})), h, null);
     const bars = document.createElement('div'); side.appendChild(bars);
-    bars.innerHTML = groupBars(DATA.work, 'chapters of this book', 'Style groups among the chapters')
-      + barChart(groupsOf(DATA.book_groups).sizes, `books of ${{DATA.language_name}}`,
-                 'Where this book sits', `<p class="small">Groups fitted over every book of the
+    const la = langAuthor();
+    bars.innerHTML = groupBars(DATA.work, 'chapters of this book', 'Authors among the chapters')
+      + barChart(la ? la.sizes : groupsOf(DATA.book_groups).sizes, `books of ${{DATA.language_name}}`,
+                 'Where this book sits', `<p class="small">Authors over every book of the
                  language. The marked row is this book's.</p>`, mineAcross());
     const mk = document.createElement('div'); side.appendChild(mk); markerList(DATA.work, mk);
     mk.insertAdjacentHTML('afterbegin', '<p class="small">Each point is a chapter of this book.</p>');
@@ -674,7 +656,7 @@ function render() {{
   const many = groupsOf(ch).k > 1;
   list.innerHTML = `<h2>Chapter ${{ch.label}} — verses</h2>` + groupSummary(ch, 'verses') + groupLegend(ch)
     + `<button class="row" id="up"><span class="t">← back to chapters</span><span class="n"></span></button>`
-    + `<div class="vhead"><span>verse</span><span>${{many ? 'group' : ''}}</span><span>text</span></div>`
+    + `<div class="vhead"><span>verse</span><span>${{many ? 'author' : ''}}</span><span>text</span></div>`
     + ch.v.map((v, i) => `<button class="vrow" data-i="${{i}}"${{groupEdge(ch, vGroupOf(v))}}>
         <span class="vref">${{ch.label}}:${{v[0]}}</span>
         <span class="vtok">${{v[2]}} tok</span>
@@ -690,14 +672,14 @@ function render() {{
   plot(ch.v.map(v => ({{ label: ch.label + ':' + v[0], xy: vxyOf(v), g: many ? vGroupOf(v) : 0 }})), h, p => {{
     verse = ch.v.findIndex(v => ch.label + ':' + v[0] === p.label); render(); }});
   const bars = document.createElement('div'); side.appendChild(bars);
-  bars.innerHTML = groupBars(ch, `verses of chapter ${{ch.label}}`, 'Style groups among the verses');
+  bars.innerHTML = groupBars(ch, `verses of chapter ${{ch.label}}`, 'Authors among the verses');
   const mk = document.createElement('div'); side.appendChild(mk);
   if (verse !== null) {{
     const v = ch.v[verse], xy = vxyOf(v);
     mk.innerHTML = `<h2>${{ch.label}}:${{v[0]}}</h2>
       ${{speakerTag(v[5])}}
       <div class="vtext ${{RTL ? 'rtl' : ''}}">${{v[1]}}</div>
-      ${{many ? `<div class="mk"><span>style group in this chapter</span>
+      ${{many ? `<div class="mk"><span>author in this chapter</span>
         <span><i style="display:inline-block;width:9px;height:9px;border-radius:2px;
         margin-right:5px;background:${{G(vGroupOf(v))}}"></i>${{A(vGroupOf(v))}} of ${{groupsOf(ch).k}}</span></div>` : ''}}
       <div class="mk"><span>position under this strategy</span><span>${{xy[0].toFixed(1)}}, ${{xy[1].toFixed(1)}}</span></div>
@@ -733,5 +715,8 @@ strategyBar(render); render();
         # the one language that carries known authors.
         "authors": {key: data["author_groups"]["af"][i]
                     for i, key in enumerate(data["keys"]) if data["author_groups"]["af"][i]},
+        # The assumed-author view as the front page opens it, so that page can report hands where it
+        # reports groups instead of quoting a style-group count under an authorship heading.
+        "author_groups": {key: _author_card(data, i) for i, key in enumerate(data["keys"])},
     }, ensure_ascii=False), encoding="utf-8")
     return out

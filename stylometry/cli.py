@@ -575,13 +575,14 @@ def _write_explorer_index(out: Path, built: list) -> None:
         "group_reasons": languages[0]["group_reasons"],
         "languages": [{"code": e["code"], "label": e["label"], "verses": e["verses"],
                        "books": e["books"], "keys": e["keys"], "groups": e["groups"],
-                       "authors": e.get("authors") or {}}
+                       "authors": e.get("authors") or {},
+                       "author_groups": e.get("author_groups") or {}}
                       for e in languages],
     }
     (out / "index.html").write_text(
         '<!doctype html><html lang="en"><head><meta charset="utf-8">'
         '<meta name="viewport" content="width=device-width, initial-scale=1">'
-        "<title>Style explorer</title>"
+        "<title>Authors explorer</title>"
         '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:wght@400;600&'
         'family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">'
         f"<style>{CSS}.row{{text-decoration:none;display:grid}}"
@@ -594,47 +595,52 @@ def _write_explorer_index(out: Path, built: list) -> None:
         ".row .au{grid-column:1/-1;font-size:12px;color:var(--muted);margin-top:4px;"
         "border-left:3px solid var(--clay);padding-left:8px}.row .au b{color:var(--ink)}"
         "</style></head><body><div class=\"wrap\">"
-        "<h1>Style explorer</h1>"
+        "<h1>Authors, inferred from style</h1>"
         "<p class=\"small\">Pick a strategy, then a language, then drill from collection to book to "
-        "chapter to verse. Every level reports how many style groups the units it lists fall into, and "
-        "the strategy can be changed on every page — a grouping that survives the change means "
-        "something, one that rearranges itself does not.</p>"
+        "chapter to verse. Every level reports how many authors the units it lists fall to, and the "
+        "strategy can be changed on every page — a division that survives the change means something, "
+        "one that rearranges itself does not.</p>"
         "<div class=\"bar\" id=\"bar\"></div><div id=\"list\"></div>"
-        "<p class=\"small\" style=\"margin-top:22px\">A style group is a partition of the units a level "
-        "lists, fitted on pooled profiles and kept only if it survives refitting on 80% subsamples at an "
-        "adjusted Rand index of 0.8 or better. One group means no split was supported, not that one hand "
-        "wrote the text. Positions are the first two principal components of the chosen strategy's "
-        "standardised features, comparable within a strategy and never between strategies. No model is "
-        "involved at any point.</p>"
-        "<p class=\"small\">Each language page also offers an <b>assumed-author view</b>, which drops "
-        "the evidence test and asks instead: if there are N hands here, whose is this? N is yours to "
-        "set, because it cannot be read off the text — on the English corpus, where the authors are "
-        "known, choosing it automatically returned 2 whether the truth was 3, 5 or 13. English is "
-        "there to say what that assumption is worth: given the true number of hands, the best "
-        "strategy recovers 2 of 3 Federalist authors and 3 of 5 novelists, and 0 of 13 across the "
-        "whole mixed corpus. The scripture corpora are mixed and have no known author to check "
-        "against.</p>"
+        "<p class=\"small\" style=\"margin-top:22px\">Authors are inferred from style: each level "
+        "partitions the units it lists on pooled profiles, and the count is the largest that survives "
+        "refitting on 80% subsamples at an adjusted Rand index of 0.8 or better. One author means no "
+        "division was supported, not that one hand wrote the text. At the book level the count can be "
+        "moved by hand, because the inference is not reliable — on the English corpus, where the "
+        "authors are known, it returned 2 whether the truth was 3, 5 or 13. English is there to say "
+        "what the inference is worth: given the true number of hands, the best strategy recovers "
+        "2 of 3 Federalist authors and 3 of 5 novelists, and 0 of 13 across the whole mixed corpus. "
+        "The scripture corpora are mixed and have no known author to check against. Positions are "
+        "the first two principal components of the chosen strategy's standardised features, "
+        "comparable within a strategy and never between strategies. No model is involved.</p>"
         "<script>const DATA = " + _json.dumps(payload, ensure_ascii=False) + ";\n" + JS_COMMON + """
 function render() {
   document.getElementById('list').innerHTML = DATA.languages.map(l => {
-    const has = l.keys.includes(strategy), g = l.groups[strategy];
-    const count = !has ? '' : g.k > 1
-      ? `<span class="k">${g.k} style groups</span>`
-      : `<span class="k">1 style group</span>`;
-    const why = (!has || g.k > 1) ? '' :
-      `<span class="w">${(DATA.group_reasons || {})[g.reason] || 'no split is supported'}</span>`;
+    const has = l.keys.includes(strategy);
+    const a = (l.author_groups || {})[strategy];
+    const g = a ? { k: a.k, sizes: a.sizes } : (l.groups[strategy] || { k: 0, sizes: [] });
+    const reason = (l.groups[strategy] || {}).reason;
+    const fit = l.authors[strategy];
+    const count = (!has || !g.k) ? '' :
+      `<span class="k">${g.k} author${g.k > 1 ? 's' : ''}${fit ? ' · known' : ' · inferred'}</span>`;
+    const why = (!has || g.k > 1 || fit) ? '' :
+      `<span class="w">${(DATA.group_reasons || {})[reason] || 'no division is supported'}</span>`;
     const stack = (!has || g.k < 2) ? '' :
-      `<span class="bk">${g.sizes.map((c, i) => `A${i + 1}&nbsp;${c}`).join(' · ')}` +
+      `<span class="bk">${g.sizes.map((c, i) => `Author&nbsp;${i + 1}&nbsp;${c}`).join(' · ')}` +
       `<span class="stack">${g.sizes.map((c, i) =>
-        `<span style="flex:${c};background:var(--g${i + 1})" title="A${i + 1}: ${c}"></span>`).join('')}</span></span>`;
+        `<span style="flex:${c};background:var(--g${i + 1})" title="Author ${i + 1}: ${c}"></span>`).join('')}</span></span>`;
+    const check = !has ? '' : fit ? (() => {
+        const apart = (a || {}).apart;
+        return `<span class="au">Authors are known here, so this can be checked. As one partition of
+          all ${l.books} books it recovers <b>${fit.recovered} of ${fit.true_k}</b>` +
+          (apart ? `; fitting each of the ${apart.collections} collections separately,
+           <b>${apart.recovered} of ${apart.true_k}</b>` : '') + `.</span>`; })()
+      : `<span class="au">No author here is known, so nothing on this row can be checked.</span>`;
     return `<a class="row${has ? '' : ' dim'}" href="${l.code}/index.html?s=${encodeURIComponent(strategy)}">
       <span class="t">${l.label}</span>
       <span class="n">${l.verses.toLocaleString()} verses</span>
       <span class="s">${l.books} books · ${l.keys.length} strategies</span>
       ${count}${why}${stack}
-      ${(has && l.authors[strategy]) ? `<span class="au">Authors are known here: assuming one style is
-        one hand recovers <b>${l.authors[strategy].recovered} of ${l.authors[strategy].true_k}</b>
-        of them under this strategy.</span>` : ''}
+      ${check}
       ${has ? '' : `<span class="w">no ${strategy} data here — opens on ${l.keys[0]}</span>`}
     </a>`;
   }).join('');

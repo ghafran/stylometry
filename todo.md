@@ -440,8 +440,25 @@ would look like.
 
 **What this licenses.** Within one genre and one collection the assumption is worth something — 2 of
 3 and 3 of 5. Across a mixed corpus it is worth nothing — 0 of 13. Since the scripture corpora are
-mixed by genre and have no known author anywhere to check against, the assumed-author view there
-carries the caution rather than a score.
+mixed by genre and have no known author anywhere to check against, the author view there carries
+the caution rather than a score.
+
+**The explorer now speaks only of authors, inferred from style — decided 19 September 2026.** The
+"style group" framing and its separate view are gone; every level reports how many *authors* the
+units it lists fall to. What was the style-group count is now the *inferred* author count — the
+largest division that survives resampling — and the page says "inferred from style" beside it.
+Where the authors are actually known (English) the page opens at the known count, says so, and
+scores the inference against it; the front page shows both the one-partition figure (0 of 13) and
+the per-collection figure (6 of 13) so neither is quoted alone. At the book level the count is a
+slider from one up to the number of books, because the inference is not reliable enough to be a
+result. The best strategy for author recovery is `function_words` (6 of 13 across the three
+collections), which is also what the supervised test in 6c.1 chose by an independent route. The
+old per-language dashboards, passage runs, strategy comparisons and witness diffs were removed
+from `output/`; only the explorer remains, and the rest regenerate from `stylometry analyse`,
+`html`, `strategies` and `witnesses`.
+
+The one thing that did not change, and must not: **one author still means "no division was
+supported", never "one hand wrote it."** The words changed; the test behind them did not.
 
 - [ ] 6c.3 Attribute the disputed twelve Federalist papers with the honest mix and report it. The
       published answer is Madison; this is the field's reference test and the corpus is now set up

@@ -358,23 +358,27 @@ def build_root_index(output_dir: str | Path) -> Path | None:
             f'<div class="l">{s["n_verses"]:,} {units} · {s["n_works"]} works · {s["k_used"]} style groups · '
             f'{"AI + lexical" if s.get("used_ai_profiles") else "lexical only"}</div></div>'
         )
-    if not cards:
+    explorer = (output_dir / "explorer" / "index.html").exists()
+    if not cards and not explorer:
         return None
     body = ""
     nav = '<a href="index.html">All languages</a>'
-    if (output_dir / "explorer" / "index.html").exists():
+    if explorer:
         # The explorer is the way into this output: it is the only view where the strategy is a
         # control rather than a decision already taken. It goes first, and it is a link people see.
-        body += ('<p class="sub"><a href="explorer/index.html"><strong>Open the style explorer</strong></a>'
-                 " - choose a strategy, then a language, then drill from collection to book to chapter to "
-                 "verse. Every page keeps the strategy picker, so a grouping can be re-tested under another "
-                 "measure in one click.</p>")
+        body += ('<p class="sub"><a href="explorer/index.html"><strong>Open the explorer</strong></a>'
+                 " - authors inferred from style. Choose a strategy, then a language, then drill from "
+                 "collection to book to chapter to verse. Every page keeps the strategy picker, so a "
+                 "division can be re-tested under another measure in one click.</p>")
         nav += '<a href="explorer/index.html">Explorer</a>'
-    body += '<div class="tiles">' + "".join(cards) + "</div><p class=\"sub\">Each language is analysed on its own. These are exploratory style groups, not identified authors.</p>"
+    if cards:
+        body += ('<div class="tiles">' + "".join(cards)
+                 + "</div><p class=\"sub\">Each language is analysed on its own. These are "
+                   "exploratory style groups, not identified authors.</p>")
     if (output_dir / "models" / "index.html").exists():
         body += '<p><a href="models/index.html">Which model should profile the verses?</a> - agreement, repeatability and cost of every model tried.</p>'
         nav += '<a href="models/index.html">Models</a>'
     path = output_dir / "index.html"
     subtitle = "Exploratory style analysis across languages" if has_passages else "Exploratory style analysis across Greek, Hebrew and Arabic scripture"
-    path.write_text(page("Style groups", body, "", subtitle, nav=nav), encoding="utf-8")
+    path.write_text(page("Authors", body, "", subtitle, nav=nav), encoding="utf-8")
     return path

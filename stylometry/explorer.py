@@ -44,12 +44,13 @@ GROUP_RELIABLE_TOKENS = 1000
 # inferred from the text and so has to be the reader's to set.
 AUTHOR_OFFER_MAX = 60
 
-# Why a level reports one group, in the words the page shows.
+# Why a level infers one author, in the words the page shows. Every one of these is "the text did
+# not support more", never "one hand wrote it": the same test returned one for Codex Sinaiticus.
 GROUP_REASONS = {
-    "too_few_units": "too few units here to look for groups",
+    "too_few_units": "too few units here to look for more than one",
     "no_variation": "this strategy finds no variation between them",
-    "no_supported_split": "no split is supported: they read as one style",
-    "unstable": "a split scored well but did not survive resampling",
+    "no_supported_split": "no division into more than one is supported",
+    "unstable": "a division scored well but did not survive resampling",
 }
 
 
@@ -155,12 +156,12 @@ def author_partitions(P: np.ndarray, seed: int = 0) -> dict:
     distinct = len(np.unique(X, axis=0))
     top = min(n - 1, AUTHOR_OFFER_MAX, distinct)
     if top < 2:
-        return {"n_units": n, "range": [], "labels": {}}
-    out = {}
+        return {"n_units": n, "range": [1, 1], "labels": {1: [1] * n}}
+    out = {1: [1] * n}
     for k in range(2, top + 1):
         labels, _, _ = cluster(X, k, seed=seed)
         out[k] = [int(a[1:]) for a in labels]
-    return {"n_units": n, "range": [2, top], "labels": out}
+    return {"n_units": n, "range": [1, top], "labels": out}
 
 
 def author_fit(labels_by_k: dict, truth: list[str]) -> dict | None:
@@ -462,20 +463,23 @@ def build(verses: list[dict], language: str, seed: int = 0, progress=print,
         "author_groups": _pack_authors([groups[k]["author_language"] for k in keys],
                                        [w["author"] for c in tree for w in c["children"]]),
         "group_reasons": GROUP_REASONS,
-        "author_note": "An assumed author is not a style group and not an attribution. It answers "
-                       "'if there are N hands here, whose is this', with N supplied by the reader "
-                       "because it cannot be read off the text: on the English corpus, where the "
-                       "authors are known, selecting N by silhouette returned 2 whether the truth "
-                       "was 3, 5 or 13. Where authors are known, `af` reports how many of them this "
-                       "procedure recovers into a group that is both mostly theirs and mostly no "
-                       "one else's; on all 120 English books, given the true count of 13, that is 0.",
+        "author_note": "At the book level the count can be overridden: `al` holds a partition at "
+                       "every count from one to the number of books. The inferred count is not "
+                       "reliable - on the English corpus, where the authors are known, inference "
+                       "returned 2 whether the truth was 3, 5 or 13 - so it is offered as a start, "
+                       "not an answer. Where authors are known, `af` reports how many of them the "
+                       "partition at the true count recovers into a group that is both mostly theirs "
+                       "and mostly no one else's; over all 120 English books that is 0 of 13, and "
+                       "fitting each collection on its own, 6 of 13.",
         "reliable_tokens": GROUP_RELIABLE_TOKENS,
         "note": "Coordinates are the first two principal components of each strategy's standardised "
                 "features, fitted over every verse of this language. They are comparable within a "
                 "strategy and not between strategies.",
-        "group_note": "A style group is a partition of the units a level lists - a collection groups "
-                      "its books, a book its chapters, a chapter its verses - fitted on pooled "
-                      "profiles and kept only if it survives refitting on 80% subsamples at an "
-                      "adjusted Rand index of 0.8 or better. One group means no split was supported, "
-                      "not that one hand wrote it.",
+        "group_note": "Authors are inferred from style. Each level partitions the units it lists - "
+                      "a collection its books, a book its chapters, a chapter its verses - on pooled "
+                      "profiles, and the inferred count is the largest that survives refitting on 80% "
+                      "subsamples at an adjusted Rand index of 0.8 or better. One author means no "
+                      "division was supported, not that one hand wrote it. Where the authors are "
+                      "actually known - English - the known count is used and the inference is "
+                      "scored against it.",
     }
