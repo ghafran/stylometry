@@ -105,6 +105,7 @@ _HTML_START = r'''<!doctype html>
 @media(max-width:740px){.contribution-toolbar{align-items:start;flex-direction:column}.contribution-card{padding:16px 12px}.contribution-axis,.contribution-row{grid-template-columns:90px minmax(65px,1fr) 110px;gap:8px}.contribution-value{font-size:11px}.contribution-value .share{min-width:43px;margin-left:4px}.contribution-heading{align-items:start;flex-direction:column;gap:5px}}
 @media(max-width:400px){.contribution-axis,.contribution-row{grid-template-columns:75px minmax(0,1fr) 90px;gap:6px}.contribution-value .share{display:block;margin-left:0}.contribution-ticks span:nth-child(even){display:none}}
 .trail[hidden]{display:none}
+.works-picker{max-width:360px;margin:18px 0}.works-overview{border:1px solid var(--line);border-radius:11px;background:white;padding:20px;margin-bottom:20px}.works-overview h3{font-size:19px}.works-counts{display:flex;gap:24px;flex-wrap:wrap;margin-top:14px}.works-counts strong{display:block;font-size:23px;font-weight:600}.works-counts span{font-size:12px;color:var(--muted)}.works-branch{border:1px solid var(--line);border-radius:8px;background:white;margin:10px 0;overflow:hidden}.works-branch>summary{cursor:pointer;padding:13px 16px;color:var(--ink);font-weight:600;overflow-wrap:anywhere}.works-branch>summary:hover{background:#f0f6f4}.works-branch>summary .tiny{display:inline;font-weight:400;margin-left:12px}.works-children{padding:0 14px 8px 20px}.works-chapter>.works-children{padding:0}.works-chapter .text-table .ref{min-width:160px}.works-chapter .text-table .tag{min-width:140px}.works-caption{font-size:12px;color:var(--muted);margin:0 0 10px}.works-more{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;flex-wrap:wrap}@media(max-width:740px){.works-children{padding:0 7px 5px 9px}.works-branch>summary{padding:11px}.works-branch>summary .tiny{display:block;margin-left:0}.works-counts{gap:15px}}
 </style>
 </head>
 <body>
@@ -117,14 +118,14 @@ _HTML_START = r'''<!doctype html>
 <div class="field"><label for="chapter">Chapter</label><select id="chapter"></select></div>
 <div class="field"><label for="author">Inferred author</label><select id="author"></select></div>
 <div class="field"><label for="status">Evidence status</label><select id="status"><option value="">All evidence</option value="assigned">Assigned</option><option value="low_evidence">Low evidence</option><option value="insufficient_text">Insufficient text</option></select></div>
-<button type="button" class="button" id="reset">Reset filters</button><p class="scope-note">These filters apply to Text explorer, Hierarchy, and Author groups. Opening a result keeps your filters. Broaden them here to explore more text.</p>
+<button type="button" class="button" id="reset">Reset filters</button><p class="scope-note">These filters apply to Text explorer, Hierarchy, Author groups, and By author. Opening a result keeps your filters. Broaden them here to explore more text.</p>
 </aside>
 <main><noscript>This report needs JavaScript for interactive exploration. Download the CSV files or report.json to read every result.</noscript>
 <div class="metrics" id="metrics" aria-live="polite"></div>
 <p class="muted" id="source-scope" hidden></p>
 <div class="notice">These are <strong>estimated style groups</strong>, not verified identities. Tags are inferred from passages and inherited by their verses or paragraphs. Low evidence and insufficient text remain visible. Reference authors are used only for validation.</div>
 <div id="estimate-warnings" aria-live="polite"></div>
-<nav class="tabs" role="tablist" aria-label="Analysis views"><button type="button" class="tab" id="tab-text" role="tab" aria-controls="panel-text" aria-selected="true" data-tab="text">Text explorer</button><button type="button" class="tab" id="tab-hierarchy" role="tab" aria-controls="panel-hierarchy" aria-selected="false" data-tab="hierarchy">Hierarchy</button><button type="button" class="tab" id="tab-contributions" role="tab" aria-controls="panel-contributions" aria-selected="false" data-tab="contributions">Contributions</button><button type="button" class="tab" id="tab-authors" role="tab" aria-controls="panel-authors" aria-selected="false" data-tab="authors">Author groups</button><button type="button" class="tab" id="tab-benchmark" role="tab" aria-controls="panel-benchmark" aria-selected="false" data-tab="benchmark">English validation</button><button type="button" class="tab" id="tab-method" role="tab" aria-controls="panel-method" aria-selected="false" data-tab="method">About the analysis</button></nav>
+<nav class="tabs" role="tablist" aria-label="Analysis views"><button type="button" class="tab" id="tab-text" role="tab" aria-controls="panel-text" aria-selected="true" data-tab="text">Text explorer</button><button type="button" class="tab" id="tab-hierarchy" role="tab" aria-controls="panel-hierarchy" aria-selected="false" data-tab="hierarchy">Hierarchy</button><button type="button" class="tab" id="tab-contributions" role="tab" aria-controls="panel-contributions" aria-selected="false" data-tab="contributions">Contributions</button><button type="button" class="tab" id="tab-authors" role="tab" aria-controls="panel-authors" aria-selected="false" data-tab="authors">Author groups</button><button type="button" class="tab" id="tab-works" role="tab" aria-controls="panel-works" aria-selected="false" data-tab="works">By author</button><button type="button" class="tab" id="tab-benchmark" role="tab" aria-controls="panel-benchmark" aria-selected="false" data-tab="benchmark">English validation</button><button type="button" class="tab" id="tab-method" role="tab" aria-controls="panel-method" aria-selected="false" data-tab="method">About the analysis</button></nav>
 <div id="selection-summary" class="trail" aria-live="polite"></div>
 <section class="panel" id="panel-text" role="tabpanel" aria-labelledby="tab-text"><div class="panel-heading"><div><h2>Every text, an attribution</h2><p class="muted">Inspect verse tags, supporting evidence, and matching voices.</p></div></div><div class="toolbar"><div class="search"><label for="search">Search text, title, reference, or inferred author</label><input id="search" type="search" placeholder="Search the selected corpus…"></div><div class="size"><label for="page-size">Per page</label><select id="page-size"><option>25</option><option selected>50</option><option>100</option></select></div></div><div class="panelbox"><div class="table-wrap"><table class="text-table"><thead><tr><th>Text reference</th><th>Inferred author</th><th>Verse / paragraph</th></tr></thead><tbody id="verse-rows"></tbody></table></div><div id="verse-empty" hidden class="empty"><strong>No matching text</strong>Try a broader filter or a different search.</div><div class="pagination"><span class="count" id="verse-count" aria-live="polite"></span><div class="page-buttons"><button type="button" class="button" id="previous">← Previous</button><button type="button" class="button" id="next">Next →</button></div></div></div></section>
 <section class="panel" id="panel-hierarchy" role="tabpanel" aria-labelledby="tab-hierarchy" hidden><div class="panel-heading"><div><h2>From language to verse</h2><p class="muted">Open a row to move down the hierarchy. Counts include only text matching your filters.</p></div><div class="hierarchy-level"><label for="level">Rollup level</label><select id="level"><option value="language">Language</option><option value="collection">Collection</option><option value="book">Book</option><option value="chapter">Chapter</option><option value="verse">Verse / paragraph</option></select></div></div><div id="trail" class="trail"></div><div class="panelbox"><div class="table-wrap"><table><thead><tr><th>Text unit</th><th>Verses / paragraphs</th><th>Tagged</th><th>Authors</th><th>Dominant group</th></tr></thead><tbody id="rollup-rows"></tbody></table></div><div id="rollup-empty" hidden class="empty"><strong>No rollups at this level</strong>Choose another level or broaden the filters.</div><div class="pagination"><span class="count" id="rollup-count"></span><div class="page-buttons"><button type="button" class="button" id="rollup-previous">← Previous</button><button type="button" class="button" id="rollup-next">Next →</button></div></div></div></section>
@@ -133,7 +134,13 @@ _HTML_START = r'''<!doctype html>
 <div id="contribution-charts" aria-live="polite"></div>
 <p class="footer-note">Shares include unassigned text and use all text within the selected language, collection, book and chapter. Selecting an author highlights its bar; text search and evidence filters do not change these totals. Low-evidence assignments remain included. Words are the word tokens counted by the analysis.</p>
 </section>
-<section class="panel" id="panel-authors" role="tabpanel" aria-labelledby="tab-authors" hidden><div class="panel-heading"><div><h2>Follow an inferred voice</h2><p class="muted">Author groups represented in your filtered corpus. Select a group to see its matching text.</p></div></div><div class="panelbox"><div class="table-wrap"><table><thead><tr><th>Inferred author</th><th>Language</th><th>Verses / paragraphs</th><th>Books</th><th>Collections</th><th>Words</th></tr></thead><tbody id="author-rows"></tbody></table></div><div id="author-empty" hidden class="empty"><strong>No inferred author groups</strong>No assigned text matches the current filters.</div><div class="pagination"><span class="count" id="author-count"></span><div class="page-buttons"><button type="button" class="button" id="author-previous">← Previous</button><button type="button" class="button" id="author-next">Next →</button></div></div></div><p class="footer-note">Counts use only matching text in the current corpus filters and search. Words count each verse’s own text once.</p></section>
+<section class="panel" id="panel-authors" role="tabpanel" aria-labelledby="tab-authors" hidden><div class="panel-heading"><div><h2>Follow an inferred voice</h2><p class="muted">Author groups represented in your filtered corpus. Select a group to see its matching text.</p></div></div><div class="panelbox"><div class="table-wrap"><table><thead><tr><th>Inferred author</th><th>Language</th><th>Verses / paragraphs</th><th>Books</th><th>Collections</th><th>Words</th><th>Explore</th></tr></thead><tbody id="author-rows"></tbody></table></div><div id="author-empty" hidden class="empty"><strong>No inferred author groups</strong>No assigned text matches the current filters.</div><div class="pagination"><span class="count" id="author-count"></span><div class="page-buttons"><button type="button" class="button" id="author-previous">← Previous</button><button type="button" class="button" id="author-next">Next →</button></div></div></div><p class="footer-note">Counts use only matching text in the current corpus filters and search. Words count each verse’s own text once.</p></section>
+<section class="panel" id="panel-works" role="tabpanel" aria-labelledby="tab-works" hidden>
+<div class="panel-heading"><div><h2>Text by author</h2><p class="muted">Follow one inferred author through every collection, book, chapter, and verse in your filtered corpus.</p></div></div>
+<div class="works-picker"><label for="works-author">Browse author</label><select id="works-author"></select></div>
+<div id="works-overview" aria-live="polite"></div><div id="works-tree"></div>
+<p class="footer-note">Open a collection, then a book and chapter to read its assigned verses or paragraphs. All corpus filters and search remain active. Clear filters in the sidebar to see an author's wider coverage.</p>
+</section>
 <section class="panel" id="panel-benchmark" role="tabpanel" aria-labelledby="tab-benchmark" hidden><h2>The English reference test</h2><p class="muted">Compare inferred groups with the known English author labels. The reference corpus has 13 expected authors when complete.</p><div id="benchmark-content"></div></section>
 <section class="panel" id="panel-method" role="tabpanel" aria-labelledby="tab-method" hidden><h2>Estimates, with evidence</h2><p class="muted">A separate authorship model is fitted for each language.</p><div id="source-coverage"></div><div id="language-cards" class="language-grid"></div><div class="method-grid"><article class="method-card"><h3>How to read a tag</h3><p>An author tag identifies an inferred writing-style group. It does not establish a historical author’s identity. The same tag in one language points to text assigned to the same group, including across collections.</p><p>Short verses and English paragraphs borrow evidence from their surrounding passage. A passage can contain several writers; its inherited tag can miss a change within that passage.</p></article><article class="method-card"><h3>How to read uncertainty</h3><p>“Low evidence” marks an attribution that needs caution. “Insufficient text” has no supported attribution. A distance margin compares a passage’s distance to its assigned group’s center with its nearest alternative center; it is not a probability of authorship.</p><p>Genre, translation, period, editing, and shared quotations can produce style differences or similarities. Estimated group counts therefore need external validation.</p></article></div><details class="method-card"><summary>Analysis configuration</summary><pre id="configuration"></pre></details></section>
 <p class="footer-note">Portable report · Works offline · Use the CSV exports for complete verse-level and hierarchy results.</p>
@@ -153,6 +160,7 @@ const count = value => new Intl.NumberFormat().format(value || 0);
 const str = value => value == null ? '' : String(value);
 const state = {language:'', collection:'', book:'', chapter:'', author:'', status:'', query:'', focusId:'', page:0, rollupPage:0, authorPage:0, size:50, level:'language', tab:'text'};
 let filtered = verses, filteredRollups = [], filteredAuthors = [];
+let worksAuthorKey='', worksSource=null;
 function el(tag, text, cls) { const node = document.createElement(tag); if(text != null) node.textContent = str(text); if(cls) node.className = cls; return node; }
 function unique(rows, key) { return Array.from(new Set(rows.map(row => str(row[key])).filter(Boolean))).sort((a,b) => a.localeCompare(b,undefined,{numeric:true})); }
 function selectOptions(id, values, label, display) { const select = $(id); select.replaceChildren(); const all = el('option', label); all.value=''; select.append(all); if(state[id] && !values.includes(state[id]))values=[...values,state[id]]; for(const value of values){ const option=el('option',display ? display(value) : value); option.value=value; select.append(option); } select.value=state[id]; }
@@ -284,14 +292,14 @@ function renderEstimateWarnings(){
  if(unestablished.length)notes.push('Estimate stability not established: '+unestablished.join(', ')+'. More evidence is needed.');
  if(notes.length)target.append(el('p',notes.join(' '),'notice'));
 }
-function refresh(){filtered=selectCorpus(verses,state);renderMetrics();renderEstimateWarnings();renderVerses();renderRollups();renderAuthors();renderContributions();renderSelection();}
+function refresh(){filtered=selectCorpus(verses,state);renderMetrics();renderEstimateWarnings();renderVerses();renderRollups();renderAuthors();renderContributions();renderSelection();renderAuthorWorks();}
 function renderSelection(){
  const summary=$('selection-summary');summary.replaceChildren();
  if(state.query){summary.append(el('span','Search: '+state.query));const clear=el('button','Clear search');clear.type='button';clear.addEventListener('click',()=>{clearTimeout(searchTimer);state.query='';$('search').value='';resetPages();refresh();});summary.append(clear);}
  if(state.focusId){summary.append(el('span','Text: '+state.focusId));const clear=el('button','Show all matching text');clear.type='button';clear.addEventListener('click',()=>{state.focusId='';resetPages();refresh();});summary.append(clear);}
- summary.hidden=!['text','hierarchy','authors'].includes(state.tab) || !summary.childNodes.length;
+ summary.hidden=!['text','hierarchy','authors','works'].includes(state.tab) || !summary.childNodes.length;
 }
-function activate(tab){state.tab=tab;for(const button of document.querySelectorAll('[data-tab]')){const selected=button.dataset.tab===tab;button.setAttribute('aria-selected',str(selected));button.tabIndex=selected?0:-1;$('panel-'+button.dataset.tab).hidden=!selected;}renderSelection();}
+function activate(tab){state.tab=tab;for(const button of document.querySelectorAll('[data-tab]')){const selected=button.dataset.tab===tab;button.setAttribute('aria-selected',str(selected));button.tabIndex=selected?0:-1;$('panel-'+button.dataset.tab).hidden=!selected;}renderSelection();renderAuthorWorks();}
 function drill(row){Object.assign(state,drillSelection(state,row));$('level').value=state.level;refreshOptions();resetPages();refresh();if(row.level==='verse')activate('text');}
 function rollupTitle(row){if(row.level==='language')return row.language;if(row.level==='collection')return row.collection;if(row.level==='book'){const found=bookTitles.get(str(row.language)+'\u0000'+str(row.collection)+'\u0000'+str(row.book));return found || row.book;}if(row.level==='chapter')return 'Chapter '+str(row.chapter);return reference(row);}
 const bookTitles=new Map(verses.map(row=>[str(row.language)+'\u0000'+str(row.collection)+'\u0000'+str(row.book),row.book_title || row.book]));
@@ -349,7 +357,84 @@ function renderRollups(){
   button.title='Change hierarchy level while keeping the current filters';button.addEventListener('click',()=>showHierarchy(['collection','book','chapter','verse'][index]));trail.append(button);
  }
 }
-function renderAuthors(){filteredAuthors=authorSummary(filtered);const start=state.authorPage*state.size,fragment=document.createDocumentFragment();for(const row of filteredAuthors.slice(start,start+state.size)){const tr=el('tr'),tag=el('td');tag.append(authorButton(row.author_id,row.language));tr.append(tag,el('td',row.language),el('td',count(row.verse_count)),el('td',count(row.book_count)),el('td',count(row.collection_count)),el('td',count(row.token_count)));fragment.append(tr);}$('author-rows').replaceChildren(fragment);$('author-empty').hidden=filteredAuthors.length>0;$('author-count').textContent=pageInfo(filteredAuthors.length,state.authorPage,state.size);$('author-previous').disabled=state.authorPage===0;$('author-next').disabled=(state.authorPage+1)*state.size>=filteredAuthors.length;}
+function renderAuthors(){filteredAuthors=authorSummary(filtered);const start=state.authorPage*state.size,fragment=document.createDocumentFragment();for(const row of filteredAuthors.slice(start,start+state.size)){const tr=el('tr'),tag=el('td');tag.append(authorButton(row.author_id,row.language));tr.append(tag,el('td',row.language),el('td',count(row.verse_count)),el('td',count(row.book_count)),el('td',count(row.collection_count)),el('td',count(row.token_count)));const explore=el('td'),button=el('button','Browse works','button');button.type='button';button.setAttribute('aria-label','Browse works by '+row.author_id+' in '+row.language);button.addEventListener('click',()=>{worksAuthorKey=JSON.stringify([str(row.language),str(row.author_id)]);worksSource=null;activate('works');});explore.append(button);tr.append(explore);fragment.append(tr);}$('author-rows').replaceChildren(fragment);$('author-empty').hidden=filteredAuthors.length>0;$('author-count').textContent=pageInfo(filteredAuthors.length,state.authorPage,state.size);$('author-previous').disabled=state.authorPage===0;$('author-next').disabled=(state.authorPage+1)*state.size>=filteredAuthors.length;}
+function authorWorks(rows,language,author){
+ const result={language,author_id:author,verse_count:0,token_count:0,collection_count:0,book_count:0,chapter_count:0,collections:[]},collections=new Map();
+ for(const row of rows){
+  if(!row.author_id || str(row.language)!==str(language) || str(row.author_id)!==str(author))continue;
+  const collectionKey=str(row.collection),bookKey=str(row.book),chapterKey=str(row.chapter);
+  if(!collections.has(collectionKey))collections.set(collectionKey,{collection:row.collection,verse_count:0,token_count:0,book_count:0,chapter_count:0,books:new Map()});
+  const collection=collections.get(collectionKey);
+  if(!collection.books.has(bookKey))collection.books.set(bookKey,{book:row.book,book_title:row.book_title || row.book,verse_count:0,token_count:0,chapter_count:0,chapters:new Map()});
+  const book=collection.books.get(bookKey);
+  if(!book.chapters.has(chapterKey))book.chapters.set(chapterKey,{chapter:row.chapter,verse_count:0,token_count:0,verses:[]});
+  const chapter=book.chapters.get(chapterKey),words=typeof row.token_count==='number' && Number.isFinite(row.token_count)?row.token_count:0;
+  for(const group of [result,collection,book,chapter]){group.verse_count++;group.token_count+=words;}
+  chapter.verses.push(row);
+ }
+ const natural=(a,b)=>str(a).localeCompare(str(b),undefined,{numeric:true});
+ result.collections=Array.from(collections.values()).sort((a,b)=>natural(a.collection,b.collection)).map(collection=>{
+  collection.books=Array.from(collection.books.values()).sort((a,b)=>natural(a.book_title,b.book_title)).map(book=>{
+   book.chapters=Array.from(book.chapters.values()).sort((a,b)=>natural(a.chapter,b.chapter));
+   book.chapter_count=book.chapters.length;collection.chapter_count+=book.chapter_count;
+   return book;
+  });
+  collection.book_count=collection.books.length;result.book_count+=collection.book_count;result.chapter_count+=collection.chapter_count;
+  return collection;
+ });
+ result.collection_count=result.collections.length;
+ return result;
+}
+function worksBranch(title,description,kind,build){
+ const details=el('details',null,'works-branch works-'+kind),summary=el('summary');
+ summary.append(el('span',title),el('span',description,'tiny'));details.append(summary);
+ let loaded=false;details.addEventListener('toggle',()=>{
+  if(!details.open || loaded)return;loaded=true;
+  const children=el('div',null,'works-children');build(children);details.append(children);
+ });
+ return details;
+}
+function renderWorksChapter(container,chapter){
+ const wrap=el('div',null,'table-wrap'),table=el('table',null,'text-table'),head=el('thead'),heading=el('tr'),body=el('tbody');
+ for(const label of ['Text reference','Inferred author','Verse / paragraph'])heading.append(el('th',label));
+ head.append(heading);table.append(head,body);wrap.append(table);
+ const footer=el('div',null,'works-more'),shown=el('span',null,'count'),more=el('button','Show more verses / paragraphs','button');more.type='button';
+ let visible=0;function appendPage(){
+  const next=Math.min(visible+50,chapter.verses.length),fragment=document.createDocumentFragment();
+  for(const row of chapter.verses.slice(visible,next))fragment.append(verseRow(row));
+  body.append(fragment);visible=next;shown.textContent='Showing '+count(visible)+' of '+count(chapter.verses.length)+' verses / paragraphs';more.hidden=visible>=chapter.verses.length;
+ }
+ more.addEventListener('click',appendPage);footer.append(shown,more);container.append(wrap,footer);appendPage();
+}
+function renderAuthorWorks(){
+ if(state.tab!=='works' || worksSource===filtered)return;
+ worksSource=filtered;
+ const picker=$('works-author'),overview=$('works-overview'),tree=$('works-tree');picker.replaceChildren();overview.replaceChildren();tree.replaceChildren();
+ const choices=filteredAuthors.map(row=>({row,key:JSON.stringify([str(row.language),str(row.author_id)])}));
+ if(!choices.length){
+  worksAuthorKey='';const option=el('option','No authors in this selection');option.value='';picker.append(option);picker.disabled=true;
+  const empty=el('div',null,'panelbox empty');empty.append(el('strong','No assigned text in this selection'),'Try broadening your corpus filters or clearing the search.');overview.append(empty);return;
+ }
+ picker.disabled=false;
+ if(!choices.some(choice=>choice.key===worksAuthorKey))worksAuthorKey=choices[0].key;
+ for(const {row,key} of choices){const option=el('option',row.author_id+' · '+row.language+' · '+count(row.verse_count)+' text units');option.value=key;picker.append(option);}
+ picker.value=worksAuthorKey;
+ const {row:selected}=choices.find(choice=>choice.key===worksAuthorKey),works=authorWorks(filtered,selected.language,selected.author_id);
+ const card=el('article',null,'works-overview'),counts=el('div',null,'works-counts');card.append(el('h3',works.author_id),el('p','Language: '+works.language+' · Text assigned to this inferred author within your current filters.','works-caption'));
+ for(const [label,value] of [['Collections',works.collection_count],['Books',works.book_count],['Chapters',works.chapter_count],['Verses / paragraphs',works.verse_count],['Words',works.token_count]]){
+  const item=el('div');item.append(el('strong',count(value)),el('span',label));counts.append(item);
+ }
+ card.append(counts);overview.append(card);
+ for(const collection of works.collections){
+  tree.append(worksBranch(collection.collection || 'Collection not specified',count(collection.book_count)+' books · '+count(collection.chapter_count)+' chapters · '+count(collection.verse_count)+' verses / paragraphs','collection',children=>{
+   for(const book of collection.books){
+    children.append(worksBranch(book.book_title || book.book || 'Book not specified',count(book.chapter_count)+' chapters · '+count(book.verse_count)+' verses / paragraphs','book',chapters=>{
+     for(const chapter of book.chapters)chapters.append(worksBranch(chapter.chapter==null?'Chapter not specified':'Chapter '+chapter.chapter,count(chapter.verse_count)+' verses / paragraphs · '+count(chapter.token_count)+' words','chapter',verses=>renderWorksChapter(verses,chapter)));
+    }));
+   }
+  }));
+ }
+}
 function humanize(key){return key.replace(/_/g,' ').replace(/\b\w/g,letter=>letter.toUpperCase());}
 function renderDiscovery(container){
  const validation=data.discovery_validation;
@@ -400,6 +485,7 @@ function resetAll(){for(const key of ['language','collection','book','chapter','
 for(const key of ['language','collection','book','chapter','author','status'])$(key).addEventListener('change',()=>{state[key]=$(key).value;state.focusId='';const keys=['language','collection','book','chapter'];if(keys.includes(key)){for(const child of keys.slice(keys.indexOf(key)+1))state[child]='';if(key==='language')state.author='';}refreshOptions();resetPages();refresh();});
 let searchTimer;$('search').addEventListener('input',()=>{clearTimeout(searchTimer);searchTimer=setTimeout(()=>{state.query=$('search').value;state.focusId='';resetPages();refresh();},200);});
 $('contribution-measure').addEventListener('change',renderContributions);
+$('works-author').addEventListener('change',()=>{worksAuthorKey=$('works-author').value;worksSource=null;renderAuthorWorks();});
 $('page-size').addEventListener('change',()=>{state.size=Number($('page-size').value);resetPages();refresh();});$('reset').addEventListener('click',resetAll);$('previous').addEventListener('click',()=>{state.page--;renderVerses();});$('next').addEventListener('click',()=>{state.page++;renderVerses();});$('level').addEventListener('change',()=>showHierarchy($('level').value));$('rollup-previous').addEventListener('click',()=>{state.rollupPage--;renderRollups();});$('rollup-next').addEventListener('click',()=>{state.rollupPage++;renderRollups();});$('author-previous').addEventListener('click',()=>{state.authorPage--;renderAuthors();});$('author-next').addEventListener('click',()=>{state.authorPage++;renderAuthors();});for(const button of document.querySelectorAll('[data-tab]')){button.addEventListener('click',()=>activate(button.dataset.tab));button.addEventListener('keydown',event=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();const tabs=Array.from(document.querySelectorAll('[data-tab]'));const current=tabs.indexOf(button);const index=event.key==='Home'?0:event.key==='End'?tabs.length-1:(current+(event.key==='ArrowRight'?1:tabs.length-1))%tabs.length;activate(tabs[index].dataset.tab);tabs[index].focus();});}
 refreshOptions();renderBenchmark();renderSourceCoverage();renderMethod();refresh();activate('text');
 </script>
