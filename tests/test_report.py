@@ -188,3 +188,61 @@ def test_on_demand_verse_rollups_preserve_counts_and_references():
         assert row["low_evidence_verse_count"] == int(original["status"] == "low_evidence")
         assert row["author_ids"] == ([original["author_id"]] if original["author_id"] else [])
         assert row["author_counts"] == ({original["author_id"]: 1} if original["author_id"] else {})
+
+
+def _contributions(rows, selection=None, measure='words'):
+    if shutil.which('node') is None:
+        pytest.skip('Node is optional for browser-code validation')
+    function = re.search(r'function contributionSummary\(.*?\n}\n', _HTML_END, re.DOTALL).group(0)
+    program = function + '\nprocess.stdout.write(JSON.stringify(contributionSummary(' + ','.join(
+        json.dumps(value) for value in (rows, selection or {}, measure)) + ')));'
+    return json.loads(subprocess.run(['node', '-e', program], check=True,
+                                    text=True, capture_output=True).stdout)
+
+
+def test_contribution_shares_count_verse_words_once_and_include_unassigned():
+    base = dict(language='eng', collection='C', book='B', chapter='1', evidence_tokens=1200)
+    rows = [dict(base, author_id='A', token_count=100, status='low_evidence'),
+            dict(base, author_id='B', token_count=50, status='assigned'),
+            dict(base, author_id=None, token_count=50, status='insufficient_text')]
+    # Author/text/evidence selection highlights a contribution; it must not
+    # change the full-scope denominator or drop unassigned/uncertain text.
+    result = _contributions(rows, {'author': 'A', 'query': 'no match', 'status': 'assigned'})[0]
+    assert result['total'] == 200  # Not three copies of the 1200-token context.
+    assert {x['author']: x['share'] for x in result['authors']} == {'A': .5, 'B': .25, None: .25}
+    assert result['authors'][0]['lowEvidenceUnits'] == 1
+    by_verse = _contributions(rows, measure='verses')[0]
+    assert by_verse['total'] == 3
+    assert all(x['share'] == pytest.approx(1/3) for x in by_verse['authors'])
+
+
+@pytest.mark.parametrize(('selection', 'expected'), [
+    ({'language': 'eng'}, 150),
+    ({'language': 'eng', 'collection': 'C1'}, 100),
+    ({'language': 'eng', 'collection': 'C1', 'book': 'B1'}, 60),
+    ({'language': 'eng', 'collection': 'C1', 'book': 'B1', 'chapter': '1'}, 30),
+])
+def test_contributions_follow_each_hierarchy_level(selection, expected):
+    rows = [dict(language='eng', collection='C1', book='B1', chapter='1', author_id='A', token_count=10),
+            dict(language='eng', collection='C1', book='B1', chapter='1', author_id='B', token_count=20),
+            dict(language='eng', collection='C1', book='B1', chapter='2', author_id='A', token_count=30),
+            dict(language='eng', collection='C1', book='B2', chapter='1', author_id='A', token_count=40),
+            dict(language='eng', collection='C2', book='B3', chapter='1', author_id='A', token_count=50),
+            dict(language='grc', collection='C1', book='B1', chapter='1', author_id='A', token_count=999)]
+    result = _contributions(rows, selection)
+    assert len(result) == 1 and result[0]['language'] == 'eng'
+    assert result[0]['total'] == expected
+    assert sum(x['share'] for x in result[0]['authors']) == pytest.approx(1)
+    all_languages = _contributions(rows)
+    assert [(x['language'], x['total']) for x in all_languages] == [('eng', 150), ('grc', 999)]
+
+
+def test_contributions_handle_missing_counts_zero_words_and_empty_scope():
+    rows = [dict(language='eng', author_id=None, token_count=0),
+            dict(language='eng', author_id='A', evidence_tokens=1200)]
+    result = _contributions(rows)[0]
+    assert result['total'] == 0
+    assert result['missingWords'] == 1
+    assert all(x['share'] == 0 for x in result['authors'])
+    assert _contributions(rows, {'language': 'grc'}) == []
+    assert _contributions(rows, measure='verses')[0]['total'] == 2

@@ -69,6 +69,13 @@ Search verse text or filter by an inferred author to find related passages acros
 books in that language. English prose uses paragraphs as verse-like text units;
 the input adapter preserves chapter headings where available.
 
+The **Contributions** tab charts each inferred author's share of the selected
+language, collection, book or chapter. Switch between word counts and
+verse/paragraph counts. Percentages include unassigned text; words count each
+verse's own tokens once, without repeating its supporting passage. Selecting an
+author highlights its bar while keeping the full selection as the denominator.
+Text search and evidence filters do not change contribution totals.
+
 ## Analysis
 
 Each language is fitted independently. Whole verses are pooled into disjoint
