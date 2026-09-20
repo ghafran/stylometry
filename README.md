@@ -66,11 +66,11 @@ also shows this scope. A custom JSONL corpus analyzes every supplied row directl
 
 In the explorer, choose a language and drill into collections, books and chapters.
 Search verse text or filter by an inferred author to find related passages across
-books in that language. Text explorer, Hierarchy, Author groups, and By author share the
+books in that language. Text explorer, Authorship map, Author groups, and By author share the
 corpus filters and search. Their counts are recomputed from matching text, even
 when viewing a parent rollup with a chapter or evidence filter selected. Opening
-an author or hierarchy row keeps existing filters; hierarchy breadcrumbs change
-the displayed level without broadening the selection. Use the sidebar or Reset
+an author keeps existing filters. The map has its own drill path; breadcrumbs
+return to earlier graph levels inside the same corpus filters. Use the sidebar or Reset
 filters to broaden the corpus. English prose uses paragraphs as verse-like text units;
 the input adapter preserves chapter headings where available.
 
@@ -80,12 +80,15 @@ or use **Browse works** in Author groups. Expand a chapter to read the text and
 its evidence; longer chapters offer **Show more** until every matching unit is
 visible. Counts and the outline respect all active corpus filters and search.
 
-The **Contributions** tab charts each inferred author's share of the selected
-language, collection, book or chapter. Switch between word counts and
-verse/paragraph counts. Percentages include unassigned text; words count each
-verse's own tokens once, without repeating its supporting passage. Selecting an
-author highlights its bar while keeping the full selection as the denominator.
-Text search and evidence filters do not change contribution totals.
+The **Authorship map** combines hierarchy navigation and contribution graphs.
+Each language, collection, book, chapter, or verse has a bar split by inferred
+author. Select a bar to drill down; expand its author breakdown for exact counts
+and shares. Switch between words and verse/paragraph counts. Unassigned text
+remains in the denominator, and words count each verse's own tokens once.
+**Author totals for this selection** shows an overall bar chart whose author
+buttons highlight the corresponding segments without changing the totals.
+All corpus filters and search apply to both charts. **Open matching text** carries
+the current graph location and optional highlighted author into Text explorer.
 
 ## Analysis
 
