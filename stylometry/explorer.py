@@ -318,7 +318,9 @@ def _pack_authors(parts: list[dict], known: list[str]) -> dict:
     well this procedure recovers them, and where they are not it is null, which is most of the time.
     """
     return {"an": parts[0]["n_units"] if parts else 0,
-            "arange": parts[0]["range"] if parts else [],
+            # Per strategy, not from the first one: a strategy that finds no variation between these
+            # books offers no range at all, and must not inherit a slider from one that does.
+            "arange": [p["range"] for p in parts],
             "al": [{str(k): v for k, v in p["labels"].items()} for p in parts],
             "af": [author_fit(p["labels"], known) for p in parts],
             "aknown": known if any(known) else []}
@@ -460,8 +462,11 @@ def build(verses: list[dict], language: str, seed: int = 0, progress=print,
         # handful of collections the language page lists, which is a much weaker thing.
         "book_groups": _pack([groups[k]["language_books"] for k in keys]),
         "collection_groups": _pack([groups[k]["collections"] for k in keys]),
-        "author_groups": _pack_authors([groups[k]["author_language"] for k in keys],
-                                       [w["author"] for c in tree for w in c["children"]]),
+        # Carries the inferred partition as well as the settable ones, the way a collection node does,
+        # so the language page opens at the same count the front page reports.
+        "author_groups": {**_pack([groups[k]["language_books"] for k in keys]),
+                          **_pack_authors([groups[k]["author_language"] for k in keys],
+                                          [w["author"] for c in tree for w in c["children"]])},
         "group_reasons": GROUP_REASONS,
         "author_note": "At the book level the count can be overridden: `al` holds a partition at "
                        "every count from one to the number of books. The inferred count is not "

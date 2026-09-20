@@ -859,8 +859,10 @@ def test_the_author_view_offers_more_hands_than_the_style_grouping_will_ever_rep
                  progress=lambda m: None, workers=1)
     groups = data["author_groups"]
     assert groups["an"] == 15
-    low, high = groups["arange"]
+    assert len(groups["arange"]) == len(data["keys"]), "one offered range per strategy"
+    low, high = groups["arange"][data["keys"].index("function_words")]
     assert low == 1 and high > GROUP_MAX_K, "one hand is offered, and the top is not the old ceiling"
+    assert "gk" in groups and "gsz" in groups, "the language node also carries the inferred partition"
     for key_labels in groups["al"]:
         for count, labels in key_labels.items():
             assert len(labels) == 15, "every book is placed at every offered count"

@@ -272,7 +272,7 @@ const assumed = {};
 
 const authorsOf = node => ({
   n: (node && node.an) || 0,
-  range: (node && node.arange) || [],
+  range: (node && node.arange && node.arange[idx()]) || [],
   labels: node && node.al ? node.al[idx()] : null,
   fit: node && node.af ? node.af[idx()] : null,
   known: (node && node.aknown) || [],
@@ -423,7 +423,7 @@ def _author_card(data: dict, i: int) -> dict | None:
     itself offers. Nothing here trusts that number - see `explorer.author_partitions`.
     """
     groups = data["author_groups"]
-    span = groups.get("arange") or []
+    span = groups["arange"][i] if groups.get("arange") else []
     if not span:
         return None
     fit = groups["af"][i]
