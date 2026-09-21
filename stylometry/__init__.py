@@ -1,3 +1,2 @@
-"""Verse-level stylometry and author discovery for Codex Sinaiticus and early Christian apocrypha."""
-
-__version__ = "0.1.0"
+"""Authorship discovery, evaluated against whole held-out reference works."""
+__version__ = "0.2.0"

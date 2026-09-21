@@ -1,0 +1,82 @@
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+.pytest_cache/
+.env
+.coverage
+
+# Calculated artifacts. Everything here is rebuilt by the pipeline from the sources below, so it is
+# never checked in: verses.jsonl, witnesses.jsonl, the AI profiles and every report and site.
+data/processed/
+output*/
+
+# ---------------------------------------------------------------------------------------------
+# The scripture sources under data/raw/ ARE checked in, so the corpus can be rebuilt from this
+# repository alone. See data/raw/SOURCES.md for the licence and attribution each one carries.
+#
+# What stays out is only material no loader reads: the working copies the downloads arrived in,
+# superseded editions, and the Text-Fabric features the Dead Sea Scrolls loader never opens.
+# Trimming those takes data/raw from 770 MB to the 234 MB checked in without changing a single parsed unit.
+# ---------------------------------------------------------------------------------------------
+
+# Git working copies of upstream repositories; the files themselves are checked in beside them.
+data/raw/**/.git/
+data/raw/**/.gitignore
+data/raw/**/Pipfile
+data/raw/**/Pipfile.lock
+
+# Codex Sinaiticus: the loader reads sinaiticus_full_v195.xml. The archive holds superseded releases
+# and beta-versions is marked not for release by the project.
+data/raw/codex-sinaiticus/archive/
+data/raw/codex-sinaiticus/beta-versions_not-for-release/
+
+# Apostolic Fathers: the loader reads texts/. The rest is the upstream project's build machinery,
+# intermediate conversions and a second analytical edition.
+data/raw/apostolic-fathers/comparison/
+data/raw/apostolic-fathers/docs/
+data/raw/apostolic-fathers/logos/
+data/raw/apostolic-fathers/raw-ccel-lake/
+data/raw/apostolic-fathers/raw-gcelano-analysis/
+data/raw/apostolic-fathers/raw-ogl-lake/
+data/raw/apostolic-fathers/scripts/
+data/raw/apostolic-fathers/structured/
+
+# The download archives themselves, once unpacked.
+data/raw/**/*.zip
+
+# Dead Sea Scrolls: keep the features the loader needs plus the ones otext.tf names, which
+# Text-Fabric loads to satisfy its text formats. The other 49 features are morphological and
+# lexical layers this project never touches.
+data/raw/dss/tf/2.0.1/*.tf
+!data/raw/dss/tf/2.0.1/after.tf
+!data/raw/dss/tf/2.0.1/biblical.tf
+!data/raw/dss/tf/2.0.1/book.tf
+!data/raw/dss/tf/2.0.1/book_etcbc.tf
+!data/raw/dss/tf/2.0.1/chapter.tf
+!data/raw/dss/tf/2.0.1/fragment.tf
+!data/raw/dss/tf/2.0.1/full.tf
+!data/raw/dss/tf/2.0.1/fulle.tf
+!data/raw/dss/tf/2.0.1/fullo.tf
+!data/raw/dss/tf/2.0.1/glex.tf
+!data/raw/dss/tf/2.0.1/glexe.tf
+!data/raw/dss/tf/2.0.1/glexo.tf
+!data/raw/dss/tf/2.0.1/glyph.tf
+!data/raw/dss/tf/2.0.1/glyphe.tf
+!data/raw/dss/tf/2.0.1/glypho.tf
+!data/raw/dss/tf/2.0.1/lang.tf
+!data/raw/dss/tf/2.0.1/lex.tf
+!data/raw/dss/tf/2.0.1/lexe.tf
+!data/raw/dss/tf/2.0.1/lexo.tf
+!data/raw/dss/tf/2.0.1/line.tf
+!data/raw/dss/tf/2.0.1/morpho.tf
+!data/raw/dss/tf/2.0.1/oslots.tf
+!data/raw/dss/tf/2.0.1/otext.tf
+!data/raw/dss/tf/2.0.1/otype.tf
+!data/raw/dss/tf/2.0.1/punc.tf
+!data/raw/dss/tf/2.0.1/punce.tf
+!data/raw/dss/tf/2.0.1/punco.tf
+!data/raw/dss/tf/2.0.1/rec.tf
+!data/raw/dss/tf/2.0.1/scroll.tf
+!data/raw/dss/tf/2.0.1/type.tf
+!data/raw/dss/tf/2.0.1/verse.tf

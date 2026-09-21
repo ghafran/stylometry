@@ -27,19 +27,24 @@ the people and institutions named. The only files this project generates are und
 | `english/` | Federalist Papers, 15 novels, 20 cross-genre works | Public domain in the United States | Project Gutenberg. The texts are out of copyright; PG's own licence covers its trademark and its front and back matter, which the loader strips and this project does not redistribute. |
 | `benchmarks/` | Reference works by catalogued authors | per-manifest, recorded with each entry | See `benchmarks/*_manifest.json` in the repository root |
 
-## What the Bukhari loader keeps
+## What the hadith loaders keep
 
-`data/raw/bukhari/` holds the whole collection, chain and all, exactly as published. The loader keeps
-only the *matn*, the body of each report, and drops the *isnad*, the chain of transmitters prefixed to
-it — 28% of the text. That is a judgement made in code, in `stylometry/corpus/bukhari.py`, not an edit
-to the file on disk: the raw text stays complete so the decision can be checked or reversed.
+`data/raw/bukhari/` and `data/raw/qudsi/` hold the complete reports as published.
+The fresh importers preserve the entire transmitted report, including the isnad,
+framing, and citation notes. They do not infer a speaker boundary or assume that
+quoted speech identifies the historical author. All numbered Bukhari reports are
+retained, including records in unassigned book 0 and an empty source report, which
+receives an insufficient-text result. Qudsi HTML line-break tags are removed.
 
-## What the Hadith Qudsi loader keeps
+## Witness and fragment policy
 
-The same treatment as Bukhari — matn only, chain dropped — plus the closing "narrated by X" citation
-this edition appends to 39 of its 40 reports. The collection is small on purpose and is labelled so:
-40 reports, about 2,400 tokens, one work. It is there as a third category beside the Qur'an and
-Bukhari, not as something to cluster.
+The import parses every supported source, then chooses one primary witness per
+language and book. A preferred manuscript must have at least 90% of the fullest
+witness's token coverage. Every alternate witness and its unit count is recorded
+in `data/processed/build_report.json`; alternate editions are not counted as
+independent authored works. Nonempty Dead Sea Scrolls fragments and reconstructed
+readings are retained with reconstruction metadata. Repeated references within a
+selected manuscript receive distinct IDs while preserving their source references.
 
 ## Why there is English here
 
@@ -51,8 +56,15 @@ several long works per author for whole-work holdout, and the cross-genre set ha
 writing fiction and essays, which is where a strategy that tracks genre rather than authorship shows
 itself.
 
-Each work contributes 20,000 words taken from a sixth of the way in, which steps over the front
-matter and avoids making the corpus a study of how these authors open books.
+The English importer keeps full body paragraphs, including short dialogue, with no
+word cap and no percentage-based skip. Verified opening-text anchors remove title
+blocks, contents, and editorial prefaces; Gutenberg wrappers, illustrations,
+transcriber notes, and verified publisher advertisements are excluded. Printed
+Federalist bylines, publication metadata, salutations, and signatures are excluded
+from analysis. Undisputed works provide the 13 reference authors; the 12 disputed
+and three joint Federalist papers remain in the corpus with no single-author
+reference label. Prose paragraphs stand in for verses. Sequential section numbers
+are used for English chapters, with available printed headings retained separately.
 
 ## Non-commercial terms
 
@@ -70,9 +82,10 @@ Only material no loader reads:
   conversions and a second analytical edition.
 - 49 of the 80 Dead Sea Scrolls Text-Fabric features: morphological and lexical layers this project
   never opens. The 31 kept are the ones the loader requests plus the ones `otext.tf` names, which
-  Text-Fabric loads to satisfy its declared text formats. Parsing the trimmed set yields the same
-  7,824 units from 178 witnesses as the full download.
+  Text-Fabric loads to satisfy its declared text formats. The retained features include the text and reconstruction annotations needed by
+  the current importer.
 
-Together these take `data/raw/` from about 770 MB to the 234 MB checked in without changing a single parsed unit.
-`scripts/download_sources.sh` refetches anything missing, and `stylometry manifest --check` verifies that
-what is present still matches the checked-in manifest.
+The original download and manifest scripts are preserved under `_backup/`. The fresh
+`stylometry build` command reports missing sources and fails if a present supported
+source cannot be parsed. Auxiliary `benchmarks/` downloads are reported separately
+and excluded from the primary corpus.

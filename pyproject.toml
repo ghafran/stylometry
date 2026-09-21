@@ -1,18 +1,10 @@
 [project]
 name = "stylometry"
-version = "0.1.0"
-description = "Verse-level stylometry and author discovery for Codex Sinaiticus and early Christian apocrypha"
-requires-python = ">=3.10"
+version = "0.2.0"
+description = "Language-scoped authorship discovery and verse explorer"
+requires-python = ">=3.11"
 dependencies = [
-    "anthropic>=1.6",
-    "lxml>=5",
-    "numpy>=1.26",
-    "pandas>=2",
-    "scikit-learn>=1.4",
-    "scipy>=1.11",
-    "hdbscan>=0.8",
-    "openai>=3.14.1",
-    "text-fabric>=13.1.0",
+  "numpy>=1.26", "scipy>=1.11", "scikit-learn>=1.4", "lxml>=5", "text-fabric>=13.1",
 ]
 
 [project.scripts]
@@ -26,11 +18,8 @@ build-backend = "hatchling.build"
 packages = ["stylometry"]
 
 [dependency-groups]
-dev = [
-    "pytest>=9.1.1",
-]
+dev = ["pytest>=8"]
 
 [tool.pytest.ini_options]
-markers = [
-    "empirical: real reference-author acceptance gate (opt-in with --run-empirical; needs cached benchmark data)",
-]
+testpaths = ["tests"]
+addopts = "-ra"
