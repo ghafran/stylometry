@@ -67,7 +67,7 @@ def test_portable_report_and_exports_preserve_attributions(tmp_path):
     assert path.name == "index.html"
     assert path.parent.is_dir()
     assert {p.name for p in path.parent.iterdir()} == {
-        "index.html", "report.json", "verses.csv", "rollups.csv"
+        "index.html", "analysis.html", "report.json", "verses.csv", "rollups.csv"
     }
     assert json.loads((path.parent / "report.json").read_text()) == source
     html = path.read_text()
@@ -112,6 +112,11 @@ def test_untrusted_text_cannot_close_the_data_script(tmp_path):
     assert "\u2029" not in payload
     assert html.count("</script>") == 2
     assert "innerHTML" not in html
+    analysis = (tmp_path / "analysis.html").read_text()
+    assert analysis.count("</script>") == 2
+    assert "innerHTML" not in analysis
+    for marker in ("<", ">", "&", "\u2028", "\u2029"):
+        assert marker not in _embedded_json(analysis)
     assert "node.textContent = str(text)" in html
 
 
@@ -123,7 +128,12 @@ def test_empty_report_is_complete_and_readable(tmp_path):
     _assert_display_projection(html, source)
     assert "No matching text" in html
     assert "No inferred author groups" in html
-    assert "No English validation results" in html
+    # Validation and method are their own page now, reached from the explorer's top navigation.
+    assert 'href="analysis.html#validation"' in html and 'href="analysis.html#method"' in html
+    assert "No English validation results" not in html
+    analysis = (tmp_path / "analysis.html").read_text()
+    assert "No English validation results" in analysis
+    assert "verse_rows" not in analysis, "the corpus table never reaches the summary page"
     with (tmp_path / "verses.csv").open(encoding="utf-8-sig", newline="") as stream:
         reader = csv.DictReader(stream)
         assert "author_id" in reader.fieldnames
