@@ -120,7 +120,8 @@ _CSS = r'''
 .map-toolbar{display:flex;gap:18px;align-items:end;flex-wrap:wrap;margin:15px 0}.map-toolbar>div{width:190px}.map-toolbar p{margin:0 0 8px;flex:1;min-width:180px;font-size:12px}.map-explanation{font-size:12px;color:var(--muted)}.map-row{border:1px solid var(--line);border-radius:10px;background:white;padding:16px 18px;margin:12px 0}.map-row-heading{display:flex;justify-content:space-between;gap:14px;align-items:start}.map-title{font-size:15px}.map-amount{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;font-size:13px}.map-stack{display:flex;width:100%;height:30px;overflow:hidden;border:0;padding:0;background:#e8eeed;border-radius:5px;margin:13px 0 9px;cursor:pointer}.map-stack:hover{box-shadow:0 0 0 2px #79aba0}.map-segment{height:100%;min-width:0;transition:opacity .15s}.map-segment.dimmed{opacity:.25}.map-preview{font-size:11px;color:var(--muted);line-height:1.7;overflow-wrap:anywhere}.map-preview .swatch{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px}.map-preview>span{margin-right:12px;display:inline-block}.map-breakdown{font-size:12px;margin-top:8px}.map-breakdown>summary{cursor:pointer;color:var(--teal)}.map-breakdown table{margin-top:10px;font-size:12px}.map-breakdown th,.map-breakdown td{padding:8px}.map-totals{margin-top:22px;border-top:1px solid var(--line);padding-top:18px}.map-totals>summary{cursor:pointer;font-weight:600;color:var(--teal)}.map-totals .contribution-scope{margin-top:14px}.map-leaf{padding:22px;background:white;border:1px solid var(--line);border-radius:10px;margin:16px 0}.map-leaf .verse-text{margin:18px 0}.map-zero{font-size:12px;color:var(--muted);margin:12px 0}.map-rows:empty{display:none}#map-children[hidden]{display:none}@media(max-width:740px){.map-toolbar{gap:12px}.map-toolbar>div{flex:1;min-width:120px}.map-row{padding:13px 12px}.map-row-heading{flex-wrap:wrap}.map-amount{text-align:left}.map-leaf{padding:15px}#panel-hierarchy .panel-heading{flex-direction:column;align-items:stretch}}
 .works-picker{max-width:360px;margin:18px 0}.works-overview{border:1px solid var(--line);border-radius:11px;background:white;padding:20px;margin-bottom:20px}.works-overview h3{font-size:19px}.works-counts{display:flex;gap:24px;flex-wrap:wrap;margin-top:14px}.works-counts strong{display:block;font-size:23px;font-weight:600}.works-counts span{font-size:12px;color:var(--muted)}.works-branch{border:1px solid var(--line);border-radius:8px;background:white;margin:10px 0;overflow:hidden}.works-branch>summary{cursor:pointer;padding:13px 16px;color:var(--ink);font-weight:600;overflow-wrap:anywhere}.works-branch>summary:hover{background:#f0f6f4}.works-branch>summary .tiny{display:inline;font-weight:400;margin-left:12px}.works-children{padding:0 14px 8px 20px}.works-chapter>.works-children{padding:0}.works-chapter .text-table .ref{min-width:160px}.works-chapter .text-table .tag{min-width:140px}.works-caption{font-size:12px;color:var(--muted);margin:0 0 10px}.works-more{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;flex-wrap:wrap}@media(max-width:740px){.works-children{padding:0 7px 5px 9px}.works-branch>summary{padding:11px}.works-branch>summary .tiny{display:block;margin-left:0}.works-counts{gap:15px}}
 
-.pages{display:flex;gap:8px;flex-wrap:wrap}.pages a{border:1px solid var(--line);background:white;color:var(--ink);border-radius:8px;padding:8px 12px;text-decoration:none;white-space:nowrap}.pages a:hover{background:#f0f6f4;border-color:#abcac2}.header-links{display:flex;flex-direction:column;gap:9px;align-items:flex-end}main.single{padding:28px 42px 48px;max-width:1100px}main.single section{margin-bottom:40px}main.single section:target h2{color:var(--teal)}@media(max-width:740px){.header-links{align-items:stretch;margin-top:17px}main.single{padding:20px 16px}}'''
+.pages{display:flex;gap:8px;flex-wrap:wrap}.pages a{border:1px solid var(--line);background:white;color:var(--ink);border-radius:8px;padding:8px 12px;text-decoration:none;white-space:nowrap}.pages a:hover{background:#f0f6f4;border-color:#abcac2}.header-links{display:flex;flex-direction:column;gap:9px;align-items:flex-end}main.single{padding:28px 42px 48px;max-width:1100px}main.single section{margin-bottom:40px}main.single section:target h2{color:var(--teal)}@media(max-width:740px){.header-links{align-items:stretch;margin-top:17px}main.single{padding:20px 16px}}
+.overview{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:21px 23px;margin-bottom:22px}.overview-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap}.overview-head h2{margin:0 0 5px}.overview-head p{margin:0;font-size:13px;max-width:78ch}.overview-measure{width:200px;flex:none}.overview-card{border-top:1px solid var(--line);margin-top:18px;padding-top:16px}.overview-card:first-child{border-top:0;margin-top:16px;padding-top:0}.overview-card-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:9px}.overview-card-head h3{margin:0;font-size:15px}.overview-bar{display:flex;gap:2px;height:34px;border-radius:6px;background:var(--paper)}.overview-segment{min-width:3px;border-radius:2px}.further{background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.26) 0 5px,transparent 5px 10px)}.overview-bar>.overview-segment:first-child{border-radius:6px 2px 2px 6px}.overview-bar>.overview-segment:last-child{border-radius:2px 6px 6px 2px}.overview-legend{display:flex;flex-wrap:wrap;gap:7px 20px;margin-top:12px;font-size:12px}.overview-entry{display:flex;align-items:center;gap:7px}.overview-entry .swatch{display:inline-block;width:11px;height:11px;border-radius:3px;flex:none}.overview-entry .amount{color:var(--muted)}.overview-tail{margin-top:11px;font-size:12px;color:var(--muted)}.overview-tail summary{cursor:pointer;color:var(--teal)}.overview-tail ul{margin:8px 0 0;padding-left:18px;columns:230px}.overview-empty{margin:0;padding:18px 0;color:var(--muted)}@media(max-width:740px){.overview{padding:16px 14px}.overview-measure{width:100%}.overview-legend{gap:6px 14px}}'''
 
 
 _ANALYSIS_START = r'''<!doctype html>
@@ -135,7 +136,7 @@ _ANALYSIS_START = r'''<!doctype html>
 <header><div class="titles"><div class="eyebrow">Stylometry workspace</div><h1>Validation and method</h1><p class="muted">How the estimates are made, and how they score where the answer is known.</p></div><div class="header-links"><nav class="pages" aria-label="Analysis pages"><a href="index.html">← Back to the explorer</a></nav><nav class="downloads" aria-label="Download analysis"><a href="benchmark.json" download>Validation ↓</a><a href="report.json" download>Full analysis ↓</a></nav></div></header>
 <main class="single"><noscript>This page needs JavaScript. Download benchmark.json or report.json to read every result.</noscript>
 <section id="validation" aria-labelledby="validation-heading"><h2 id="validation-heading">The English reference test</h2><p class="muted">Compare inferred groups with the known English author labels. The reference corpus has 13 expected authors when complete.</p><div id="benchmark-content"></div></section>
-<section id="method" aria-labelledby="method-heading"><h2 id="method-heading">Estimates, with evidence</h2><p class="muted">A separate authorship model is fitted for each language.</p><div id="source-coverage"></div><div id="language-cards" class="language-grid"></div><div class="method-grid"><article class="method-card"><h3>How to read a tag</h3><p>An author tag identifies an inferred writing-style group. It does not establish a historical author’s identity. The same tag in one language points to text assigned to the same group, including across collections.</p><p>Short verses and English paragraphs borrow evidence from their surrounding passage. A passage can contain several writers; its inherited tag can miss a change within that passage.</p></article><article class="method-card"><h3>How to read uncertainty</h3><p>“Low evidence” marks an attribution that needs caution. “Insufficient text” has no supported attribution. A distance margin compares a passage’s distance to its assigned group’s center with its nearest alternative center; it is not a probability of authorship.</p><p>Genre, translation, period, editing, and shared quotations can produce style differences or similarities. Estimated group counts therefore need external validation.</p></article></div><details class="method-card"><summary>Analysis configuration</summary><pre id="configuration"></pre></details></section>
+<section id="method" aria-labelledby="method-heading"><h2 id="method-heading">Estimates, with evidence</h2><p class="muted">A separate authorship model is fitted for each language.</p><div id="source-coverage"></div><div id="language-cards" class="language-grid"></div><div class="method-grid"><article class="method-card"><h3>How to read a tag</h3><p>An author tag identifies one writing style inferred from the text. It does not establish a historical author’s identity. The same tag in one language points to text assigned to the same group, including across collections.</p><p>Short verses and English paragraphs borrow evidence from their surrounding passage. A passage can contain several writers; its inherited tag can miss a change within that passage.</p></article><article class="method-card"><h3>How to read uncertainty</h3><p>“Low evidence” marks an attribution that needs caution. “Insufficient text” has no supported attribution. A distance margin compares a passage’s distance to its assigned group’s center with its nearest alternative center; it is not a probability of authorship.</p><p>Genre, translation, period, editing, and shared quotations can produce style differences or similarities. Estimated group counts therefore need external validation.</p></article></div><details class="method-card"><summary>Analysis configuration</summary><pre id="configuration"></pre></details></section>
 </main>
 <script type="application/json" id="report-data">'''
 
@@ -172,7 +173,7 @@ function renderBenchmark(){
  const percent=value=>value==null?'Unavailable':(100*value).toFixed(1)+'%';
  const grid=el('div',null,'benchmark-grid');
  const english=languages.filter(row=>/^(en|eng|english)$/i.test(str(row.language)));
- const metrics=[['Expected authors',benchmark.expected_author_count,'Known reference corpus'],['Reference authors loaded',benchmark.known_author_count,'Coverage in this analysis'],['Estimated style groups',english.length?english.reduce((n,row)=>n+(row.estimated_authors || 0),0):null,'Unsupervised English discovery'],['Authors evaluated',benchmark.evaluated_author_count,'Eligible for held-out book testing']];
+ const metrics=[['Expected authors',benchmark.expected_author_count,'Known reference corpus'],['Reference authors loaded',benchmark.known_author_count,'Coverage in this analysis'],['Authors discovered',english.length?english.reduce((n,row)=>n+(row.estimated_authors || 0),0):null,'Unsupervised English discovery'],['Authors evaluated',benchmark.evaluated_author_count,'Eligible for held-out book testing']];
  for(const [label,value,hint] of metrics)grid.append(metric(value==null?'Unavailable':count(value),label,hint));
  container.append(grid);
  const completeness=benchmark.source_completeness || {};
@@ -221,21 +222,22 @@ _HTML_START = r'''<!doctype html>
 <div class="field"><label for="book">Book</label><select id="book"></select></div>
 <div class="field"><label for="chapter">Chapter</label><select id="chapter"></select></div>
 <div class="field"><label for="author">Inferred author</label><select id="author"></select></div>
-<div class="field"><label for="status">Evidence status</label><select id="status"><option value="">All evidence</option value="assigned">Assigned</option><option value="low_evidence">Low evidence</option><option value="insufficient_text">Insufficient text</option></select></div>
+<div class="field"><label for="status">Evidence status</label><select id="status"><option value="">All evidence</option><option value="assigned">Assigned</option><option value="low_evidence">Low evidence</option><option value="insufficient_text">Insufficient text</option></select></div>
 <button type="button" class="button" id="reset">Reset filters</button><p class="scope-note">These filters apply to Text explorer, Authorship map, Author groups, and By author. Opening a result keeps your filters. Broaden them here to explore more text.</p>
 </aside>
 <main><noscript>This report needs JavaScript for interactive exploration. Download the CSV files or report.json to read every result.</noscript>
 <div class="metrics" id="metrics" aria-live="polite"></div>
 <p class="muted" id="source-scope" hidden></p>
-<div class="notice">These are <strong>estimated style groups</strong>, not verified identities. Tags are inferred from passages and inherited by their verses or paragraphs. Low evidence and insufficient text remain visible. Reference authors are used only for validation.</div>
+<div class="notice">These are <strong>estimated authors</strong>, not verified identities. Tags are inferred from passages and inherited by their verses or paragraphs. Low evidence and insufficient text remain visible. Reference authors are used only for validation.</div>
 <div id="estimate-warnings" aria-live="polite"></div>
+<section class="overview" id="overview" aria-labelledby="overview-heading"><div class="overview-head"><div><h2 id="overview-heading">Authorship at a glance</h2><p class="muted" id="overview-summary" aria-live="polite"></p></div><div class="overview-measure"><label for="contribution-measure">Measure by</label><select id="contribution-measure"><option value="words">Words</option><option value="verses">Verses / paragraphs</option></select></div></div><div id="overview-charts"></div><p class="footer-note">Shares follow every sidebar filter and search. Authors are separate per language, so each language is charted on its own.</p></section>
 <nav class="tabs" role="tablist" aria-label="Analysis views"><button type="button" class="tab" id="tab-text" role="tab" aria-controls="panel-text" aria-selected="true" data-tab="text">Text explorer</button><button type="button" class="tab" id="tab-hierarchy" role="tab" aria-controls="panel-hierarchy" aria-selected="false" data-tab="hierarchy">Authorship map</button><button type="button" class="tab" id="tab-authors" role="tab" aria-controls="panel-authors" aria-selected="false" data-tab="authors">Author groups</button><button type="button" class="tab" id="tab-works" role="tab" aria-controls="panel-works" aria-selected="false" data-tab="works">By author</button></nav>
 <div id="selection-summary" class="trail" aria-live="polite"></div>
 <section class="panel" id="panel-text" role="tabpanel" aria-labelledby="tab-text"><div class="panel-heading"><div><h2>Every text, an attribution</h2><p class="muted">Inspect verse tags, supporting evidence, and matching voices.</p></div></div><div class="toolbar"><div class="search"><label for="search">Search text, title, reference, or inferred author</label><input id="search" type="search" placeholder="Search the selected corpus…"></div><div class="size"><label for="page-size">Per page</label><select id="page-size"><option>25</option><option selected>50</option><option>100</option></select></div></div><div class="panelbox"><div class="table-wrap"><table class="text-table"><thead><tr><th>Text reference</th><th>Inferred author</th><th>Verse / paragraph</th></tr></thead><tbody id="verse-rows"></tbody></table></div><div id="verse-empty" hidden class="empty"><strong>No matching text</strong>Try a broader filter or a different search.</div><div class="pagination"><span class="count" id="verse-count" aria-live="polite"></span><div class="page-buttons"><button type="button" class="button" id="previous">← Previous</button><button type="button" class="button" id="next">Next →</button></div></div></div></section>
 <section class="panel" id="panel-hierarchy" role="tabpanel" aria-labelledby="tab-hierarchy" hidden>
 <div class="panel-heading"><div><h2>Authorship map</h2><p class="muted">See who contributed at every level. Select a bar to explore its books, chapters, and verses.</p></div><button type="button" class="button" id="map-open-text">Open matching text</button></div>
 <nav id="trail" class="trail" aria-label="Map location"></nav>
-<div class="map-toolbar"><div><label for="level">Group by</label><select id="level"><option value="language">Language</option><option value="collection">Collection</option><option value="book">Book</option><option value="chapter">Chapter</option><option value="verse">Verse / paragraph</option></select></div><div><label for="contribution-measure">Measure contribution by</label><select id="contribution-measure"><option value="words">Words</option><option value="verses">Verses / paragraphs</option></select></div><p id="map-summary" class="muted" aria-live="polite"></p></div>
+<div class="map-toolbar"><div><label for="level">Group by</label><select id="level"><option value="language">Language</option><option value="collection">Collection</option><option value="book">Book</option><option value="chapter">Chapter</option><option value="verse">Verse / paragraph</option></select></div><p id="map-summary" class="muted" aria-live="polite"></p></div>
 <p class="map-explanation">Each colored segment is an inferred author's share of that row. Counts include unassigned text and honor all corpus filters and search.</p>
 <div id="map-highlight" class="trail" hidden></div>
 <div id="map-detail"></div>
@@ -333,21 +335,139 @@ function contributionSummary(rows,selection,measure='words'){
   }).map(entry=>({...entry,share:group.total?entry.amount/group.total:0}))
  }));
 }
+const authorPalette=['#229c9d','#be7125','#0256a9','#941f6d','#4d6106','#9769dc'];
+const unassignedColor='#8c9a9d', furtherColor='#5d7276';
+const languageNames={eng:'English',grc:'Greek',hbo:'Hebrew',arb:'Arabic'};
+function languageName(code){return languageNames[code] || str(code);}
+// Ranked once over the whole corpus so an author keeps its colour under every filter.
+const authorRank=(()=>{
+ const totals=new Map();
+ for(const row of verses){
+  if(!row.author_id)continue;
+  const key=str(row.language)+'\u0000'+str(row.author_id);
+  const words=typeof row.token_count==='number' && Number.isFinite(row.token_count)?row.token_count:0;
+  totals.set(key,(totals.get(key) || 0)+words);
+ }
+ const byLanguage=new Map();
+ for(const key of totals.keys()){
+  const language=key.split('\u0000')[0];
+  if(!byLanguage.has(language))byLanguage.set(language,[]);
+  byLanguage.get(language).push(key);
+ }
+ const rank=new Map();
+ for(const keys of byLanguage.values()){
+  keys.sort((a,b)=>totals.get(b)-totals.get(a) || a.localeCompare(b));
+  keys.forEach((key,index)=>rank.set(key,index));
+ }
+ return rank;
+})();
+function authorIndex(language,author){return author?authorRank.get(str(language)+'\u0000'+str(author)):undefined;}
 function contributionColor(language,author){
- if(!author)return '#899b9e';
+ if(!author)return unassignedColor;
+ const index=authorIndex(language,author);
+ if(index!=null && index<authorPalette.length)return authorPalette[index];
  let hash=0;for(const letter of language+':'+author)hash=((hash<<5)-hash+letter.charCodeAt(0))|0;
- return 'hsl('+((Math.abs(hash)*137.508)%360).toFixed(1)+' 43% 42%)';
+ return 'hsl('+((Math.abs(hash)*137.508)%360).toFixed(1)+' 30% 44%)';
+}
+function overviewSeries(group){
+ const leading=[],further=[];let unassigned=null;
+ for(const entry of group.authors){
+  if(!entry.author){unassigned=entry;continue;}
+  const index=authorIndex(group.language,entry.author);
+  (index!=null && index<authorPalette.length?leading:further).push(entry);
+ }
+ leading.sort((a,b)=>authorIndex(group.language,a.author)-authorIndex(group.language,b.author));
+ const series=leading.map(entry=>({label:entry.author,amount:entry.amount,share:entry.share,
+  color:authorPalette[authorIndex(group.language,entry.author)]}));
+ if(further.length){
+  const amount=further.reduce((total,entry)=>total+entry.amount,0);
+  series.push({label:count(further.length)+' further authors',amount,share:group.total?amount/group.total:0,
+   color:furtherColor,members:further});
+ }
+ if(unassigned)series.push({label:'Unassigned',amount:unassigned.amount,share:unassigned.share,color:unassignedColor});
+ return series;
+}
+function overviewSummary(groups,measure){
+ const unit=measure==='words'?'words':'verses / paragraphs';
+ if(!groups.length)return 'No text matches the current filters. Broaden them in the sidebar or clear the search.';
+ const units=groups.reduce((total,group)=>total+group.units,0);
+ const amount=groups.reduce((total,group)=>total+group.total,0);
+ const named=groups.reduce((total,group)=>total+group.authors.filter(entry=>entry.author).length,0);
+ const unplaced=groups.reduce((total,group)=>total+(group.authors.find(entry=>!entry.author)?.units || 0),0);
+ const lowEvidence=groups.reduce((total,group)=>total+group.authors.reduce((sum,entry)=>sum+(entry.author?entry.lowEvidenceUnits:0),0),0);
+ const assigned=units-unplaced, incomplete=measure==='words' && groups.some(group=>group.missingWords);
+ let top=null;
+ for(const group of groups)for(const entry of group.authors)if(entry.author && (!top || entry.share>top.share))top={...entry,language:group.language};
+ const sentences=[count(named)+' inferred '+(named===1?'author':'authors')+' across '+count(groups.length)+' '
+  +(groups.length===1?'language':'languages')+' · '+count(units)+' text units'
+  +(incomplete?'':' · '+count(amount)+' '+unit)+'.'];
+ if(top)sentences.push('Largest single voice: '+top.author+' with '+(top.share*100).toFixed(1)+'% of '+languageName(top.language)+'.');
+ if(unplaced)sentences.push(count(unplaced)+' text units ('+(100*unplaced/units).toFixed(1)+'%) carry no inferred author.');
+ if(assigned && lowEvidence>=assigned)sentences.push('Every assigned unit here is flagged low evidence, so read these shares as provisional.');
+ else if(lowEvidence)sentences.push(count(lowEvidence)+' of '+count(assigned)+' assigned units are flagged low evidence.');
+ if(incomplete)sentences.push('Some units have no word count; switch the measure to verses / paragraphs for complete shares.');
+ return sentences.join(' ');
+}
+function renderOverview(){
+ const measure=$('contribution-measure').value,unit=measure==='words'?'words':'verses / paragraphs';
+ const groups=contributionSummary(filtered,{},measure),target=$('overview-charts');
+ $('overview-summary').textContent=overviewSummary(groups,measure);
+ target.replaceChildren();
+ if(!groups.length){target.append(el('p','No text to chart in this selection.','overview-empty'));return;}
+ for(const group of groups){
+  const card=el('article',null,'overview-card'),head=el('div',null,'overview-card-head');
+  const named=group.authors.filter(entry=>entry.author).length;
+  head.append(el('h3',languageName(group.language)),
+   el('span',count(named)+' inferred '+(named===1?'author':'authors')+' · '+count(group.units)+' text units'
+    +(measure==='words' && group.missingWords?'':' · '+count(group.total)+' '+unit),'muted'));
+  card.append(head);
+  if(measure==='words' && group.missingWords){
+   card.append(el('p',count(group.missingWords)+' text units have no word count. Switch the measure to verses / paragraphs for complete shares.','overview-empty'));
+   target.append(card);continue;
+  }
+  if(!group.total){
+   card.append(el('p','No '+unit+' to chart here. Switch the measure to include empty text units.','overview-empty'));
+   target.append(card);continue;
+  }
+  const series=overviewSeries(group),bar=el('div',null,'overview-bar');
+  bar.setAttribute('role','img');
+  bar.setAttribute('aria-label',languageName(group.language)+' authorship share by '+unit+': '
+   +series.map(item=>item.label+' '+(item.share*100).toFixed(1)+'%').join(', '));
+  for(const item of series){
+   const segment=el('div',null,'overview-segment'+(item.members?' further':''));
+   segment.style.flex='0 1 '+(item.share*100)+'%';segment.style.backgroundColor=item.color;
+   segment.title=item.label+' · '+count(item.amount)+' '+unit+' · '+(item.share*100).toFixed(1)+'%';
+   bar.append(segment);
+  }
+  const legend=el('div',null,'overview-legend');
+  for(const item of series){
+   const entry=el('div',null,'overview-entry'),swatch=el('span',null,'swatch'+(item.members?' further':''));
+   swatch.style.backgroundColor=item.color;
+   entry.append(swatch,el('span',item.label),
+    el('span',count(item.amount)+' '+unit+' · '+(item.share*100).toFixed(1)+'%','amount'));
+   legend.append(entry);
+  }
+  card.append(bar,legend);
+  const further=series.find(item=>item.members);
+  if(further){
+   const details=el('details',null,'overview-tail'),list=el('ul');
+   details.append(el('summary','List the '+count(further.members.length)+' further authors'));
+   for(const entry of further.members)
+    list.append(el('li',entry.author+' · '+count(entry.amount)+' '+unit+' · '+(entry.share*100).toFixed(1)+'%'));
+   details.append(list);card.append(details);
+  }
+  target.append(card);
+ }
 }
 function renderContributions(){
  const target=$('contribution-charts'),measure=$('contribution-measure').value;
  const groups=contributionSummary(mapRows,{},measure),unit=measure==='words'?'words':'verses / paragraphs';
- const names={eng:'English',grc:'Greek',hbo:'Hebrew',arb:'Arabic'};
  $('contribution-scope').textContent=mapPath.length?mapPath.map(mapTitle).join(' › '):'Current corpus selection';
  target.replaceChildren();
  if(!groups.length){target.append(el('div','No text in this selection. Choose another language, collection, book or chapter.','panelbox contribution-empty'));return;}
  for(const group of groups){
   const card=el('article',null,'contribution-card'),heading=el('div',null,'contribution-heading');
-  heading.append(el('h3',names[group.language] || group.language),el('span',count(group.total)+' '+unit+' in selection','muted'));
+  heading.append(el('h3',languageName(group.language)),el('span',count(group.total)+' '+unit+' in selection','muted'));
   card.append(heading);
   if(measure==='words' && group.missingWords){
    card.append(el('p',count(group.missingWords)+' text units have no word counts. Switch to verses / paragraphs for complete contribution shares.','notice'));
@@ -358,7 +478,7 @@ function renderContributions(){
   for(const value of ['0%','25%','50%','75%','100%'])ticks.append(el('span',value));
   axis.append(el('span','Inferred author'),ticks,el('span','Amount · share'));card.append(axis);
   const bars=el('div',null,'contribution-bars');bars.setAttribute('role','list');
-  bars.setAttribute('aria-label',(names[group.language] || group.language)+' author contributions by '+unit);
+  bars.setAttribute('aria-label',languageName(group.language)+' author contributions by '+unit);
   for(const entry of group.authors){
    const selected=mapHighlight?.author===entry.author && mapHighlight?.language===group.language;
    const row=el('div',null,'contribution-row'+(selected?' selected':mapHighlight?' dimmed':''));
@@ -398,7 +518,7 @@ function renderEstimateWarnings(){
  if(unestablished.length)notes.push('Estimate stability not established: '+unestablished.join(', ')+'. More evidence is needed.');
  if(notes.length)target.append(el('p',notes.join(' '),'notice'));
 }
-function refresh(){filtered=selectCorpus(verses,state);renderMetrics();renderEstimateWarnings();renderVerses();renderRollups();renderAuthors();renderSelection();renderAuthorWorks();}
+function refresh(){filtered=selectCorpus(verses,state);renderMetrics();renderOverview();renderEstimateWarnings();renderVerses();renderRollups();renderAuthors();renderSelection();renderAuthorWorks();}
 function renderSelection(){
  const summary=$('selection-summary');summary.replaceChildren();
  if(state.query){summary.append(el('span','Search: '+state.query));const clear=el('button','Clear search');clear.type='button';clear.addEventListener('click',()=>{clearTimeout(searchTimer);state.query='';$('search').value='';resetPages();refresh();});summary.append(clear);}
@@ -472,7 +592,7 @@ function mapBreakdown(rows,level,measure='words'){
  }
  return Array.from(groups.values(),group=>({...group,authors:Array.from(group.authors.values()).sort((a,b)=>a.author===null?1:b.author===null?-1:b.amount-a.amount || str(a.author).localeCompare(str(b.author))).map(entry=>({...entry,share:group.total?entry.amount/group.total:0}))}));
 }
-function mapTitle(row){return row.level==='language'?({eng:'English',grc:'Greek',hbo:'Hebrew',arb:'Arabic'}[row.language] || row.language):rollupTitle(row);}
+function mapTitle(row){return row.level==='language'?languageName(row.language):rollupTitle(row);}
 function mapGroupingPath(path,level){
  const levels=['language','collection','book','chapter','verse'],rank=levels.indexOf(level);
  const cut=path.findIndex(row=>levels.indexOf(row.level)>=rank);
@@ -624,7 +744,7 @@ function humanize(key){return key.replace(/_/g,' ').replace(/\b\w/g,letter=>lett
 function resetAll(){for(const key of ['language','collection','book','chapter','author','status','query','focusId'])state[key]='';state.level='language';$('level').value='language';$('search').value='';refreshOptions();resetPages();refresh();}
 for(const key of ['language','collection','book','chapter','author','status'])$(key).addEventListener('change',()=>{state[key]=$(key).value;state.focusId='';const keys=['language','collection','book','chapter'];if(keys.includes(key)){for(const child of keys.slice(keys.indexOf(key)+1))state[child]='';if(key==='language')state.author='';}refreshOptions();resetPages();refresh();});
 let searchTimer;$('search').addEventListener('input',()=>{clearTimeout(searchTimer);searchTimer=setTimeout(()=>{state.query=$('search').value;state.focusId='';resetPages();refresh();},200);});
-$('contribution-measure').addEventListener('change',()=>{state.rollupPage=0;renderRollups();});
+$('contribution-measure').addEventListener('change',()=>{state.rollupPage=0;renderOverview();renderRollups();});
 $('map-open-text').addEventListener('click',openMapText);
 $('works-author').addEventListener('change',()=>{worksAuthorKey=$('works-author').value;worksSource=null;renderAuthorWorks();});
 $('page-size').addEventListener('change',()=>{state.size=Number($('page-size').value);resetPages();refresh();});$('reset').addEventListener('click',resetAll);$('previous').addEventListener('click',()=>{state.page--;renderVerses();});$('next').addEventListener('click',()=>{state.page++;renderVerses();});$('level').addEventListener('change',()=>showHierarchy($('level').value));$('rollup-previous').addEventListener('click',()=>{state.rollupPage--;renderRollups();});$('rollup-next').addEventListener('click',()=>{state.rollupPage++;renderRollups();});$('author-previous').addEventListener('click',()=>{state.authorPage--;renderAuthors();});$('author-next').addEventListener('click',()=>{state.authorPage++;renderAuthors();});for(const button of document.querySelectorAll('[data-tab]')){button.addEventListener('click',()=>activate(button.dataset.tab));button.addEventListener('keydown',event=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;event.preventDefault();const tabs=Array.from(document.querySelectorAll('[data-tab]'));const current=tabs.indexOf(button);const index=event.key==='Home'?0:event.key==='End'?tabs.length-1:(current+(event.key==='ArrowRight'?1:tabs.length-1))%tabs.length;activate(tabs[index].dataset.tab);tabs[index].focus();});}

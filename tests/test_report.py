@@ -256,3 +256,112 @@ def test_contributions_handle_missing_counts_zero_words_and_empty_scope():
     assert all(x['share'] == 0 for x in result['authors'])
     assert _contributions(rows, {'language': 'grc'}) == []
     assert _contributions(rows, measure='verses')[0]['total'] == 2
+
+
+def _overview(rows, measure='words', shown=None):
+    """Run the browser's aggregate-chart code and return what it would draw.
+
+    ``rows`` is the whole corpus the page loads; ``shown`` is what survives the current
+    filters, which is the only thing the chart itself measures.
+    """
+    if shutil.which('node') is None:
+        pytest.skip('Node is optional for browser-code validation')
+    summary = re.search(r'function contributionSummary\(.*?\n}\n', _HTML_END, re.DOTALL).group(0)
+    block = re.search(r'const authorPalette=.*?(?=function renderOverview\()', _HTML_END, re.DOTALL).group(0)
+    program = (
+        "const str = value => value == null ? '' : String(value);\n"
+        "const count = value => new Intl.NumberFormat('en-US').format(value || 0);\n"
+        f"const verses = {json.dumps(rows)};\n"
+        f"const shown = {json.dumps(rows if shown is None else shown)};\n" + summary + block +
+        f"const measure = {json.dumps(measure)};\n"
+        "const groups = contributionSummary(shown, {}, measure);\n"
+        "process.stdout.write(JSON.stringify({summary: overviewSummary(groups, measure),"
+        " languages: groups.map(group => ({language: group.language, series: overviewSeries(group)}))}));"
+    )
+    return json.loads(subprocess.run(['node', '-e', program], check=True,
+                                     text=True, capture_output=True).stdout)
+
+
+def _corpus(author_count, words=None):
+    rows = []
+    for index in range(author_count):
+        rows.append(dict(language='eng', collection='C', book='B', chapter='1', status='assigned',
+                         author_id=f'eng-A{index + 1:03d}',
+                         token_count=(words[index] if words else author_count - index) * 10))
+    return rows
+
+
+def test_aggregate_chart_gives_the_largest_authors_a_fixed_palette_and_folds_the_rest():
+    result = _overview(_corpus(9))
+    series = result['languages'][0]['series']
+    assert [item['label'] for item in series[:6]] == [f'eng-A{i:03d}' for i in range(1, 7)]
+    assert len({item['color'] for item in series[:6]}) == 6
+    assert series[6]['label'] == '3 further authors'
+    assert [entry['author'] for entry in series[6]['members']] == ['eng-A007', 'eng-A008', 'eng-A009']
+    assert series[6]['amount'] == sum(entry['amount'] for entry in series[6]['members'])
+    assert sum(item['share'] for item in series) == pytest.approx(1)
+
+
+def test_filtering_to_fewer_authors_never_repaints_the_ones_that_remain():
+    rows = _corpus(9)
+    full = {item['label']: item['color'] for item in _overview(rows)['languages'][0]['series']}
+    # The chart reads an already-filtered corpus, so a filter arrives here as missing rows.
+    narrowed = _overview(rows, shown=[row for row in rows if row['author_id'] in {'eng-A002', 'eng-A005'}])
+    series = narrowed['languages'][0]['series']
+    assert [item['label'] for item in series] == ['eng-A002', 'eng-A005']
+    assert [item['color'] for item in series] == [full['eng-A002'], full['eng-A005']]
+
+
+def test_aggregate_chart_ranks_by_the_whole_corpus_not_by_the_current_filter():
+    # eng-A009 is the largest author overall, so it keeps a palette colour when others are filtered out.
+    rows = _corpus(9, words=[1, 1, 1, 1, 1, 1, 1, 1, 90])
+    series = _overview(rows)['languages'][0]['series']
+    assert series[0]['label'] == 'eng-A009'
+    assert series[0]['share'] == pytest.approx(900 / 980)
+    assert series[-1]['label'] == '3 further authors'
+
+
+def test_aggregate_summary_reports_scope_concentration_unassigned_and_evidence():
+    rows = [dict(language='eng', collection='C', book='B', chapter='1', author_id='eng-A001',
+                 token_count=60, status='low_evidence'),
+            dict(language='eng', collection='C', book='B', chapter='1', author_id='eng-A002',
+                 token_count=20, status='assigned'),
+            dict(language='eng', collection='C', book='B', chapter='1', author_id=None,
+                 token_count=20, status='insufficient_text'),
+            dict(language='grc', collection='C', book='G', chapter='1', author_id='grc-A001',
+                 token_count=100, status='assigned')]
+    summary = _overview(rows)['summary']
+    assert '3 inferred authors across 2 languages' in summary
+    assert '4 text units' in summary
+    assert '200 words' in summary
+    assert 'grc-A001 with 100.0% of Greek' in summary
+    assert '1 text units (25.0%) carry no inferred author' in summary
+    assert '1 of 3 assigned units are flagged low evidence' in summary
+    assert 'No text matches' in _overview([])['summary']
+
+
+def test_aggregate_summary_flags_a_selection_that_is_entirely_low_evidence():
+    rows = [dict(language='eng', collection='C', book='B', chapter='1', author_id='eng-A001',
+                 token_count=10, status='low_evidence')]
+    assert 'Every assigned unit here is flagged low evidence' in _overview(rows)['summary']
+
+
+def test_aggregate_summary_switches_units_and_reports_missing_word_counts():
+    rows = [dict(language='eng', collection='C', book='B', chapter='1', author_id='eng-A001',
+                 status='assigned'),
+            dict(language='eng', collection='C', book='B', chapter='1', author_id='eng-A002',
+                 token_count=10, status='assigned')]
+    assert 'switch the measure' in _overview(rows)['summary']
+    by_verse = _overview(rows, measure='verses')
+    assert '2 verses / paragraphs' in by_verse['summary']
+    assert [item['share'] for item in by_verse['languages'][0]['series']] == [0.5, 0.5]
+
+
+def test_aggregate_chart_is_visible_above_the_tabs_under_every_filter(tmp_path):
+    html = write_report(_result(), tmp_path).read_text()
+    overview = html.index('id="overview"')
+    assert overview < html.index('role="tablist"'), 'the chart must sit above the tabbed views'
+    assert overview > html.index('id="estimate-warnings"')
+    assert html.count('id="contribution-measure"') == 1, 'one measure control governs every view'
+    assert 'renderMetrics();renderOverview();' in html, 'the chart redraws with every filter change'
+    assert '<option value="assigned">Assigned</option>' in html
