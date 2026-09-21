@@ -1,0 +1,4193 @@
+{
+  "status": "evaluated",
+  "kind": "held_out_work_closed_set_attribution",
+  "expected_author_count": 13,
+  "known_author_count": 13,
+  "evaluated_author_count": 13,
+  "accuracy": 0.8361344537815126,
+  "balanced_accuracy": 0.7760683760683759,
+  "book_accuracy": 0.96,
+  "book_balanced_accuracy": 0.9230769230769231,
+  "source_completeness": {
+    "scope": "Reference-author coverage; this does not verify that every source work was loaded.",
+    "expected_authors": [
+      "Alexander Hamilton",
+      "Arthur Conan Doyle",
+      "Charles Dickens",
+      "Charlotte Bronte",
+      "G. K. Chesterton",
+      "George Eliot",
+      "H. G. Wells",
+      "James Madison",
+      "Jane Austen",
+      "John Jay",
+      "Mark Twain",
+      "Robert Louis Stevenson",
+      "Thomas Hardy"
+    ],
+    "present_authors": [
+      "Alexander Hamilton",
+      "Arthur Conan Doyle",
+      "Charles Dickens",
+      "Charlotte Bronte",
+      "G. K. Chesterton",
+      "George Eliot",
+      "H. G. Wells",
+      "James Madison",
+      "Jane Austen",
+      "John Jay",
+      "Mark Twain",
+      "Robert Louis Stevenson",
+      "Thomas Hardy"
+    ],
+    "missing_authors": [],
+    "unexpected_authors": [],
+    "all_expected_authors_present": true,
+    "all_expected_authors_evaluable": true
+  },
+  "english_verse_count": 70292,
+  "english_book_count": 120,
+  "excluded_books": [
+    {
+      "collection": "Federalist",
+      "book": "FED18",
+      "book_title": "Federalist No. 18",
+      "verse_count": 21,
+      "reason": "missing, disputed, joint, or inconsistent reference authorship"
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED19",
+      "book_title": "Federalist No. 19",
+      "verse_count": 20,
+      "reason": "missing, disputed, joint, or inconsistent reference authorship"
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED20",
+      "book_title": "Federalist No. 20",
+      "verse_count": 24,
+      "reason": "missing, disputed, joint, or inconsistent reference authorship"
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED49",
+      "book_title": "Federalist No. 49",
+      "verse_count": 11,
+      "reason": "missing, disputed, joint, or inconsistent reference authorship"
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED50",
+      "book_title": "Federalist No. 50",
+      "verse_count": 11,
+      "reason": "missing, disputed, joint, or inconsistent reference authorship"
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED51",
+      "book_title": "Federalist No. 51",
+      "verse_count": 10,
+      "reason": "missing, disputed, joint, or inconsistent reference authorship"
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED52",
+      "book_title": "Federalist No. 52",
+      "verse_count": 9,
+      "reason": "missing, disputed, joint, or inconsistent reference authorship"
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED53",
+      "book_title": "Federalist No. 53",
+      "verse_count": 11,
+      "reason": "missing, disputed, joint, or inconsistent reference authorship"
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED54",
+      "book_title": "Federalist No. 54",
+      "verse_count": 11,
+      "reason": "missing, disputed, joint, or inconsistent reference authorship"
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED55",
+      "book_title": "Federalist No. 55",
+      "verse_count": 9,
+      "reason": "missing, disputed, joint, or inconsistent reference authorship"
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED56",
+      "book_title": "Federalist No. 56",
+      "verse_count": 12,
+      "reason": "missing, disputed, joint, or inconsistent reference authorship"
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED57",
+      "book_title": "Federalist No. 57",
+      "verse_count": 21,
+      "reason": "missing, disputed, joint, or inconsistent reference authorship"
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED58",
+      "book_title": "Federalist No. 58",
+      "verse_count": 15,
+      "reason": "missing, disputed, joint, or inconsistent reference authorship"
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED62",
+      "book_title": "Federalist No. 62",
+      "verse_count": 18,
+      "reason": "missing, disputed, joint, or inconsistent reference authorship"
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED63",
+      "book_title": "Federalist No. 63",
+      "verse_count": 21,
+      "reason": "missing, disputed, joint, or inconsistent reference authorship"
+    }
+  ],
+  "ineligible_authors": [],
+  "per_author": [
+    {
+      "author": "Alexander Hamilton",
+      "train_books": 40,
+      "test_books": 11,
+      "test_passages": 27,
+      "correct_passages": 27,
+      "accuracy": 1.0
+    },
+    {
+      "author": "Arthur Conan Doyle",
+      "train_books": 3,
+      "test_books": 1,
+      "test_passages": 20,
+      "correct_passages": 20,
+      "accuracy": 1.0
+    },
+    {
+      "author": "Charles Dickens",
+      "train_books": 2,
+      "test_books": 1,
+      "test_passages": 20,
+      "correct_passages": 16,
+      "accuracy": 0.8
+    },
+    {
+      "author": "Charlotte Bronte",
+      "train_books": 2,
+      "test_books": 1,
+      "test_passages": 20,
+      "correct_passages": 20,
+      "accuracy": 1.0
+    },
+    {
+      "author": "G. K. Chesterton",
+      "train_books": 3,
+      "test_books": 1,
+      "test_passages": 20,
+      "correct_passages": 20,
+      "accuracy": 1.0
+    },
+    {
+      "author": "George Eliot",
+      "train_books": 2,
+      "test_books": 1,
+      "test_passages": 20,
+      "correct_passages": 12,
+      "accuracy": 0.6
+    },
+    {
+      "author": "H. G. Wells",
+      "train_books": 3,
+      "test_books": 1,
+      "test_passages": 20,
+      "correct_passages": 15,
+      "accuracy": 0.75
+    },
+    {
+      "author": "James Madison",
+      "train_books": 11,
+      "test_books": 3,
+      "test_passages": 9,
+      "correct_passages": 8,
+      "accuracy": 0.8888888888888888
+    },
+    {
+      "author": "Jane Austen",
+      "train_books": 2,
+      "test_books": 1,
+      "test_passages": 20,
+      "correct_passages": 20,
+      "accuracy": 1.0
+    },
+    {
+      "author": "John Jay",
+      "train_books": 4,
+      "test_books": 1,
+      "test_passages": 2,
+      "correct_passages": 0,
+      "accuracy": 0.0
+    },
+    {
+      "author": "Mark Twain",
+      "train_books": 3,
+      "test_books": 1,
+      "test_passages": 20,
+      "correct_passages": 18,
+      "accuracy": 0.9
+    },
+    {
+      "author": "Robert Louis Stevenson",
+      "train_books": 3,
+      "test_books": 1,
+      "test_passages": 20,
+      "correct_passages": 9,
+      "accuracy": 0.45
+    },
+    {
+      "author": "Thomas Hardy",
+      "train_books": 2,
+      "test_books": 1,
+      "test_passages": 20,
+      "correct_passages": 14,
+      "accuracy": 0.7
+    }
+  ],
+  "per_collection": [
+    {
+      "collection": "Cross-genre",
+      "test_passages": 100,
+      "correct_passages": 82,
+      "accuracy": 0.82,
+      "balanced_accuracy": 0.8200000000000001,
+      "train_books": 15,
+      "test_books": 5,
+      "reference_authors": 5
+    },
+    {
+      "collection": "Federalist",
+      "test_passages": 38,
+      "correct_passages": 35,
+      "accuracy": 0.9210526315789473,
+      "balanced_accuracy": 0.6296296296296297,
+      "train_books": 55,
+      "test_books": 15,
+      "reference_authors": 3
+    },
+    {
+      "collection": "Novels",
+      "test_passages": 100,
+      "correct_passages": 82,
+      "accuracy": 0.82,
+      "balanced_accuracy": 0.82,
+      "train_books": 10,
+      "test_books": 5,
+      "reference_authors": 5
+    }
+  ],
+  "held_out_predictions": [
+    {
+      "collection": "Federalist",
+      "book": "FED59",
+      "chapter": "59",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Alexander Hamilton",
+      "predicted_author": "Alexander Hamilton",
+      "correct": true
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED59",
+      "chapter": "59",
+      "passage_index": 2,
+      "tokens": 707,
+      "actual_author": "Alexander Hamilton",
+      "predicted_author": "Alexander Hamilton",
+      "correct": true
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED13",
+      "chapter": "13",
+      "passage_index": 1,
+      "tokens": 960,
+      "actual_author": "Alexander Hamilton",
+      "predicted_author": "Alexander Hamilton",
+      "correct": true
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED81",
+      "chapter": "81",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Alexander Hamilton",
+      "predicted_author": "Alexander Hamilton",
+      "correct": true
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED81",
+      "chapter": "81",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "Alexander Hamilton",
+      "predicted_author": "Alexander Hamilton",
+      "correct": true
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED81",
+      "chapter": "81",
+      "passage_index": 3,
+      "tokens": 1200,
+      "actual_author": "Alexander Hamilton",
+      "predicted_author": "Alexander Hamilton",
+      "correct": true
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED81",
+      "chapter": "81",
+      "passage_index": 4,
+      "tokens": 313,
+      "actual_author": "Alexander Hamilton",
+      "predicted_author": "Alexander Hamilton",
+      "correct": true
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED73",
+      "chapter": "73",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Alexander Hamilton",
+      "predicted_author": "Alexander Hamilton",
+      "correct": true
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED73",
+      "chapter": "73",
+      "passage_index": 2,
+      "tokens": 1162,
+      "actual_author": "Alexander Hamilton",
+      "predicted_author": "Alexander Hamilton",
+      "correct": true
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED85",
+      "chapter": "85",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Alexander Hamilton",
+      "predicted_author": "Alexander Hamilton",
+      "correct": true
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED85",
+      "chapter": "85",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "Alexander Hamilton",
+      "predicted_author": "Alexander Hamilton",
+      "correct": true
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED85",
+      "chapter": "85",
+      "passage_index": 3,
+      "tokens": 303,
+      "actual_author": "Alexander Hamilton",
+      "predicted_author": "Alexander Hamilton",
+      "correct": true
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED27",
+      "chapter": "27",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Alexander Hamilton",
+      "predicted_author": "Alexander Hamilton",
+      "correct": true
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED27",
+      "chapter": "27",
+      "passage_index": 2,
+      "tokens": 248,
+      "actual_author": "Alexander Hamilton",
+      "predicted_author": "Alexander Hamilton",
+      "correct": true
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED11",
+      "chapter": "11",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Alexander Hamilton",
+      "predicted_author": "Alexander Hamilton",
+      "correct": true
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED11",
+      "chapter": "11",
+      "passage_index": 2,
+      "tokens": 1300,
+      "actual_author": "Alexander Hamilton",
+      "predicted_author": "Alexander Hamilton",
+      "correct": true
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED83",
+      "chapter": "83",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Alexander Hamilton",
+      "predicted_author": "Alexander Hamilton",
+      "correct": true
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED83",
+      "chapter": "83",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "Alexander Hamilton",
+      "predicted_author": "Alexander Hamilton",
+      "correct": true
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED83",
+      "chapter": "83",
+      "passage_index": 3,
+      "tokens": 1200,
+      "actual_author": "Alexander Hamilton",
+      "predicted_author": "Alexander Hamilton",
+      "correct": true
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED83",
+      "chapter": "83",
+      "passage_index": 4,
+      "tokens": 1200,
+      "actual_author": "Alexander Hamilton",
+      "predicted_author": "Alexander Hamilton",
+      "correct": true
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED83",
+      "chapter": "83",
+      "passage_index": 5,
+      "tokens": 1039,
+      "actual_author": "Alexander Hamilton",
+      "predicted_author": "Alexander Hamilton",
+      "correct": true
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED69",
+      "chapter": "69",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Alexander Hamilton",
+      "predicted_author": "Alexander Hamilton",
+      "correct": true
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED69",
+      "chapter": "69",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "Alexander Hamilton",
+      "predicted_author": "Alexander Hamilton",
+      "correct": true
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED69",
+      "chapter": "69",
+      "passage_index": 3,
+      "tokens": 582,
+      "actual_author": "Alexander Hamilton",
+      "predicted_author": "Alexander Hamilton",
+      "correct": true
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED33",
+      "chapter": "33",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Alexander Hamilton",
+      "predicted_author": "Alexander Hamilton",
+      "correct": true
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED33",
+      "chapter": "33",
+      "passage_index": 2,
+      "tokens": 484,
+      "actual_author": "Alexander Hamilton",
+      "predicted_author": "Alexander Hamilton",
+      "correct": true
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED74",
+      "chapter": "74",
+      "passage_index": 1,
+      "tokens": 1000,
+      "actual_author": "Alexander Hamilton",
+      "predicted_author": "Alexander Hamilton",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "DOYLE-SH",
+      "chapter": "1",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Arthur Conan Doyle",
+      "predicted_author": "Arthur Conan Doyle",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "DOYLE-SH",
+      "chapter": "2",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "Arthur Conan Doyle",
+      "predicted_author": "Arthur Conan Doyle",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "DOYLE-SH",
+      "chapter": "4",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "Arthur Conan Doyle",
+      "predicted_author": "Arthur Conan Doyle",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "DOYLE-SH",
+      "chapter": "4",
+      "passage_index": 7,
+      "tokens": 1200,
+      "actual_author": "Arthur Conan Doyle",
+      "predicted_author": "Arthur Conan Doyle",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "DOYLE-SH",
+      "chapter": "5",
+      "passage_index": 3,
+      "tokens": 1200,
+      "actual_author": "Arthur Conan Doyle",
+      "predicted_author": "Arthur Conan Doyle",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "DOYLE-SH",
+      "chapter": "6",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "Arthur Conan Doyle",
+      "predicted_author": "Arthur Conan Doyle",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "DOYLE-SH",
+      "chapter": "6",
+      "passage_index": 7,
+      "tokens": 1200,
+      "actual_author": "Arthur Conan Doyle",
+      "predicted_author": "Arthur Conan Doyle",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "DOYLE-SH",
+      "chapter": "7",
+      "passage_index": 4,
+      "tokens": 1200,
+      "actual_author": "Arthur Conan Doyle",
+      "predicted_author": "Arthur Conan Doyle",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "DOYLE-SH",
+      "chapter": "8",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "Arthur Conan Doyle",
+      "predicted_author": "Arthur Conan Doyle",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "DOYLE-SH",
+      "chapter": "8",
+      "passage_index": 7,
+      "tokens": 1200,
+      "actual_author": "Arthur Conan Doyle",
+      "predicted_author": "Arthur Conan Doyle",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "DOYLE-SH",
+      "chapter": "9",
+      "passage_index": 4,
+      "tokens": 1200,
+      "actual_author": "Arthur Conan Doyle",
+      "predicted_author": "Arthur Conan Doyle",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "DOYLE-SH",
+      "chapter": "10",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "Arthur Conan Doyle",
+      "predicted_author": "Arthur Conan Doyle",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "DOYLE-SH",
+      "chapter": "10",
+      "passage_index": 6,
+      "tokens": 1200,
+      "actual_author": "Arthur Conan Doyle",
+      "predicted_author": "Arthur Conan Doyle",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "DOYLE-SH",
+      "chapter": "11",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "Arthur Conan Doyle",
+      "predicted_author": "Arthur Conan Doyle",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "DOYLE-SH",
+      "chapter": "11",
+      "passage_index": 7,
+      "tokens": 1145,
+      "actual_author": "Arthur Conan Doyle",
+      "predicted_author": "Arthur Conan Doyle",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "DOYLE-SH",
+      "chapter": "12",
+      "passage_index": 5,
+      "tokens": 1200,
+      "actual_author": "Arthur Conan Doyle",
+      "predicted_author": "Arthur Conan Doyle",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "DOYLE-SH",
+      "chapter": "13",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "Arthur Conan Doyle",
+      "predicted_author": "Arthur Conan Doyle",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "DOYLE-SH",
+      "chapter": "13",
+      "passage_index": 7,
+      "tokens": 1200,
+      "actual_author": "Arthur Conan Doyle",
+      "predicted_author": "Arthur Conan Doyle",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "DOYLE-SH",
+      "chapter": "14",
+      "passage_index": 4,
+      "tokens": 1200,
+      "actual_author": "Arthur Conan Doyle",
+      "predicted_author": "Arthur Conan Doyle",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "DOYLE-SH",
+      "chapter": "14",
+      "passage_index": 9,
+      "tokens": 390,
+      "actual_author": "Arthur Conan Doyle",
+      "predicted_author": "Arthur Conan Doyle",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "DICKENS-TC",
+      "chapter": "1",
+      "passage_index": 1,
+      "tokens": 1015,
+      "actual_author": "Charles Dickens",
+      "predicted_author": "Mark Twain",
+      "correct": false
+    },
+    {
+      "collection": "Novels",
+      "book": "DICKENS-TC",
+      "chapter": "4",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "Charles Dickens",
+      "predicted_author": "Charles Dickens",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "DICKENS-TC",
+      "chapter": "6",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Charles Dickens",
+      "predicted_author": "Charles Dickens",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "DICKENS-TC",
+      "chapter": "8",
+      "passage_index": 2,
+      "tokens": 1207,
+      "actual_author": "Charles Dickens",
+      "predicted_author": "Charles Dickens",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "DICKENS-TC",
+      "chapter": "10",
+      "passage_index": 2,
+      "tokens": 1062,
+      "actual_author": "Charles Dickens",
+      "predicted_author": "Charles Dickens",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "DICKENS-TC",
+      "chapter": "13",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Charles Dickens",
+      "predicted_author": "Mark Twain",
+      "correct": false
+    },
+    {
+      "collection": "Novels",
+      "book": "DICKENS-TC",
+      "chapter": "15",
+      "passage_index": 3,
+      "tokens": 1200,
+      "actual_author": "Charles Dickens",
+      "predicted_author": "Charles Dickens",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "DICKENS-TC",
+      "chapter": "17",
+      "passage_index": 2,
+      "tokens": 201,
+      "actual_author": "Charles Dickens",
+      "predicted_author": "Robert Louis Stevenson",
+      "correct": false
+    },
+    {
+      "collection": "Novels",
+      "book": "DICKENS-TC",
+      "chapter": "20",
+      "passage_index": 3,
+      "tokens": 1200,
+      "actual_author": "Charles Dickens",
+      "predicted_author": "Charles Dickens",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "DICKENS-TC",
+      "chapter": "22",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "Charles Dickens",
+      "predicted_author": "Charles Dickens",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "DICKENS-TC",
+      "chapter": "24",
+      "passage_index": 2,
+      "tokens": 1225,
+      "actual_author": "Charles Dickens",
+      "predicted_author": "Charles Dickens",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "DICKENS-TC",
+      "chapter": "27",
+      "passage_index": 3,
+      "tokens": 1200,
+      "actual_author": "Charles Dickens",
+      "predicted_author": "Charles Dickens",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "DICKENS-TC",
+      "chapter": "30",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Charles Dickens",
+      "predicted_author": "Charles Dickens",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "DICKENS-TC",
+      "chapter": "31",
+      "passage_index": 3,
+      "tokens": 1200,
+      "actual_author": "Charles Dickens",
+      "predicted_author": "Charles Dickens",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "DICKENS-TC",
+      "chapter": "34",
+      "passage_index": 2,
+      "tokens": 950,
+      "actual_author": "Charles Dickens",
+      "predicted_author": "Robert Louis Stevenson",
+      "correct": false
+    },
+    {
+      "collection": "Novels",
+      "book": "DICKENS-TC",
+      "chapter": "38",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Charles Dickens",
+      "predicted_author": "Charles Dickens",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "DICKENS-TC",
+      "chapter": "39",
+      "passage_index": 3,
+      "tokens": 1200,
+      "actual_author": "Charles Dickens",
+      "predicted_author": "Charles Dickens",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "DICKENS-TC",
+      "chapter": "41",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Charles Dickens",
+      "predicted_author": "Charles Dickens",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "DICKENS-TC",
+      "chapter": "43",
+      "passage_index": 3,
+      "tokens": 1200,
+      "actual_author": "Charles Dickens",
+      "predicted_author": "Charles Dickens",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "DICKENS-TC",
+      "chapter": "45",
+      "passage_index": 2,
+      "tokens": 1041,
+      "actual_author": "Charles Dickens",
+      "predicted_author": "Charles Dickens",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "BRONTE-JE",
+      "chapter": "1",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Charlotte Bronte",
+      "predicted_author": "Charlotte Bronte",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "BRONTE-JE",
+      "chapter": "4",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Charlotte Bronte",
+      "predicted_author": "Charlotte Bronte",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "BRONTE-JE",
+      "chapter": "7",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Charlotte Bronte",
+      "predicted_author": "Charlotte Bronte",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "BRONTE-JE",
+      "chapter": "10",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Charlotte Bronte",
+      "predicted_author": "Charlotte Bronte",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "BRONTE-JE",
+      "chapter": "12",
+      "passage_index": 3,
+      "tokens": 1200,
+      "actual_author": "Charlotte Bronte",
+      "predicted_author": "Charlotte Bronte",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "BRONTE-JE",
+      "chapter": "14",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "Charlotte Bronte",
+      "predicted_author": "Charlotte Bronte",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "BRONTE-JE",
+      "chapter": "16",
+      "passage_index": 3,
+      "tokens": 1200,
+      "actual_author": "Charlotte Bronte",
+      "predicted_author": "Charlotte Bronte",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "BRONTE-JE",
+      "chapter": "18",
+      "passage_index": 3,
+      "tokens": 1200,
+      "actual_author": "Charlotte Bronte",
+      "predicted_author": "Charlotte Bronte",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "BRONTE-JE",
+      "chapter": "19",
+      "passage_index": 5,
+      "tokens": 1143,
+      "actual_author": "Charlotte Bronte",
+      "predicted_author": "Charlotte Bronte",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "BRONTE-JE",
+      "chapter": "21",
+      "passage_index": 5,
+      "tokens": 1080,
+      "actual_author": "Charlotte Bronte",
+      "predicted_author": "Charlotte Bronte",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "BRONTE-JE",
+      "chapter": "23",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Charlotte Bronte",
+      "predicted_author": "Charlotte Bronte",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "BRONTE-JE",
+      "chapter": "25",
+      "passage_index": 3,
+      "tokens": 1200,
+      "actual_author": "Charlotte Bronte",
+      "predicted_author": "Charlotte Bronte",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "BRONTE-JE",
+      "chapter": "27",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Charlotte Bronte",
+      "predicted_author": "Charlotte Bronte",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "BRONTE-JE",
+      "chapter": "28",
+      "passage_index": 5,
+      "tokens": 1200,
+      "actual_author": "Charlotte Bronte",
+      "predicted_author": "Charlotte Bronte",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "BRONTE-JE",
+      "chapter": "29",
+      "passage_index": 4,
+      "tokens": 1200,
+      "actual_author": "Charlotte Bronte",
+      "predicted_author": "Charlotte Bronte",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "BRONTE-JE",
+      "chapter": "31",
+      "passage_index": 3,
+      "tokens": 1368,
+      "actual_author": "Charlotte Bronte",
+      "predicted_author": "Charlotte Bronte",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "BRONTE-JE",
+      "chapter": "34",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "Charlotte Bronte",
+      "predicted_author": "Charlotte Bronte",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "BRONTE-JE",
+      "chapter": "35",
+      "passage_index": 7,
+      "tokens": 1200,
+      "actual_author": "Charlotte Bronte",
+      "predicted_author": "Charlotte Bronte",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "BRONTE-JE",
+      "chapter": "37",
+      "passage_index": 4,
+      "tokens": 369,
+      "actual_author": "Charlotte Bronte",
+      "predicted_author": "Charlotte Bronte",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "BRONTE-JE",
+      "chapter": "39",
+      "passage_index": 2,
+      "tokens": 636,
+      "actual_author": "Charlotte Bronte",
+      "predicted_author": "Charlotte Bronte",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "CHESTERTON-OR",
+      "chapter": "1",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "G. K. Chesterton",
+      "predicted_author": "G. K. Chesterton",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "CHESTERTON-OR",
+      "chapter": "2",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "G. K. Chesterton",
+      "predicted_author": "G. K. Chesterton",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "CHESTERTON-OR",
+      "chapter": "2",
+      "passage_index": 4,
+      "tokens": 1200,
+      "actual_author": "G. K. Chesterton",
+      "predicted_author": "G. K. Chesterton",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "CHESTERTON-OR",
+      "chapter": "3",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "G. K. Chesterton",
+      "predicted_author": "G. K. Chesterton",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "CHESTERTON-OR",
+      "chapter": "3",
+      "passage_index": 4,
+      "tokens": 1200,
+      "actual_author": "G. K. Chesterton",
+      "predicted_author": "G. K. Chesterton",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "CHESTERTON-OR",
+      "chapter": "4",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "G. K. Chesterton",
+      "predicted_author": "G. K. Chesterton",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "CHESTERTON-OR",
+      "chapter": "4",
+      "passage_index": 4,
+      "tokens": 1200,
+      "actual_author": "G. K. Chesterton",
+      "predicted_author": "G. K. Chesterton",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "CHESTERTON-OR",
+      "chapter": "4",
+      "passage_index": 7,
+      "tokens": 1354,
+      "actual_author": "G. K. Chesterton",
+      "predicted_author": "G. K. Chesterton",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "CHESTERTON-OR",
+      "chapter": "5",
+      "passage_index": 3,
+      "tokens": 1200,
+      "actual_author": "G. K. Chesterton",
+      "predicted_author": "G. K. Chesterton",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "CHESTERTON-OR",
+      "chapter": "5",
+      "passage_index": 6,
+      "tokens": 522,
+      "actual_author": "G. K. Chesterton",
+      "predicted_author": "G. K. Chesterton",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "CHESTERTON-OR",
+      "chapter": "6",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "G. K. Chesterton",
+      "predicted_author": "G. K. Chesterton",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "CHESTERTON-OR",
+      "chapter": "6",
+      "passage_index": 5,
+      "tokens": 1200,
+      "actual_author": "G. K. Chesterton",
+      "predicted_author": "G. K. Chesterton",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "CHESTERTON-OR",
+      "chapter": "6",
+      "passage_index": 8,
+      "tokens": 389,
+      "actual_author": "G. K. Chesterton",
+      "predicted_author": "G. K. Chesterton",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "CHESTERTON-OR",
+      "chapter": "7",
+      "passage_index": 3,
+      "tokens": 1200,
+      "actual_author": "G. K. Chesterton",
+      "predicted_author": "G. K. Chesterton",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "CHESTERTON-OR",
+      "chapter": "7",
+      "passage_index": 6,
+      "tokens": 1200,
+      "actual_author": "G. K. Chesterton",
+      "predicted_author": "G. K. Chesterton",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "CHESTERTON-OR",
+      "chapter": "8",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "G. K. Chesterton",
+      "predicted_author": "G. K. Chesterton",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "CHESTERTON-OR",
+      "chapter": "8",
+      "passage_index": 4,
+      "tokens": 1200,
+      "actual_author": "G. K. Chesterton",
+      "predicted_author": "G. K. Chesterton",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "CHESTERTON-OR",
+      "chapter": "9",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "G. K. Chesterton",
+      "predicted_author": "G. K. Chesterton",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "CHESTERTON-OR",
+      "chapter": "9",
+      "passage_index": 4,
+      "tokens": 1200,
+      "actual_author": "G. K. Chesterton",
+      "predicted_author": "G. K. Chesterton",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "CHESTERTON-OR",
+      "chapter": "9",
+      "passage_index": 7,
+      "tokens": 1374,
+      "actual_author": "G. K. Chesterton",
+      "predicted_author": "G. K. Chesterton",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "ELIOT-MM",
+      "chapter": "1",
+      "passage_index": 1,
+      "tokens": 501,
+      "actual_author": "George Eliot",
+      "predicted_author": "H. G. Wells",
+      "correct": false
+    },
+    {
+      "collection": "Novels",
+      "book": "ELIOT-MM",
+      "chapter": "6",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "George Eliot",
+      "predicted_author": "George Eliot",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "ELIOT-MM",
+      "chapter": "11",
+      "passage_index": 3,
+      "tokens": 1200,
+      "actual_author": "George Eliot",
+      "predicted_author": "Charlotte Bronte",
+      "correct": false
+    },
+    {
+      "collection": "Novels",
+      "book": "ELIOT-MM",
+      "chapter": "15",
+      "passage_index": 3,
+      "tokens": 1159,
+      "actual_author": "George Eliot",
+      "predicted_author": "Jane Austen",
+      "correct": false
+    },
+    {
+      "collection": "Novels",
+      "book": "ELIOT-MM",
+      "chapter": "19",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "George Eliot",
+      "predicted_author": "G. K. Chesterton",
+      "correct": false
+    },
+    {
+      "collection": "Novels",
+      "book": "ELIOT-MM",
+      "chapter": "23",
+      "passage_index": 5,
+      "tokens": 847,
+      "actual_author": "George Eliot",
+      "predicted_author": "Charles Dickens",
+      "correct": false
+    },
+    {
+      "collection": "Novels",
+      "book": "ELIOT-MM",
+      "chapter": "28",
+      "passage_index": 3,
+      "tokens": 1065,
+      "actual_author": "George Eliot",
+      "predicted_author": "Thomas Hardy",
+      "correct": false
+    },
+    {
+      "collection": "Novels",
+      "book": "ELIOT-MM",
+      "chapter": "33",
+      "passage_index": 4,
+      "tokens": 863,
+      "actual_author": "George Eliot",
+      "predicted_author": "Charlotte Bronte",
+      "correct": false
+    },
+    {
+      "collection": "Novels",
+      "book": "ELIOT-MM",
+      "chapter": "38",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "George Eliot",
+      "predicted_author": "George Eliot",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "ELIOT-MM",
+      "chapter": "41",
+      "passage_index": 4,
+      "tokens": 1200,
+      "actual_author": "George Eliot",
+      "predicted_author": "George Eliot",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "ELIOT-MM",
+      "chapter": "46",
+      "passage_index": 4,
+      "tokens": 1200,
+      "actual_author": "George Eliot",
+      "predicted_author": "Thomas Hardy",
+      "correct": false
+    },
+    {
+      "collection": "Novels",
+      "book": "ELIOT-MM",
+      "chapter": "51",
+      "passage_index": 4,
+      "tokens": 512,
+      "actual_author": "George Eliot",
+      "predicted_author": "George Eliot",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "ELIOT-MM",
+      "chapter": "55",
+      "passage_index": 4,
+      "tokens": 1025,
+      "actual_author": "George Eliot",
+      "predicted_author": "George Eliot",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "ELIOT-MM",
+      "chapter": "59",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "George Eliot",
+      "predicted_author": "George Eliot",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "ELIOT-MM",
+      "chapter": "63",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "George Eliot",
+      "predicted_author": "George Eliot",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "ELIOT-MM",
+      "chapter": "67",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "George Eliot",
+      "predicted_author": "George Eliot",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "ELIOT-MM",
+      "chapter": "71",
+      "passage_index": 3,
+      "tokens": 1200,
+      "actual_author": "George Eliot",
+      "predicted_author": "George Eliot",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "ELIOT-MM",
+      "chapter": "76",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "George Eliot",
+      "predicted_author": "George Eliot",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "ELIOT-MM",
+      "chapter": "82",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "George Eliot",
+      "predicted_author": "George Eliot",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "ELIOT-MM",
+      "chapter": "88",
+      "passage_index": 3,
+      "tokens": 431,
+      "actual_author": "George Eliot",
+      "predicted_author": "George Eliot",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "WELLS-WW",
+      "chapter": "1",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "H. G. Wells",
+      "predicted_author": "H. G. Wells",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "WELLS-WW",
+      "chapter": "3",
+      "passage_index": 1,
+      "tokens": 1019,
+      "actual_author": "H. G. Wells",
+      "predicted_author": "H. G. Wells",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "WELLS-WW",
+      "chapter": "5",
+      "passage_index": 2,
+      "tokens": 288,
+      "actual_author": "H. G. Wells",
+      "predicted_author": "H. G. Wells",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "WELLS-WW",
+      "chapter": "8",
+      "passage_index": 1,
+      "tokens": 980,
+      "actual_author": "H. G. Wells",
+      "predicted_author": "H. G. Wells",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "WELLS-WW",
+      "chapter": "10",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "H. G. Wells",
+      "predicted_author": "H. G. Wells",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "WELLS-WW",
+      "chapter": "11",
+      "passage_index": 2,
+      "tokens": 832,
+      "actual_author": "H. G. Wells",
+      "predicted_author": "H. G. Wells",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "WELLS-WW",
+      "chapter": "12",
+      "passage_index": 3,
+      "tokens": 1200,
+      "actual_author": "H. G. Wells",
+      "predicted_author": "H. G. Wells",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "WELLS-WW",
+      "chapter": "13",
+      "passage_index": 2,
+      "tokens": 581,
+      "actual_author": "H. G. Wells",
+      "predicted_author": "Arthur Conan Doyle",
+      "correct": false
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "WELLS-WW",
+      "chapter": "14",
+      "passage_index": 3,
+      "tokens": 1356,
+      "actual_author": "H. G. Wells",
+      "predicted_author": "Mark Twain",
+      "correct": false
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "WELLS-WW",
+      "chapter": "15",
+      "passage_index": 3,
+      "tokens": 420,
+      "actual_author": "H. G. Wells",
+      "predicted_author": "H. G. Wells",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "WELLS-WW",
+      "chapter": "16",
+      "passage_index": 3,
+      "tokens": 1200,
+      "actual_author": "H. G. Wells",
+      "predicted_author": "Charles Dickens",
+      "correct": false
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "WELLS-WW",
+      "chapter": "17",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "H. G. Wells",
+      "predicted_author": "Arthur Conan Doyle",
+      "correct": false
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "WELLS-WW",
+      "chapter": "18",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "H. G. Wells",
+      "predicted_author": "H. G. Wells",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "WELLS-WW",
+      "chapter": "19",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "H. G. Wells",
+      "predicted_author": "H. G. Wells",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "WELLS-WW",
+      "chapter": "20",
+      "passage_index": 2,
+      "tokens": 758,
+      "actual_author": "H. G. Wells",
+      "predicted_author": "H. G. Wells",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "WELLS-WW",
+      "chapter": "22",
+      "passage_index": 1,
+      "tokens": 965,
+      "actual_author": "H. G. Wells",
+      "predicted_author": "H. G. Wells",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "WELLS-WW",
+      "chapter": "24",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "H. G. Wells",
+      "predicted_author": "Mark Twain",
+      "correct": false
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "WELLS-WW",
+      "chapter": "24",
+      "passage_index": 5,
+      "tokens": 790,
+      "actual_author": "H. G. Wells",
+      "predicted_author": "H. G. Wells",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "WELLS-WW",
+      "chapter": "25",
+      "passage_index": 3,
+      "tokens": 704,
+      "actual_author": "H. G. Wells",
+      "predicted_author": "H. G. Wells",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "WELLS-WW",
+      "chapter": "27",
+      "passage_index": 1,
+      "tokens": 1378,
+      "actual_author": "H. G. Wells",
+      "predicted_author": "H. G. Wells",
+      "correct": true
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED47",
+      "chapter": "47",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "James Madison",
+      "predicted_author": "James Madison",
+      "correct": true
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED47",
+      "chapter": "47",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "James Madison",
+      "predicted_author": "Alexander Hamilton",
+      "correct": false
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED47",
+      "chapter": "47",
+      "passage_index": 3,
+      "tokens": 339,
+      "actual_author": "James Madison",
+      "predicted_author": "James Madison",
+      "correct": true
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED37",
+      "chapter": "37",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "James Madison",
+      "predicted_author": "James Madison",
+      "correct": true
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED37",
+      "chapter": "37",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "James Madison",
+      "predicted_author": "James Madison",
+      "correct": true
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED37",
+      "chapter": "37",
+      "passage_index": 3,
+      "tokens": 309,
+      "actual_author": "James Madison",
+      "predicted_author": "James Madison",
+      "correct": true
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED39",
+      "chapter": "39",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "James Madison",
+      "predicted_author": "James Madison",
+      "correct": true
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED39",
+      "chapter": "39",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "James Madison",
+      "predicted_author": "James Madison",
+      "correct": true
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED39",
+      "chapter": "39",
+      "passage_index": 3,
+      "tokens": 206,
+      "actual_author": "James Madison",
+      "predicted_author": "James Madison",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "AUSTEN-EM",
+      "chapter": "1",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Jane Austen",
+      "predicted_author": "Jane Austen",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "AUSTEN-EM",
+      "chapter": "4",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Jane Austen",
+      "predicted_author": "Jane Austen",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "AUSTEN-EM",
+      "chapter": "7",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Jane Austen",
+      "predicted_author": "Jane Austen",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "AUSTEN-EM",
+      "chapter": "9",
+      "passage_index": 3,
+      "tokens": 1200,
+      "actual_author": "Jane Austen",
+      "predicted_author": "Jane Austen",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "AUSTEN-EM",
+      "chapter": "12",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "Jane Austen",
+      "predicted_author": "Jane Austen",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "AUSTEN-EM",
+      "chapter": "15",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "Jane Austen",
+      "predicted_author": "Jane Austen",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "AUSTEN-EM",
+      "chapter": "19",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "Jane Austen",
+      "predicted_author": "Jane Austen",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "AUSTEN-EM",
+      "chapter": "22",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Jane Austen",
+      "predicted_author": "Jane Austen",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "AUSTEN-EM",
+      "chapter": "25",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Jane Austen",
+      "predicted_author": "Jane Austen",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "AUSTEN-EM",
+      "chapter": "27",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Jane Austen",
+      "predicted_author": "Jane Austen",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "AUSTEN-EM",
+      "chapter": "30",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Jane Austen",
+      "predicted_author": "Jane Austen",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "AUSTEN-EM",
+      "chapter": "33",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Jane Austen",
+      "predicted_author": "Jane Austen",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "AUSTEN-EM",
+      "chapter": "36",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Jane Austen",
+      "predicted_author": "Jane Austen",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "AUSTEN-EM",
+      "chapter": "39",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Jane Austen",
+      "predicted_author": "Jane Austen",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "AUSTEN-EM",
+      "chapter": "42",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "Jane Austen",
+      "predicted_author": "Jane Austen",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "AUSTEN-EM",
+      "chapter": "44",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "Jane Austen",
+      "predicted_author": "Jane Austen",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "AUSTEN-EM",
+      "chapter": "47",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "Jane Austen",
+      "predicted_author": "Jane Austen",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "AUSTEN-EM",
+      "chapter": "49",
+      "passage_index": 3,
+      "tokens": 1032,
+      "actual_author": "Jane Austen",
+      "predicted_author": "Jane Austen",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "AUSTEN-EM",
+      "chapter": "53",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "Jane Austen",
+      "predicted_author": "Jane Austen",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "AUSTEN-EM",
+      "chapter": "56",
+      "passage_index": 1,
+      "tokens": 1216,
+      "actual_author": "Jane Austen",
+      "predicted_author": "Jane Austen",
+      "correct": true
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED64",
+      "chapter": "64",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "John Jay",
+      "predicted_author": "Alexander Hamilton",
+      "correct": false
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED64",
+      "chapter": "64",
+      "passage_index": 2,
+      "tokens": 1105,
+      "actual_author": "John Jay",
+      "predicted_author": "Alexander Hamilton",
+      "correct": false
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "TWAIN-HF",
+      "chapter": "1",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Mark Twain",
+      "predicted_author": "Mark Twain",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "TWAIN-HF",
+      "chapter": "3",
+      "passage_index": 2,
+      "tokens": 515,
+      "actual_author": "Mark Twain",
+      "predicted_author": "Mark Twain",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "TWAIN-HF",
+      "chapter": "6",
+      "passage_index": 3,
+      "tokens": 606,
+      "actual_author": "Mark Twain",
+      "predicted_author": "Robert Louis Stevenson",
+      "correct": false
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "TWAIN-HF",
+      "chapter": "8",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "Mark Twain",
+      "predicted_author": "Mark Twain",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "TWAIN-HF",
+      "chapter": "10",
+      "passage_index": 2,
+      "tokens": 259,
+      "actual_author": "Mark Twain",
+      "predicted_author": "Robert Louis Stevenson",
+      "correct": false
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "TWAIN-HF",
+      "chapter": "12",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "Mark Twain",
+      "predicted_author": "Mark Twain",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "TWAIN-HF",
+      "chapter": "15",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Mark Twain",
+      "predicted_author": "Mark Twain",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "TWAIN-HF",
+      "chapter": "17",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "Mark Twain",
+      "predicted_author": "Mark Twain",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "TWAIN-HF",
+      "chapter": "19",
+      "passage_index": 3,
+      "tokens": 1200,
+      "actual_author": "Mark Twain",
+      "predicted_author": "Mark Twain",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "TWAIN-HF",
+      "chapter": "21",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "Mark Twain",
+      "predicted_author": "Mark Twain",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "TWAIN-HF",
+      "chapter": "23",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Mark Twain",
+      "predicted_author": "Mark Twain",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "TWAIN-HF",
+      "chapter": "27",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Mark Twain",
+      "predicted_author": "Mark Twain",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "TWAIN-HF",
+      "chapter": "28",
+      "passage_index": 3,
+      "tokens": 539,
+      "actual_author": "Mark Twain",
+      "predicted_author": "Mark Twain",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "TWAIN-HF",
+      "chapter": "32",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Mark Twain",
+      "predicted_author": "Mark Twain",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "TWAIN-HF",
+      "chapter": "34",
+      "passage_index": 3,
+      "tokens": 1336,
+      "actual_author": "Mark Twain",
+      "predicted_author": "Mark Twain",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "TWAIN-HF",
+      "chapter": "36",
+      "passage_index": 3,
+      "tokens": 275,
+      "actual_author": "Mark Twain",
+      "predicted_author": "Mark Twain",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "TWAIN-HF",
+      "chapter": "39",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Mark Twain",
+      "predicted_author": "Mark Twain",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "TWAIN-HF",
+      "chapter": "41",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Mark Twain",
+      "predicted_author": "Mark Twain",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "TWAIN-HF",
+      "chapter": "44",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Mark Twain",
+      "predicted_author": "Mark Twain",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "TWAIN-HF",
+      "chapter": "46",
+      "passage_index": 1,
+      "tokens": 659,
+      "actual_author": "Mark Twain",
+      "predicted_author": "Mark Twain",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "STEVENSON-VP",
+      "chapter": "1",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Robert Louis Stevenson",
+      "predicted_author": "G. K. Chesterton",
+      "correct": false
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "STEVENSON-VP",
+      "chapter": "1",
+      "passage_index": 3,
+      "tokens": 1200,
+      "actual_author": "Robert Louis Stevenson",
+      "predicted_author": "H. G. Wells",
+      "correct": false
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "STEVENSON-VP",
+      "chapter": "2",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Robert Louis Stevenson",
+      "predicted_author": "Robert Louis Stevenson",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "STEVENSON-VP",
+      "chapter": "2",
+      "passage_index": 3,
+      "tokens": 929,
+      "actual_author": "Robert Louis Stevenson",
+      "predicted_author": "Robert Louis Stevenson",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "STEVENSON-VP",
+      "chapter": "3",
+      "passage_index": 3,
+      "tokens": 1096,
+      "actual_author": "Robert Louis Stevenson",
+      "predicted_author": "George Eliot",
+      "correct": false
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "STEVENSON-VP",
+      "chapter": "4",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "Robert Louis Stevenson",
+      "predicted_author": "Robert Louis Stevenson",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "STEVENSON-VP",
+      "chapter": "5",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Robert Louis Stevenson",
+      "predicted_author": "H. G. Wells",
+      "correct": false
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "STEVENSON-VP",
+      "chapter": "5",
+      "passage_index": 4,
+      "tokens": 1261,
+      "actual_author": "Robert Louis Stevenson",
+      "predicted_author": "H. G. Wells",
+      "correct": false
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "STEVENSON-VP",
+      "chapter": "6",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "Robert Louis Stevenson",
+      "predicted_author": "Robert Louis Stevenson",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "STEVENSON-VP",
+      "chapter": "7",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Robert Louis Stevenson",
+      "predicted_author": "Robert Louis Stevenson",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "STEVENSON-VP",
+      "chapter": "7",
+      "passage_index": 4,
+      "tokens": 1143,
+      "actual_author": "Robert Louis Stevenson",
+      "predicted_author": "Robert Louis Stevenson",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "STEVENSON-VP",
+      "chapter": "8",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "Robert Louis Stevenson",
+      "predicted_author": "George Eliot",
+      "correct": false
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "STEVENSON-VP",
+      "chapter": "9",
+      "passage_index": 1,
+      "tokens": 1168,
+      "actual_author": "Robert Louis Stevenson",
+      "predicted_author": "Robert Louis Stevenson",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "STEVENSON-VP",
+      "chapter": "10",
+      "passage_index": 3,
+      "tokens": 1200,
+      "actual_author": "Robert Louis Stevenson",
+      "predicted_author": "Robert Louis Stevenson",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "STEVENSON-VP",
+      "chapter": "11",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Robert Louis Stevenson",
+      "predicted_author": "Arthur Conan Doyle",
+      "correct": false
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "STEVENSON-VP",
+      "chapter": "11",
+      "passage_index": 3,
+      "tokens": 556,
+      "actual_author": "Robert Louis Stevenson",
+      "predicted_author": "H. G. Wells",
+      "correct": false
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "STEVENSON-VP",
+      "chapter": "12",
+      "passage_index": 3,
+      "tokens": 1200,
+      "actual_author": "Robert Louis Stevenson",
+      "predicted_author": "H. G. Wells",
+      "correct": false
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "STEVENSON-VP",
+      "chapter": "13",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Robert Louis Stevenson",
+      "predicted_author": "Robert Louis Stevenson",
+      "correct": true
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "STEVENSON-VP",
+      "chapter": "13",
+      "passage_index": 3,
+      "tokens": 774,
+      "actual_author": "Robert Louis Stevenson",
+      "predicted_author": "George Eliot",
+      "correct": false
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "STEVENSON-VP",
+      "chapter": "15",
+      "passage_index": 1,
+      "tokens": 1350,
+      "actual_author": "Robert Louis Stevenson",
+      "predicted_author": "Mark Twain",
+      "correct": false
+    },
+    {
+      "collection": "Novels",
+      "book": "HARDY-FM",
+      "chapter": "1",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Thomas Hardy",
+      "predicted_author": "Thomas Hardy",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "HARDY-FM",
+      "chapter": "3",
+      "passage_index": 3,
+      "tokens": 473,
+      "actual_author": "Thomas Hardy",
+      "predicted_author": "Thomas Hardy",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "HARDY-FM",
+      "chapter": "6",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "Thomas Hardy",
+      "predicted_author": "Thomas Hardy",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "HARDY-FM",
+      "chapter": "8",
+      "passage_index": 5,
+      "tokens": 1200,
+      "actual_author": "Thomas Hardy",
+      "predicted_author": "Thomas Hardy",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "HARDY-FM",
+      "chapter": "12",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Thomas Hardy",
+      "predicted_author": "Thomas Hardy",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "HARDY-FM",
+      "chapter": "15",
+      "passage_index": 3,
+      "tokens": 1248,
+      "actual_author": "Thomas Hardy",
+      "predicted_author": "Charles Dickens",
+      "correct": false
+    },
+    {
+      "collection": "Novels",
+      "book": "HARDY-FM",
+      "chapter": "20",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Thomas Hardy",
+      "predicted_author": "Thomas Hardy",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "HARDY-FM",
+      "chapter": "23",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Thomas Hardy",
+      "predicted_author": "Thomas Hardy",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "HARDY-FM",
+      "chapter": "27",
+      "passage_index": 1,
+      "tokens": 1073,
+      "actual_author": "Thomas Hardy",
+      "predicted_author": "Thomas Hardy",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "HARDY-FM",
+      "chapter": "30",
+      "passage_index": 2,
+      "tokens": 491,
+      "actual_author": "Thomas Hardy",
+      "predicted_author": "Thomas Hardy",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "HARDY-FM",
+      "chapter": "33",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Thomas Hardy",
+      "predicted_author": "Thomas Hardy",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "HARDY-FM",
+      "chapter": "36",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Thomas Hardy",
+      "predicted_author": "Charles Dickens",
+      "correct": false
+    },
+    {
+      "collection": "Novels",
+      "book": "HARDY-FM",
+      "chapter": "40",
+      "passage_index": 2,
+      "tokens": 1141,
+      "actual_author": "Thomas Hardy",
+      "predicted_author": "Thomas Hardy",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "HARDY-FM",
+      "chapter": "42",
+      "passage_index": 4,
+      "tokens": 498,
+      "actual_author": "Thomas Hardy",
+      "predicted_author": "George Eliot",
+      "correct": false
+    },
+    {
+      "collection": "Novels",
+      "book": "HARDY-FM",
+      "chapter": "45",
+      "passage_index": 2,
+      "tokens": 413,
+      "actual_author": "Thomas Hardy",
+      "predicted_author": "Charles Dickens",
+      "correct": false
+    },
+    {
+      "collection": "Novels",
+      "book": "HARDY-FM",
+      "chapter": "49",
+      "passage_index": 1,
+      "tokens": 1200,
+      "actual_author": "Thomas Hardy",
+      "predicted_author": "George Eliot",
+      "correct": false
+    },
+    {
+      "collection": "Novels",
+      "book": "HARDY-FM",
+      "chapter": "51",
+      "passage_index": 2,
+      "tokens": 1200,
+      "actual_author": "Thomas Hardy",
+      "predicted_author": "Thomas Hardy",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "HARDY-FM",
+      "chapter": "57",
+      "passage_index": 1,
+      "tokens": 634,
+      "actual_author": "Thomas Hardy",
+      "predicted_author": "George Eliot",
+      "correct": false
+    },
+    {
+      "collection": "Novels",
+      "book": "HARDY-FM",
+      "chapter": "60",
+      "passage_index": 2,
+      "tokens": 320,
+      "actual_author": "Thomas Hardy",
+      "predicted_author": "Thomas Hardy",
+      "correct": true
+    },
+    {
+      "collection": "Novels",
+      "book": "HARDY-FM",
+      "chapter": "64",
+      "passage_index": 2,
+      "tokens": 686,
+      "actual_author": "Thomas Hardy",
+      "predicted_author": "Thomas Hardy",
+      "correct": true
+    }
+  ],
+  "book_predictions": [
+    {
+      "collection": "Federalist",
+      "book": "FED59",
+      "book_title": "Federalist No. 59",
+      "author": "Alexander Hamilton",
+      "verse_count": 11,
+      "available_passages": 2,
+      "sampled_passages": 2,
+      "predicted_author": "Alexander Hamilton",
+      "correct": true,
+      "passage_votes": {
+        "Alexander Hamilton": 2
+      }
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED13",
+      "book_title": "Federalist No. 13",
+      "author": "Alexander Hamilton",
+      "verse_count": 4,
+      "available_passages": 1,
+      "sampled_passages": 1,
+      "predicted_author": "Alexander Hamilton",
+      "correct": true,
+      "passage_votes": {
+        "Alexander Hamilton": 1
+      }
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED81",
+      "book_title": "Federalist No. 81",
+      "author": "Alexander Hamilton",
+      "verse_count": 27,
+      "available_passages": 4,
+      "sampled_passages": 4,
+      "predicted_author": "Alexander Hamilton",
+      "correct": true,
+      "passage_votes": {
+        "Alexander Hamilton": 4
+      }
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED73",
+      "book_title": "Federalist No. 73",
+      "author": "Alexander Hamilton",
+      "verse_count": 16,
+      "available_passages": 2,
+      "sampled_passages": 2,
+      "predicted_author": "Alexander Hamilton",
+      "correct": true,
+      "passage_votes": {
+        "Alexander Hamilton": 2
+      }
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED85",
+      "book_title": "Federalist No. 85",
+      "author": "Alexander Hamilton",
+      "verse_count": 18,
+      "available_passages": 3,
+      "sampled_passages": 3,
+      "predicted_author": "Alexander Hamilton",
+      "correct": true,
+      "passage_votes": {
+        "Alexander Hamilton": 3
+      }
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED27",
+      "book_title": "Federalist No. 27",
+      "author": "Alexander Hamilton",
+      "verse_count": 7,
+      "available_passages": 2,
+      "sampled_passages": 2,
+      "predicted_author": "Alexander Hamilton",
+      "correct": true,
+      "passage_votes": {
+        "Alexander Hamilton": 2
+      }
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED11",
+      "book_title": "Federalist No. 11",
+      "author": "Alexander Hamilton",
+      "verse_count": 15,
+      "available_passages": 2,
+      "sampled_passages": 2,
+      "predicted_author": "Alexander Hamilton",
+      "correct": true,
+      "passage_votes": {
+        "Alexander Hamilton": 2
+      }
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED83",
+      "book_title": "Federalist No. 83",
+      "author": "Alexander Hamilton",
+      "verse_count": 41,
+      "available_passages": 5,
+      "sampled_passages": 5,
+      "predicted_author": "Alexander Hamilton",
+      "correct": true,
+      "passage_votes": {
+        "Alexander Hamilton": 5
+      }
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED69",
+      "book_title": "Federalist No. 69",
+      "author": "Alexander Hamilton",
+      "verse_count": 14,
+      "available_passages": 3,
+      "sampled_passages": 3,
+      "predicted_author": "Alexander Hamilton",
+      "correct": true,
+      "passage_votes": {
+        "Alexander Hamilton": 3
+      }
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED33",
+      "book_title": "Federalist No. 33",
+      "author": "Alexander Hamilton",
+      "verse_count": 8,
+      "available_passages": 2,
+      "sampled_passages": 2,
+      "predicted_author": "Alexander Hamilton",
+      "correct": true,
+      "passage_votes": {
+        "Alexander Hamilton": 2
+      }
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED74",
+      "book_title": "Federalist No. 74",
+      "author": "Alexander Hamilton",
+      "verse_count": 4,
+      "available_passages": 1,
+      "sampled_passages": 1,
+      "predicted_author": "Alexander Hamilton",
+      "correct": true,
+      "passage_votes": {
+        "Alexander Hamilton": 1
+      }
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "DOYLE-SH",
+      "book_title": "The Adventures of Sherlock Holmes",
+      "author": "Arthur Conan Doyle",
+      "verse_count": 2527,
+      "available_passages": 91,
+      "sampled_passages": 20,
+      "predicted_author": "Arthur Conan Doyle",
+      "correct": true,
+      "passage_votes": {
+        "Arthur Conan Doyle": 20
+      }
+    },
+    {
+      "collection": "Novels",
+      "book": "DICKENS-TC",
+      "book_title": "A Tale of Two Cities",
+      "author": "Charles Dickens",
+      "verse_count": 3259,
+      "available_passages": 128,
+      "sampled_passages": 20,
+      "predicted_author": "Charles Dickens",
+      "correct": true,
+      "passage_votes": {
+        "Charles Dickens": 16,
+        "Mark Twain": 2,
+        "Robert Louis Stevenson": 2
+      }
+    },
+    {
+      "collection": "Novels",
+      "book": "BRONTE-JE",
+      "book_title": "Jane Eyre",
+      "author": "Charlotte Bronte",
+      "verse_count": 4047,
+      "available_passages": 169,
+      "sampled_passages": 20,
+      "predicted_author": "Charlotte Bronte",
+      "correct": true,
+      "passage_votes": {
+        "Charlotte Bronte": 20
+      }
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "CHESTERTON-OR",
+      "book_title": "Orthodoxy",
+      "author": "G. K. Chesterton",
+      "verse_count": 235,
+      "available_passages": 56,
+      "sampled_passages": 20,
+      "predicted_author": "G. K. Chesterton",
+      "correct": true,
+      "passage_votes": {
+        "G. K. Chesterton": 20
+      }
+    },
+    {
+      "collection": "Novels",
+      "book": "ELIOT-MM",
+      "book_title": "Middlemarch",
+      "author": "George Eliot",
+      "verse_count": 4674,
+      "available_passages": 299,
+      "sampled_passages": 20,
+      "predicted_author": "George Eliot",
+      "correct": true,
+      "passage_votes": {
+        "Charles Dickens": 1,
+        "Charlotte Bronte": 2,
+        "G. K. Chesterton": 1,
+        "George Eliot": 12,
+        "H. G. Wells": 1,
+        "Jane Austen": 1,
+        "Thomas Hardy": 2
+      }
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "WELLS-WW",
+      "book_title": "The War of the Worlds",
+      "author": "H. G. Wells",
+      "verse_count": 883,
+      "available_passages": 58,
+      "sampled_passages": 20,
+      "predicted_author": "H. G. Wells",
+      "correct": true,
+      "passage_votes": {
+        "Arthur Conan Doyle": 2,
+        "Charles Dickens": 1,
+        "H. G. Wells": 15,
+        "Mark Twain": 2
+      }
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED47",
+      "book_title": "Federalist No. 47",
+      "author": "James Madison",
+      "verse_count": 21,
+      "available_passages": 3,
+      "sampled_passages": 3,
+      "predicted_author": "James Madison",
+      "correct": true,
+      "passage_votes": {
+        "Alexander Hamilton": 1,
+        "James Madison": 2
+      }
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED37",
+      "book_title": "Federalist No. 37",
+      "author": "James Madison",
+      "verse_count": 15,
+      "available_passages": 3,
+      "sampled_passages": 3,
+      "predicted_author": "James Madison",
+      "correct": true,
+      "passage_votes": {
+        "James Madison": 3
+      }
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED39",
+      "book_title": "Federalist No. 39",
+      "author": "James Madison",
+      "verse_count": 16,
+      "available_passages": 3,
+      "sampled_passages": 3,
+      "predicted_author": "James Madison",
+      "correct": true,
+      "passage_votes": {
+        "James Madison": 3
+      }
+    },
+    {
+      "collection": "Novels",
+      "book": "AUSTEN-EM",
+      "book_title": "Emma",
+      "author": "Jane Austen",
+      "verse_count": 2315,
+      "available_passages": 152,
+      "sampled_passages": 20,
+      "predicted_author": "Jane Austen",
+      "correct": true,
+      "passage_votes": {
+        "Jane Austen": 20
+      }
+    },
+    {
+      "collection": "Federalist",
+      "book": "FED64",
+      "book_title": "Federalist No. 64",
+      "author": "John Jay",
+      "verse_count": 15,
+      "available_passages": 2,
+      "sampled_passages": 2,
+      "predicted_author": "Alexander Hamilton",
+      "correct": false,
+      "passage_votes": {
+        "Alexander Hamilton": 2
+      }
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "TWAIN-HF",
+      "book_title": "Adventures of Huckleberry Finn",
+      "author": "Mark Twain",
+      "verse_count": 2169,
+      "available_passages": 107,
+      "sampled_passages": 20,
+      "predicted_author": "Mark Twain",
+      "correct": true,
+      "passage_votes": {
+        "Mark Twain": 18,
+        "Robert Louis Stevenson": 2
+      }
+    },
+    {
+      "collection": "Cross-genre",
+      "book": "STEVENSON-VP",
+      "book_title": "Virginibus Puerisque",
+      "author": "Robert Louis Stevenson",
+      "verse_count": 181,
+      "available_passages": 45,
+      "sampled_passages": 20,
+      "predicted_author": "Robert Louis Stevenson",
+      "correct": true,
+      "passage_votes": {
+        "Arthur Conan Doyle": 1,
+        "G. K. Chesterton": 1,
+        "George Eliot": 3,
+        "H. G. Wells": 5,
+        "Mark Twain": 1,
+        "Robert Louis Stevenson": 9
+      }
+    },
+    {
+      "collection": "Novels",
+      "book": "HARDY-FM",
+      "book_title": "Far from the Madding Crowd",
+      "author": "Thomas Hardy",
+      "verse_count": 3387,
+      "available_passages": 139,
+      "sampled_passages": 20,
+      "predicted_author": "Thomas Hardy",
+      "correct": true,
+      "passage_votes": {
+        "Charles Dickens": 3,
+        "George Eliot": 3,
+        "Thomas Hardy": 14
+      }
+    }
+  ],
+  "split": {
+    "unit": "whole_book",
+    "strategy": "Seeded per-author book shuffle; 20% of books rounded up, at least one test and one training book per author.",
+    "seed": 42,
+    "test_fraction": 0.2,
+    "train_books": [
+      {
+        "collection": "Federalist",
+        "book": "FED61",
+        "book_title": "Federalist No. 61",
+        "author": "Alexander Hamilton",
+        "verse_count": 6,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED30",
+        "book_title": "Federalist No. 30",
+        "author": "Alexander Hamilton",
+        "verse_count": 11,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED28",
+        "book_title": "Federalist No. 28",
+        "author": "Alexander Hamilton",
+        "verse_count": 11,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED34",
+        "book_title": "Federalist No. 34",
+        "author": "Alexander Hamilton",
+        "verse_count": 11,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED72",
+        "book_title": "Federalist No. 72",
+        "author": "Alexander Hamilton",
+        "verse_count": 14,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED80",
+        "book_title": "Federalist No. 80",
+        "author": "Alexander Hamilton",
+        "verse_count": 22,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED76",
+        "book_title": "Federalist No. 76",
+        "author": "Alexander Hamilton",
+        "verse_count": 10,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED09",
+        "book_title": "Federalist No. 9",
+        "author": "Alexander Hamilton",
+        "verse_count": 18,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED35",
+        "book_title": "Federalist No. 35",
+        "author": "Alexander Hamilton",
+        "verse_count": 11,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED66",
+        "book_title": "Federalist No. 66",
+        "author": "Alexander Hamilton",
+        "verse_count": 14,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED36",
+        "book_title": "Federalist No. 36",
+        "author": "Alexander Hamilton",
+        "verse_count": 20,
+        "available_passages": 3,
+        "sampled_passages": 3
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED75",
+        "book_title": "Federalist No. 75",
+        "author": "Alexander Hamilton",
+        "verse_count": 7,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED16",
+        "book_title": "Federalist No. 16",
+        "author": "Alexander Hamilton",
+        "verse_count": 11,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED82",
+        "book_title": "Federalist No. 82",
+        "author": "Alexander Hamilton",
+        "verse_count": 9,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED31",
+        "book_title": "Federalist No. 31",
+        "author": "Alexander Hamilton",
+        "verse_count": 12,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED60",
+        "book_title": "Federalist No. 60",
+        "author": "Alexander Hamilton",
+        "verse_count": 13,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED77",
+        "book_title": "Federalist No. 77",
+        "author": "Alexander Hamilton",
+        "verse_count": 12,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED26",
+        "book_title": "Federalist No. 26",
+        "author": "Alexander Hamilton",
+        "verse_count": 14,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED78",
+        "book_title": "Federalist No. 78",
+        "author": "Alexander Hamilton",
+        "verse_count": 25,
+        "available_passages": 3,
+        "sampled_passages": 3
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED67",
+        "book_title": "Federalist No. 67",
+        "author": "Alexander Hamilton",
+        "verse_count": 13,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED25",
+        "book_title": "Federalist No. 25",
+        "author": "Alexander Hamilton",
+        "verse_count": 10,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED08",
+        "book_title": "Federalist No. 8",
+        "author": "Alexander Hamilton",
+        "verse_count": 15,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED65",
+        "book_title": "Federalist No. 65",
+        "author": "Alexander Hamilton",
+        "verse_count": 11,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED17",
+        "book_title": "Federalist No. 17",
+        "author": "Alexander Hamilton",
+        "verse_count": 14,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED79",
+        "book_title": "Federalist No. 79",
+        "author": "Alexander Hamilton",
+        "verse_count": 7,
+        "available_passages": 1,
+        "sampled_passages": 1
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED12",
+        "book_title": "Federalist No. 12",
+        "author": "Alexander Hamilton",
+        "verse_count": 13,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED21",
+        "book_title": "Federalist No. 21",
+        "author": "Alexander Hamilton",
+        "verse_count": 11,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED32",
+        "book_title": "Federalist No. 32",
+        "author": "Alexander Hamilton",
+        "verse_count": 5,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED29",
+        "book_title": "Federalist No. 29",
+        "author": "Alexander Hamilton",
+        "verse_count": 15,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED70",
+        "book_title": "Federalist No. 70",
+        "author": "Alexander Hamilton",
+        "verse_count": 29,
+        "available_passages": 3,
+        "sampled_passages": 3
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED01",
+        "book_title": "Federalist No. 1",
+        "author": "Alexander Hamilton",
+        "verse_count": 11,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED22",
+        "book_title": "Federalist No. 22",
+        "author": "Alexander Hamilton",
+        "verse_count": 23,
+        "available_passages": 3,
+        "sampled_passages": 3
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED24",
+        "book_title": "Federalist No. 24",
+        "author": "Alexander Hamilton",
+        "verse_count": 14,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED84",
+        "book_title": "Federalist No. 84",
+        "author": "Alexander Hamilton",
+        "verse_count": 28,
+        "available_passages": 4,
+        "sampled_passages": 4
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED07",
+        "book_title": "Federalist No. 7",
+        "author": "Alexander Hamilton",
+        "verse_count": 12,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED71",
+        "book_title": "Federalist No. 71",
+        "author": "Alexander Hamilton",
+        "verse_count": 8,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED68",
+        "book_title": "Federalist No. 68",
+        "author": "Alexander Hamilton",
+        "verse_count": 13,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED06",
+        "book_title": "Federalist No. 6",
+        "author": "Alexander Hamilton",
+        "verse_count": 31,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED23",
+        "book_title": "Federalist No. 23",
+        "author": "Alexander Hamilton",
+        "verse_count": 12,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED15",
+        "book_title": "Federalist No. 15",
+        "author": "Alexander Hamilton",
+        "verse_count": 16,
+        "available_passages": 3,
+        "sampled_passages": 3
+      },
+      {
+        "collection": "Cross-genre",
+        "book": "DOYLE-MD",
+        "book_title": "Through the Magic Door",
+        "author": "Arthur Conan Doyle",
+        "verse_count": 274,
+        "available_passages": 42,
+        "sampled_passages": 20
+      },
+      {
+        "collection": "Cross-genre",
+        "book": "DOYLE-HB",
+        "book_title": "The Hound of the Baskervilles",
+        "author": "Arthur Conan Doyle",
+        "verse_count": 1467,
+        "available_passages": 54,
+        "sampled_passages": 20
+      },
+      {
+        "collection": "Cross-genre",
+        "book": "DOYLE-BW",
+        "book_title": "The Great Boer War",
+        "author": "Arthur Conan Doyle",
+        "verse_count": 1137,
+        "available_passages": 199,
+        "sampled_passages": 20
+      },
+      {
+        "collection": "Novels",
+        "book": "DICKENS-GE",
+        "book_title": "Great Expectations",
+        "author": "Charles Dickens",
+        "verse_count": 3833,
+        "available_passages": 175,
+        "sampled_passages": 20
+      },
+      {
+        "collection": "Novels",
+        "book": "DICKENS-OT",
+        "book_title": "Oliver Twist",
+        "author": "Charles Dickens",
+        "verse_count": 3834,
+        "available_passages": 144,
+        "sampled_passages": 20
+      },
+      {
+        "collection": "Novels",
+        "book": "BRONTE-SH",
+        "book_title": "Shirley",
+        "author": "Charlotte Bronte",
+        "verse_count": 5048,
+        "available_passages": 193,
+        "sampled_passages": 20
+      },
+      {
+        "collection": "Novels",
+        "book": "BRONTE-VI",
+        "book_title": "Villette",
+        "author": "Charlotte Bronte",
+        "verse_count": 3519,
+        "available_passages": 175,
+        "sampled_passages": 20
+      },
+      {
+        "collection": "Cross-genre",
+        "book": "CHESTERTON-MT",
+        "book_title": "The Man Who Was Thursday",
+        "author": "G. K. Chesterton",
+        "verse_count": 1249,
+        "available_passages": 54,
+        "sampled_passages": 20
+      },
+      {
+        "collection": "Cross-genre",
+        "book": "CHESTERTON-HE",
+        "book_title": "Heretics",
+        "author": "G. K. Chesterton",
+        "verse_count": 233,
+        "available_passages": 62,
+        "sampled_passages": 20
+      },
+      {
+        "collection": "Cross-genre",
+        "book": "CHESTERTON-FB",
+        "book_title": "The Innocence of Father Brown",
+        "author": "G. K. Chesterton",
+        "verse_count": 1421,
+        "available_passages": 73,
+        "sampled_passages": 20
+      },
+      {
+        "collection": "Novels",
+        "book": "ELIOT-SM",
+        "book_title": "Silas Marner",
+        "author": "George Eliot",
+        "verse_count": 813,
+        "available_passages": 67,
+        "sampled_passages": 20
+      },
+      {
+        "collection": "Novels",
+        "book": "ELIOT-MF",
+        "book_title": "The Mill on the Floss",
+        "author": "George Eliot",
+        "verse_count": 3119,
+        "available_passages": 196,
+        "sampled_passages": 20
+      },
+      {
+        "collection": "Cross-genre",
+        "book": "WELLS-MM",
+        "book_title": "Mankind in the Making",
+        "author": "H. G. Wells",
+        "verse_count": 414,
+        "available_passages": 91,
+        "sampled_passages": 20
+      },
+      {
+        "collection": "Cross-genre",
+        "book": "WELLS-TM",
+        "book_title": "The Time Machine",
+        "author": "H. G. Wells",
+        "verse_count": 306,
+        "available_passages": 33,
+        "sampled_passages": 20
+      },
+      {
+        "collection": "Cross-genre",
+        "book": "WELLS-AN",
+        "book_title": "Anticipations",
+        "author": "H. G. Wells",
+        "verse_count": 322,
+        "available_passages": 69,
+        "sampled_passages": 20
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED48",
+        "book_title": "Federalist No. 48",
+        "author": "James Madison",
+        "verse_count": 16,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED44",
+        "book_title": "Federalist No. 44",
+        "author": "James Madison",
+        "verse_count": 28,
+        "available_passages": 3,
+        "sampled_passages": 3
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED45",
+        "book_title": "Federalist No. 45",
+        "author": "James Madison",
+        "verse_count": 11,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED38",
+        "book_title": "Federalist No. 38",
+        "author": "James Madison",
+        "verse_count": 11,
+        "available_passages": 3,
+        "sampled_passages": 3
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED43",
+        "book_title": "Federalist No. 43",
+        "author": "James Madison",
+        "verse_count": 31,
+        "available_passages": 3,
+        "sampled_passages": 3
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED42",
+        "book_title": "Federalist No. 42",
+        "author": "James Madison",
+        "verse_count": 20,
+        "available_passages": 3,
+        "sampled_passages": 3
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED40",
+        "book_title": "Federalist No. 40",
+        "author": "James Madison",
+        "verse_count": 21,
+        "available_passages": 3,
+        "sampled_passages": 3
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED46",
+        "book_title": "Federalist No. 46",
+        "author": "James Madison",
+        "verse_count": 11,
+        "available_passages": 3,
+        "sampled_passages": 3
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED14",
+        "book_title": "Federalist No. 14",
+        "author": "James Madison",
+        "verse_count": 12,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED10",
+        "book_title": "Federalist No. 10",
+        "author": "James Madison",
+        "verse_count": 23,
+        "available_passages": 3,
+        "sampled_passages": 3
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED41",
+        "book_title": "Federalist No. 41",
+        "author": "James Madison",
+        "verse_count": 26,
+        "available_passages": 3,
+        "sampled_passages": 3
+      },
+      {
+        "collection": "Novels",
+        "book": "AUSTEN-SS",
+        "book_title": "Sense and Sensibility",
+        "author": "Jane Austen",
+        "verse_count": 1806,
+        "available_passages": 118,
+        "sampled_passages": 20
+      },
+      {
+        "collection": "Novels",
+        "book": "AUSTEN-PP",
+        "book_title": "Pride and Prejudice",
+        "author": "Jane Austen",
+        "verse_count": 2060,
+        "available_passages": 123,
+        "sampled_passages": 20
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED05",
+        "book_title": "Federalist No. 5",
+        "author": "John Jay",
+        "verse_count": 12,
+        "available_passages": 1,
+        "sampled_passages": 1
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED04",
+        "book_title": "Federalist No. 4",
+        "author": "John Jay",
+        "verse_count": 17,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED02",
+        "book_title": "Federalist No. 2",
+        "author": "John Jay",
+        "verse_count": 14,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED03",
+        "book_title": "Federalist No. 3",
+        "author": "John Jay",
+        "verse_count": 18,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Cross-genre",
+        "book": "TWAIN-TS",
+        "book_title": "The Adventures of Tom Sawyer",
+        "author": "Mark Twain",
+        "verse_count": 1858,
+        "available_passages": 72,
+        "sampled_passages": 20
+      },
+      {
+        "collection": "Cross-genre",
+        "book": "TWAIN-IA",
+        "book_title": "The Innocents Abroad",
+        "author": "Mark Twain",
+        "verse_count": 1831,
+        "available_passages": 187,
+        "sampled_passages": 20
+      },
+      {
+        "collection": "Cross-genre",
+        "book": "TWAIN-LM",
+        "book_title": "Life on the Mississippi",
+        "author": "Mark Twain",
+        "verse_count": 1944,
+        "available_passages": 143,
+        "sampled_passages": 20
+      },
+      {
+        "collection": "Cross-genre",
+        "book": "STEVENSON-TD",
+        "book_title": "Travels with a Donkey",
+        "author": "Robert Louis Stevenson",
+        "verse_count": 341,
+        "available_passages": 35,
+        "sampled_passages": 20
+      },
+      {
+        "collection": "Cross-genre",
+        "book": "STEVENSON-JH",
+        "book_title": "Dr Jekyll and Mr Hyde",
+        "author": "Robert Louis Stevenson",
+        "verse_count": 338,
+        "available_passages": 26,
+        "sampled_passages": 20
+      },
+      {
+        "collection": "Cross-genre",
+        "book": "STEVENSON-TI",
+        "book_title": "Treasure Island",
+        "author": "Robert Louis Stevenson",
+        "verse_count": 1378,
+        "available_passages": 70,
+        "sampled_passages": 20
+      },
+      {
+        "collection": "Novels",
+        "book": "HARDY-JO",
+        "book_title": "Jude the Obscure",
+        "author": "Thomas Hardy",
+        "verse_count": 3557,
+        "available_passages": 140,
+        "sampled_passages": 20
+      },
+      {
+        "collection": "Novels",
+        "book": "HARDY-TD",
+        "book_title": "Tess of the d'Urbervilles",
+        "author": "Thomas Hardy",
+        "verse_count": 3224,
+        "available_passages": 148,
+        "sampled_passages": 20
+      }
+    ],
+    "test_books": [
+      {
+        "collection": "Federalist",
+        "book": "FED59",
+        "book_title": "Federalist No. 59",
+        "author": "Alexander Hamilton",
+        "verse_count": 11,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED13",
+        "book_title": "Federalist No. 13",
+        "author": "Alexander Hamilton",
+        "verse_count": 4,
+        "available_passages": 1,
+        "sampled_passages": 1
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED81",
+        "book_title": "Federalist No. 81",
+        "author": "Alexander Hamilton",
+        "verse_count": 27,
+        "available_passages": 4,
+        "sampled_passages": 4
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED73",
+        "book_title": "Federalist No. 73",
+        "author": "Alexander Hamilton",
+        "verse_count": 16,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED85",
+        "book_title": "Federalist No. 85",
+        "author": "Alexander Hamilton",
+        "verse_count": 18,
+        "available_passages": 3,
+        "sampled_passages": 3
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED27",
+        "book_title": "Federalist No. 27",
+        "author": "Alexander Hamilton",
+        "verse_count": 7,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED11",
+        "book_title": "Federalist No. 11",
+        "author": "Alexander Hamilton",
+        "verse_count": 15,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED83",
+        "book_title": "Federalist No. 83",
+        "author": "Alexander Hamilton",
+        "verse_count": 41,
+        "available_passages": 5,
+        "sampled_passages": 5
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED69",
+        "book_title": "Federalist No. 69",
+        "author": "Alexander Hamilton",
+        "verse_count": 14,
+        "available_passages": 3,
+        "sampled_passages": 3
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED33",
+        "book_title": "Federalist No. 33",
+        "author": "Alexander Hamilton",
+        "verse_count": 8,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED74",
+        "book_title": "Federalist No. 74",
+        "author": "Alexander Hamilton",
+        "verse_count": 4,
+        "available_passages": 1,
+        "sampled_passages": 1
+      },
+      {
+        "collection": "Cross-genre",
+        "book": "DOYLE-SH",
+        "book_title": "The Adventures of Sherlock Holmes",
+        "author": "Arthur Conan Doyle",
+        "verse_count": 2527,
+        "available_passages": 91,
+        "sampled_passages": 20
+      },
+      {
+        "collection": "Novels",
+        "book": "DICKENS-TC",
+        "book_title": "A Tale of Two Cities",
+        "author": "Charles Dickens",
+        "verse_count": 3259,
+        "available_passages": 128,
+        "sampled_passages": 20
+      },
+      {
+        "collection": "Novels",
+        "book": "BRONTE-JE",
+        "book_title": "Jane Eyre",
+        "author": "Charlotte Bronte",
+        "verse_count": 4047,
+        "available_passages": 169,
+        "sampled_passages": 20
+      },
+      {
+        "collection": "Cross-genre",
+        "book": "CHESTERTON-OR",
+        "book_title": "Orthodoxy",
+        "author": "G. K. Chesterton",
+        "verse_count": 235,
+        "available_passages": 56,
+        "sampled_passages": 20
+      },
+      {
+        "collection": "Novels",
+        "book": "ELIOT-MM",
+        "book_title": "Middlemarch",
+        "author": "George Eliot",
+        "verse_count": 4674,
+        "available_passages": 299,
+        "sampled_passages": 20
+      },
+      {
+        "collection": "Cross-genre",
+        "book": "WELLS-WW",
+        "book_title": "The War of the Worlds",
+        "author": "H. G. Wells",
+        "verse_count": 883,
+        "available_passages": 58,
+        "sampled_passages": 20
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED47",
+        "book_title": "Federalist No. 47",
+        "author": "James Madison",
+        "verse_count": 21,
+        "available_passages": 3,
+        "sampled_passages": 3
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED37",
+        "book_title": "Federalist No. 37",
+        "author": "James Madison",
+        "verse_count": 15,
+        "available_passages": 3,
+        "sampled_passages": 3
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED39",
+        "book_title": "Federalist No. 39",
+        "author": "James Madison",
+        "verse_count": 16,
+        "available_passages": 3,
+        "sampled_passages": 3
+      },
+      {
+        "collection": "Novels",
+        "book": "AUSTEN-EM",
+        "book_title": "Emma",
+        "author": "Jane Austen",
+        "verse_count": 2315,
+        "available_passages": 152,
+        "sampled_passages": 20
+      },
+      {
+        "collection": "Federalist",
+        "book": "FED64",
+        "book_title": "Federalist No. 64",
+        "author": "John Jay",
+        "verse_count": 15,
+        "available_passages": 2,
+        "sampled_passages": 2
+      },
+      {
+        "collection": "Cross-genre",
+        "book": "TWAIN-HF",
+        "book_title": "Adventures of Huckleberry Finn",
+        "author": "Mark Twain",
+        "verse_count": 2169,
+        "available_passages": 107,
+        "sampled_passages": 20
+      },
+      {
+        "collection": "Cross-genre",
+        "book": "STEVENSON-VP",
+        "book_title": "Virginibus Puerisque",
+        "author": "Robert Louis Stevenson",
+        "verse_count": 181,
+        "available_passages": 45,
+        "sampled_passages": 20
+      },
+      {
+        "collection": "Novels",
+        "book": "HARDY-FM",
+        "book_title": "Far from the Madding Crowd",
+        "author": "Thomas Hardy",
+        "verse_count": 3387,
+        "available_passages": 139,
+        "sampled_passages": 20
+      }
+    ],
+    "train_passages": 623,
+    "test_passages": 238
+  },
+  "sampling": {
+    "target_passage_tokens": 1200,
+    "minimum_passage_tokens": 200,
+    "maximum_passages_per_book": 20,
+    "method": "Non-overlapping text passages within chapters; short tails merge with the preceding passage. At most 20 evenly spaced passages per book.",
+    "available_passages": 4094,
+    "sampled_passages": 861
+  },
+  "features": {
+    "input": "Verse text only; book titles, source identifiers, and reference-author metadata are never features.",
+    "pipeline": "Training-fitted word TF-IDF (800 terms), character 3–4-gram TF-IDF (8000 features), and scaled surface statistics; class-balanced linear SVM.",
+    "fit_scope": "Training books only, including vocabulary, IDF weights, and surface-statistic scaling."
+  },
+  "caveat": "This is closed-set attribution among reference authors with training books. It does not validate how many authors unsupervised discovery finds, prove historical authorship, or measure verse-level accuracy. Held-out books can differ in topic and genre; shared editorial conventions may still affect scores.",
+  "discovery": {
+    "known_author_count": 13,
+    "discovered_groups_on_labelled_text": 19,
+    "count_error": 6,
+    "evaluated_verses": 70068,
+    "coverage": 1.0,
+    "adjusted_rand_index": 0.2601837925680145,
+    "normalized_mutual_information": 0.43677505772306174,
+    "group_reference_counts": {
+      "eng-A001": {
+        "Jane Austen": 8,
+        "Charles Dickens": 1157,
+        "Charlotte Bronte": 526,
+        "George Eliot": 146,
+        "Thomas Hardy": 2058,
+        "Mark Twain": 881,
+        "G. K. Chesterton": 1057,
+        "Robert Louis Stevenson": 432,
+        "H. G. Wells": 306,
+        "Arthur Conan Doyle": 87
+      },
+      "eng-A002": {
+        "Jane Austen": 40,
+        "Charles Dickens": 177,
+        "Charlotte Bronte": 6527,
+        "George Eliot": 79,
+        "Thomas Hardy": 16,
+        "G. K. Chesterton": 10,
+        "Robert Louis Stevenson": 120,
+        "Arthur Conan Doyle": 52
+      },
+      "eng-A003": {
+        "Jane Austen": 167,
+        "Charles Dickens": 509,
+        "Charlotte Bronte": 255,
+        "George Eliot": 2132,
+        "Thomas Hardy": 837,
+        "Mark Twain": 125,
+        "G. K. Chesterton": 142,
+        "Robert Louis Stevenson": 45,
+        "Arthur Conan Doyle": 27
+      },
+      "eng-A004": {
+        "Jane Austen": 31,
+        "Charles Dickens": 691,
+        "Charlotte Bronte": 546,
+        "George Eliot": 2156,
+        "Thomas Hardy": 3780,
+        "Mark Twain": 162,
+        "G. K. Chesterton": 81,
+        "H. G. Wells": 17,
+        "Arthur Conan Doyle": 30
+      },
+      "eng-A005": {
+        "Jane Austen": 14,
+        "Charles Dickens": 815,
+        "Charlotte Bronte": 153,
+        "George Eliot": 2791,
+        "Thomas Hardy": 1738,
+        "Mark Twain": 1049,
+        "G. K. Chesterton": 512,
+        "Robert Louis Stevenson": 382,
+        "Arthur Conan Doyle": 134
+      },
+      "eng-A006": {
+        "Jane Austen": 37,
+        "Charles Dickens": 4296,
+        "Charlotte Bronte": 261,
+        "George Eliot": 930,
+        "Thomas Hardy": 805,
+        "Mark Twain": 114,
+        "G. K. Chesterton": 661,
+        "Robert Louis Stevenson": 277,
+        "H. G. Wells": 16,
+        "Arthur Conan Doyle": 721
+      },
+      "eng-A007": {
+        "Thomas Hardy": 26,
+        "Mark Twain": 14,
+        "Arthur Conan Doyle": 1090
+      },
+      "eng-A008": {
+        "Jane Austen": 417,
+        "Charles Dickens": 725,
+        "Charlotte Bronte": 3744,
+        "George Eliot": 183,
+        "Thomas Hardy": 864,
+        "Mark Twain": 5,
+        "Robert Louis Stevenson": 26,
+        "Arthur Conan Doyle": 235
+      },
+      "eng-A009": {
+        "Charles Dickens": 66,
+        "Charlotte Bronte": 92,
+        "Mark Twain": 1645,
+        "Robert Louis Stevenson": 115,
+        "H. G. Wells": 25,
+        "Arthur Conan Doyle": 21
+      },
+      "eng-A010": {
+        "Jane Austen": 2419,
+        "Charlotte Bronte": 32,
+        "George Eliot": 52,
+        "Thomas Hardy": 44
+      },
+      "eng-A011": {
+        "Alexander Hamilton": 724,
+        "John Jay": 76,
+        "James Madison": 262,
+        "Mark Twain": 41,
+        "H. G. Wells": 6
+      },
+      "eng-A012": {
+        "Charles Dickens": 1729,
+        "Charlotte Bronte": 137,
+        "Mark Twain": 836,
+        "G. K. Chesterton": 36,
+        "Robert Louis Stevenson": 160,
+        "Arthur Conan Doyle": 225
+      },
+      "eng-A013": {
+        "Alexander Hamilton": 3,
+        "Mark Twain": 24,
+        "G. K. Chesterton": 5,
+        "H. G. Wells": 689
+      },
+      "eng-A014": {
+        "Jane Austen": 3028,
+        "Charles Dickens": 31,
+        "George Eliot": 103,
+        "Arthur Conan Doyle": 17
+      },
+      "eng-A015": {
+        "Jane Austen": 20,
+        "Charles Dickens": 681,
+        "Mark Twain": 152,
+        "G. K. Chesterton": 120,
+        "Robert Louis Stevenson": 265,
+        "H. G. Wells": 175,
+        "Arthur Conan Doyle": 2438
+      },
+      "eng-A016": {
+        "G. K. Chesterton": 467,
+        "Robert Louis Stevenson": 13,
+        "H. G. Wells": 16
+      },
+      "eng-A017": {
+        "Charles Dickens": 22,
+        "Mark Twain": 2672,
+        "H. G. Wells": 28
+      },
+      "eng-A018": {
+        "Charles Dickens": 27,
+        "Charlotte Bronte": 329,
+        "Mark Twain": 39,
+        "Robert Louis Stevenson": 268,
+        "H. G. Wells": 620,
+        "Arthur Conan Doyle": 20
+      },
+      "eng-A019": {
+        "Charlotte Bronte": 12,
+        "George Eliot": 34,
+        "Mark Twain": 43,
+        "G. K. Chesterton": 47,
+        "Robert Louis Stevenson": 135,
+        "H. G. Wells": 27,
+        "Arthur Conan Doyle": 308
+      }
+    },
+    "interpretation": "Post-hoc verse-weighted cluster agreement, not held-out accuracy. Nearby verses share passage predictions. Matching the count alone is insufficient."
+  },
+  "corpus_sha256": "f73b651b0816a2bbf9d1ac9796a400174460c31807570495bc7b5ff4648d0717"
+}

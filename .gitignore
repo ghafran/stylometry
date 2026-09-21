@@ -7,7 +7,11 @@ __pycache__/
 .coverage
 
 # Calculated artifacts. Everything here is rebuilt by the pipeline from the sources below, so it is
-# never checked in: verses.jsonl, witnesses.jsonl, the AI profiles and every report and site.
+# not checked in by default: verses.jsonl, witnesses.jsonl, the AI profiles and every report and site.
+# Exception: the six files of the current `stylometry run` under output/ are tracked, so the result
+# can be read without rebuilding it. They were force-added past this rule and stay tracked; the three
+# largest are stored through Git LFS (see .gitattributes) because GitHub rejects blobs over 100 MB.
+# output/explorer/ is the previous application's site and is deliberately still ignored.
 data/processed/
 output*/
 
