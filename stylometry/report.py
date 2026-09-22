@@ -121,7 +121,7 @@ _CSS = r'''
 .works-picker{max-width:360px;margin:18px 0}.works-overview{border:1px solid var(--line);border-radius:11px;background:white;padding:20px;margin-bottom:20px}.works-overview h3{font-size:19px}.works-counts{display:flex;gap:24px;flex-wrap:wrap;margin-top:14px}.works-counts strong{display:block;font-size:23px;font-weight:600}.works-counts span{font-size:12px;color:var(--muted)}.works-branch{border:1px solid var(--line);border-radius:8px;background:white;margin:10px 0;overflow:hidden}.works-branch>summary{cursor:pointer;padding:13px 16px;color:var(--ink);font-weight:600;overflow-wrap:anywhere}.works-branch>summary:hover{background:#f0f6f4}.works-branch>summary .tiny{display:inline;font-weight:400;margin-left:12px}.works-children{padding:0 14px 8px 20px}.works-chapter>.works-children{padding:0}.works-chapter .text-table .ref{min-width:160px}.works-chapter .text-table .tag{min-width:140px}.works-caption{font-size:12px;color:var(--muted);margin:0 0 10px}.works-more{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;flex-wrap:wrap}@media(max-width:740px){.works-children{padding:0 7px 5px 9px}.works-branch>summary{padding:11px}.works-branch>summary .tiny{display:block;margin-left:0}.works-counts{gap:15px}}
 
 .pages{display:flex;gap:8px;flex-wrap:wrap}.pages a{border:1px solid var(--line);background:white;color:var(--ink);border-radius:8px;padding:8px 12px;text-decoration:none;white-space:nowrap}.pages a:hover{background:#f0f6f4;border-color:#abcac2}.header-links{display:flex;flex-direction:column;gap:9px;align-items:flex-end}main.single{padding:28px 42px 48px;max-width:1100px}main.single section{margin-bottom:40px}main.single section:target h2{color:var(--teal)}@media(max-width:740px){.header-links{align-items:stretch;margin-top:17px}main.single{padding:20px 16px}}
-.overview{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:21px 23px;margin-bottom:22px}.overview-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap}.overview-head h2{margin:0 0 5px}.overview-head p{margin:0;font-size:13px;max-width:78ch}.overview-measure{width:200px;flex:none}.overview-card{border-top:1px solid var(--line);margin-top:18px;padding-top:16px}.overview-card:first-child{border-top:0;margin-top:16px;padding-top:0}.overview-card-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:9px}.overview-card-head h3{margin:0;font-size:15px}.overview-bar{display:flex;gap:2px;height:34px;border-radius:6px;background:var(--paper)}.overview-segment{min-width:3px;border-radius:2px}.further{background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.26) 0 5px,transparent 5px 10px)}.overview-bar>.overview-segment:first-child{border-radius:6px 2px 2px 6px}.overview-bar>.overview-segment:last-child{border-radius:2px 6px 6px 2px}.overview-legend{display:flex;flex-wrap:wrap;gap:7px 20px;margin-top:12px;font-size:12px}.overview-entry{display:flex;align-items:center;gap:7px}.overview-entry .swatch{display:inline-block;width:11px;height:11px;border-radius:3px;flex:none}.overview-entry .amount{color:var(--muted)}.overview-tail{margin-top:11px;font-size:12px;color:var(--muted)}.overview-tail summary{cursor:pointer;color:var(--teal)}.overview-tail ul{margin:8px 0 0;padding-left:18px;columns:230px}.overview-empty{margin:0;padding:18px 0;color:var(--muted)}.overview-notes{margin-top:15px;padding-top:14px;border-top:1px dashed var(--line);font-size:12px}.overview-notes h4{margin:0 0 9px;font-size:11px;font-weight:750;letter-spacing:.09em;text-transform:uppercase;color:var(--teal)}.overview-notes dl{margin:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:7px 16px}.overview-notes dt{font-weight:650}.overview-notes dt span{font-weight:400;color:var(--muted)}.overview-notes dd{margin:0;color:var(--muted)}.overview-caveat{margin:12px 0 0;color:var(--muted);max-width:92ch}@media(max-width:740px){.overview-notes dl{grid-template-columns:minmax(0,1fr);gap:2px}.overview-notes dd{margin-bottom:9px}}@media(max-width:740px){.overview{padding:16px 14px}.overview-measure{width:100%}.overview-legend{gap:6px 14px}}'''
+.overview{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:21px 23px;margin-bottom:22px}.overview-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap}.overview-head h2{margin:0 0 5px}.overview-head p{margin:0;font-size:13px;max-width:78ch}.overview-measure{width:200px;flex:none}.overview-card{border-top:1px solid var(--line);margin-top:18px;padding-top:16px}.overview-card:first-child{border-top:0;margin-top:16px;padding-top:0}.overview-card-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:9px}.overview-card-head h3{margin:0;font-size:15px}.overview-bar{display:flex;gap:2px;height:34px;border-radius:6px;background:var(--paper)}.overview-segment{min-width:3px;border-radius:2px}.further{background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.26) 0 5px,transparent 5px 10px)}.overview-bar>.overview-segment:first-child{border-radius:6px 2px 2px 6px}.overview-bar>.overview-segment:last-child{border-radius:2px 6px 6px 2px}.overview-legend{display:flex;flex-wrap:wrap;gap:7px 20px;margin-top:12px;font-size:12px}.overview-entry{display:flex;align-items:center;gap:7px}.overview-entry .swatch{display:inline-block;width:11px;height:11px;border-radius:3px;flex:none}.overview-entry .amount{color:var(--muted)}.overview-tail{margin-top:11px;font-size:12px;color:var(--muted)}.overview-tail summary{cursor:pointer;color:var(--teal)}.overview-tail ul{margin:8px 0 0;padding-left:18px;columns:230px}.overview-empty{margin:0;padding:18px 0;color:var(--muted)}.overview-notes{margin-top:15px;padding-top:14px;border-top:1px dashed var(--line);font-size:12px}.overview-notes h4{margin:0 0 9px;font-size:11px;font-weight:750;letter-spacing:.09em;text-transform:uppercase;color:var(--teal)}.overview-notes dl{margin:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:7px 16px}.overview-notes dt{font-weight:650}.overview-notes dt span{font-weight:400;color:var(--muted)}.overview-notes dd{margin:0;color:var(--muted)}.overview-notes dd p{margin:0 0 4px}.overview-notes dd p:last-child{margin-bottom:0}.overview-claim strong{color:var(--ink);font-weight:650}.overview-caveat{margin:12px 0 0;color:var(--muted);max-width:92ch}@media(max-width:740px){.overview-notes dl{grid-template-columns:minmax(0,1fr);gap:2px}.overview-notes dd{margin-bottom:9px}}@media(max-width:740px){.overview{padding:16px 14px}.overview-measure{width:100%}.overview-legend{gap:6px 14px}}'''
 
 
 _ANALYSIS_START = r'''<!doctype html>
@@ -409,19 +409,58 @@ function overviewSummary(groups,measure){
  return sentences.join(' ');
 }
 const collectionNotes={
- 'arb\u0000Quran':'In Islamic tradition, the direct speech of God, revealed to the Prophet Muhammad (peace be upon him) and fixed in its recited wording.',
- 'arb\u0000Hadith Qudsi':'Sayings whose meaning is attributed to God but which stand outside the Quran, related by the Prophet (peace be upon him) in his own wording.',
- 'arb\u0000Bukhari':'Reports of the Prophet\u2019s (peace be upon him) own words and actions, transmitted by his companions and gathered by al-Bukhari.',
- 'eng\u0000Novels':'Five nineteenth-century novelists, three novels each, all fiction. Tests whether the method separates authors writing in one genre.',
- 'eng\u0000Cross-genre':'Five authors across fiction and non-fiction alike. Tests whether the method follows the author when the subject and genre change.',
- 'eng\u0000Federalist':'The Federalist Papers, the classic attribution benchmark: Hamilton, Madison and Jay signed most of them, and the rest are disputed or jointly written.',
- 'grc\u0000NT':'The New Testament as it stands in Codex Sinaiticus, the earliest surviving complete copy, written in the fourth century.',
- 'grc\u0000LXX':'The Septuagint, the Greek Old Testament that the New Testament writers quote. Taken from Sinaiticus where it survives there and from Swete\u2019s edition elsewhere.',
- 'grc\u0000noncanonical':'Early Christian writings that circulated but were never canonised \u2014 the Didache, the Clement letters, Barnabas, the apocryphal Acts. Sinaiticus itself carries some of them.',
- 'hbo\u0000Tanakh':'The Hebrew Bible in its Masoretic form, from the Leningrad Codex by way of the Open Scriptures Hebrew Bible.',
- 'hbo\u0000DSS':'The Dead Sea Scrolls: Hebrew manuscripts roughly a thousand years older than the Masoretic text, many of them fragmentary.',
- 'hbo\u0000inscriptions':'The Ketef Hinnom silver amulets and the Nash Papyrus, the oldest surviving Hebrew scriptural text of all.',
+ 'arb\u0000Quran':{
+  note:'In Islamic tradition, the direct speech of God, revealed to the Prophet Muhammad (peace be upon him) and fixed in its recited wording.',
+  expected:'One speaker throughout, across roughly twenty-three years of revelation. A single voice is the expectation.'},
+ 'arb\u0000Hadith Qudsi':{
+  note:'Sayings whose meaning is attributed to God but which stand outside the Quran, related by the Prophet (peace be upon him) in his own wording.',
+  expected:'God\u2019s meaning in the Prophet\u2019s (peace be upon him) wording, so the wording is expected to read as his rather than as the Quran\u2019s.'},
+ 'arb\u0000Bukhari':{
+  note:'Reports of the Prophet\u2019s (peace be upon him) own words and actions, transmitted by his companions and gathered by al-Bukhari.',
+  expected:'One speaker, but reported by many narrators and edited by one compiler, so the narrators\u2019 and al-Bukhari\u2019s hands are in the text alongside his.'},
+ 'eng\u0000Novels':{
+  note:'Five nineteenth-century novelists, three novels each, all fiction. Tests whether the method separates authors writing in one genre.',
+  expected:'Five authors, named on the title pages. Five is the right answer.'},
+ 'eng\u0000Cross-genre':{
+  note:'Five authors across fiction and non-fiction alike. Tests whether the method follows the author when the subject and genre change.',
+  expected:'Five authors again, four works each. Five remains the right answer even though the genres differ.'},
+ 'eng\u0000Federalist':{
+  note:'The Federalist Papers, the classic attribution benchmark: Hamilton, Madison and Jay signed most of them, and the rest are disputed or jointly written.',
+  expected:'Three writers, with a dozen papers long disputed between Hamilton and Madison.'},
+ 'grc\u0000NT':{
+  note:'The New Testament as it stands in Codex Sinaiticus, the earliest surviving complete copy, written in the fourth century.',
+  expected:'Traditionally nine or ten writers across twenty-seven books, with several of the letters ascribed to Paul disputed.'},
+ 'grc\u0000LXX':{
+  note:'The Septuagint, the Greek Old Testament that the New Testament writers quote. Taken from Sinaiticus where it survives there and from Swete\u2019s edition elsewhere.',
+  expected:'Many translators working book by book over generations. No single voice is expected here.'},
+ 'grc\u0000noncanonical':{
+  note:'Early Christian writings that circulated but were never canonised \u2014 the Didache, the Clement letters, Barnabas, the apocryphal Acts. Sinaiticus itself carries some of them.',
+  expected:'Many hands across two centuries and several genres, from church orders to apocryphal Acts.'},
+ 'hbo\u0000Tanakh':{
+  note:'The Hebrew Bible in its Masoretic form, from the Leningrad Codex by way of the Open Scriptures Hebrew Bible.',
+  expected:'Tradition names Moses for the Torah and a prophet for each prophetic book; critical scholarship reads several strands even inside single books.'},
+ 'hbo\u0000DSS':{
+  note:'The Dead Sea Scrolls: Hebrew manuscripts roughly a thousand years older than the Masoretic text, many of them fragmentary.',
+  expected:'Many scribes copying over roughly three centuries. No single author is expected, and most scrolls are too broken to characterise.'},
+ 'hbo\u0000inscriptions':{
+  note:'The Ketef Hinnom silver amulets and the Nash Papyrus, the oldest surviving Hebrew scriptural text of all.',
+  expected:'Three artefacts, each cut or written by its own hand.'},
 };
+function collectionMeasure(entry){
+ const authors=entry.authors.size,books=entry.books.size;
+ if(!authors)return 'No text here carries an inferred author under the current filters.';
+ const named=count(authors)+' inferred '+(authors===1?'author':'authors');
+ if(books===1)return named+' in its single book.';
+ // The lower median keeps this a whole number of authors rather than half of one.
+ const counts=Array.from(entry.books.values(),set=>set.size).sort((a,b)=>a-b);
+ const middle=counts[Math.ceil(counts.length/2)-1],empty=counts.filter(size=>!size).length;
+ const parts=[named+' across '+count(books)+' books','a median of '+count(middle)+' per book'];
+ if(empty)parts.push(count(empty)+' of them carrying none at all');
+ const widest=Array.from(entry.books.entries()).sort((a,b)=>b[1].size-a[1].size || str(a[0]).localeCompare(str(b[0])))[0];
+ if(widest && widest[1].size>Math.max(middle,1))
+  parts.push(str(entry.titles.get(widest[0]) || widest[0])+' alone carrying '+count(widest[1].size));
+ return parts.slice(0,-1).join(', ')+(parts.length>1?' and ':'')+parts[parts.length-1]+'.';
+}
 const languageNotes={
  eng:'English is the control corpus, not part of the scriptural question. Every author here is known in advance, so it measures whether the method can recover authorship at all before its answers about scripture are worth anything. The held-out test on these books is on the English validation page.',
  grc:'The Greek analysis sets what the canon kept beside what it left out, largely within one manuscript. Two cautions. The Septuagint here is not one source: part is transcribed from Sinaiticus and part is Swete\u2019s printed edition, and an editor\u2019s spelling can register as style. And the Septuagint is translated Greek rendered from Hebrew, so its translators stand between any original author and this text.',
@@ -431,13 +470,31 @@ const languageNotes={
 function collectionNotesFor(language,counts){
  const rows=[];
  for(const [collection,entry] of counts){
-  const note=collectionNotes[str(language)+'\u0000'+str(collection)];
-  if(note)rows.push({collection,...entry,note});
+  const described=collectionNotes[str(language)+'\u0000'+str(collection)];
+  if(described)rows.push({collection,...entry,...described,measured:collectionMeasure(entry)});
  }
  return rows.sort((a,b)=>b.words-a.words || str(a.collection).localeCompare(str(b.collection)));
 }
-function collectionCaveats(language,rows){
+const controlContrast=(()=>{
+ const known=new Set(),inferred=new Set(),books=new Map();
+ for(const row of verses){
+  if(str(row.language)!=='eng' || !row.reference_author)continue;
+  known.add(str(row.reference_author));
+  const book=str(row.book);
+  if(!books.has(book))books.set(book,{title:str(row.book_title || row.book),authors:new Set()});
+  if(row.author_id){inferred.add(str(row.author_id));books.get(book).authors.add(str(row.author_id));}
+ }
+ if(known.size<2 || inferred.size<=known.size)return '';
+ const widest=Array.from(books.values()).sort((a,b)=>b.authors.size-a.authors.size)[0];
+ const opening='Counts here are style groups, not counted writers: on the English control, where the authors are known, '
+  +count(known.size)+' of them come back as '+count(inferred.size)+' groups';
+ return widest && widest.authors.size>1
+  ? opening+', and '+widest.title+' alone is split into '+count(widest.authors.size)+'.'
+  : opening+'.';
+})();
+function collectionCaveats(language,rows,contrast){
  const sentences=languageNotes[language]?[languageNotes[language]]:[];
+ if(contrast && language!=='eng')sentences.push(contrast);
  // A passage is 1,200 tokens and a group needs three of them, so anything near that cannot be read.
  const thin=rows.filter(row=>row.words<5000);
  if(thin.length)sentences.push(thin.map(row=>row.collection+' holds '+count(row.words)+' words here')
@@ -450,12 +507,18 @@ function appendCollectionNotes(card,language,counts){
  const block=el('div',null,'overview-notes'),list=el('dl');
  block.append(el('h4','What these collections are'));
  for(const row of rows){
-  const term=el('dt',row.collection);
+  const term=el('dt',row.collection),detail=el('dd');
   term.append(el('span',' \u00b7 '+count(row.units)+' text units \u00b7 '+count(row.words)+' words'));
-  list.append(term,el('dd',row.note));
+  detail.append(el('p',row.note));
+  for(const [label,text] of [['Expected',row.expected],['Measured here',row.measured]]){
+   const line=el('p',null,'overview-claim');
+   line.append(el('strong',label),' '+text);
+   detail.append(line);
+  }
+  list.append(term,detail);
  }
  block.append(list);
- const caveats=collectionCaveats(language,rows);
+ const caveats=collectionCaveats(language,rows,controlContrast);
  if(caveats.length)block.append(el('p',caveats.join(' '),'overview-caveat'));
  card.append(block);
  return card;
@@ -467,9 +530,12 @@ function renderOverview(){
   const language=str(row.language),collection=str(row.collection);
   if(!collections.has(language))collections.set(language,new Map());
   const counts=collections.get(language);
-  if(!counts.has(collection))counts.set(collection,{units:0,words:0});
-  const entry=counts.get(collection);entry.units++;
+  if(!counts.has(collection))counts.set(collection,{units:0,words:0,authors:new Set(),books:new Map(),titles:new Map()});
+  const entry=counts.get(collection),book=str(row.book);
+  entry.units++;
   entry.words+=typeof row.token_count==='number' && Number.isFinite(row.token_count)?row.token_count:0;
+  if(!entry.books.has(book)){entry.books.set(book,new Set());entry.titles.set(book,row.book_title || row.book);}
+  if(row.author_id){entry.authors.add(row.author_id);entry.books.get(book).add(row.author_id);}
  }
  $('overview-summary').textContent=overviewSummary(groups,measure);
  target.replaceChildren();

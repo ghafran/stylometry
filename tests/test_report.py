@@ -368,16 +368,29 @@ def test_aggregate_chart_is_visible_above_the_tabs_under_every_filter(tmp_path):
 
 
 def _collection_notes(language, counts):
-    """Return what the panel would print beneath a language's chart."""
+    """Return what the panel would print beneath a language's chart.
+
+    ``counts`` maps a collection to ``{"words": n, "books": {book: [author, ...]}}``,
+    which is what the browser accumulates while walking the filtered corpus.
+    """
     if shutil.which('node') is None:
         pytest.skip('Node is optional for browser-code validation')
     block = re.search(r'const collectionNotes=.*?(?=function appendCollectionNotes\()',
                       _HTML_END, re.DOTALL).group(0)
     program = (
         "const str = value => value == null ? '' : String(value);\n"
-        "const count = value => new Intl.NumberFormat('en-US').format(value || 0);\n" + block +
-        f"const rows = collectionNotesFor({json.dumps(language)}, new Map(Object.entries({json.dumps(counts)})));\n"
-        f"process.stdout.write(JSON.stringify({{rows, caveats: collectionCaveats({json.dumps(language)}, rows)}}));"
+        "const count = value => new Intl.NumberFormat('en-US').format(value || 0);\n"
+        "const verses = [];  // the control contrast is exercised by its own tests\n" + block +
+        f"const source = {json.dumps(counts)};\n"
+        "const counts = new Map(Object.entries(source).map(([collection, entry]) => [collection, {\n"
+        "  units: entry.units || 0, words: entry.words || 0,\n"
+        "  authors: new Set(Object.values(entry.books || {}).flat()),\n"
+        "  books: new Map(Object.entries(entry.books || {}).map(([book, list]) => [book, new Set(list)])),\n"
+        "  titles: new Map(Object.entries(entry.titles || {})),\n"
+        "}]));\n"
+        f"const rows = collectionNotesFor({json.dumps(language)}, counts);\n"
+        f"process.stdout.write(JSON.stringify({{rows: rows.map(({{authors, books, titles, ...row}}) => row),"
+        f" caveats: collectionCaveats({json.dumps(language)}, rows, '')}}));"
     )
     return json.loads(subprocess.run(['node', '-e', program], check=True,
                                      text=True, capture_output=True).stdout)
@@ -385,9 +398,13 @@ def _collection_notes(language, counts):
 
 def test_arabic_collections_say_whose_speech_each_one_reports():
     result = _collection_notes('arb', {
-        'Bukhari': {'units': 7589, 'words': 567106},
-        'Quran': {'units': 6236, 'words': 77881},
-        'Hadith Qudsi': {'units': 40, 'words': 3260}})
+        'Bukhari': {'units': 7589, 'words': 567106,
+                    'books': {'b1': ['arb-A001'], 'b2': ['arb-A001', 'arb-A004']},
+                    'titles': {'b2': 'Bukhari 65'}},
+        'Quran': {'units': 6236, 'words': 77881,
+                  'books': {'s1': ['arb-A001'], 's2': ['arb-A001'], 's3': ['arb-A001', 'arb-A002']},
+                  'titles': {'s3': 'Sura 28 Al-Qasas'}},
+        'Hadith Qudsi': {'units': 40, 'words': 3260, 'books': {'q1': ['arb-A001']}}})
     notes = {row['collection']: row['note'] for row in result['rows']}
     assert [row['collection'] for row in result['rows']] == ['Bukhari', 'Quran', 'Hadith Qudsi']
     assert 'direct speech of God' in notes['Quran']
@@ -402,9 +419,9 @@ def test_arabic_collections_say_whose_speech_each_one_reports():
 
 def test_english_is_labelled_the_control_corpus_not_a_subject():
     result = _collection_notes('eng', {
-        'Novels': {'units': 48495, 'words': 2521994},
-        'Cross-genre': {'units': 20508, 'words': 1677606},
-        'Federalist': {'units': 1289, 'words': 189773}})
+        'Novels': {'units': 48495, 'words': 2521994, 'books': {'n1': ['eng-A001']}},
+        'Cross-genre': {'units': 20508, 'words': 1677606, 'books': {'c1': ['eng-A002']}},
+        'Federalist': {'units': 1289, 'words': 189773, 'books': {'f1': ['eng-A003']}}})
     caveats = ' '.join(result['caveats'])
     assert 'control corpus, not part of the scriptural question' in caveats
     assert 'known in advance' in caveats
@@ -417,9 +434,9 @@ def test_english_is_labelled_the_control_corpus_not_a_subject():
 
 def test_greek_names_its_witnesses_and_warns_that_the_septuagint_is_two_sources():
     result = _collection_notes('grc', {
-        'LXX': {'units': 29459, 'words': 592804},
-        'NT': {'units': 7900, 'words': 136295},
-        'noncanonical': {'units': 3767, 'words': 122770}})
+        'LXX': {'units': 29459, 'words': 592804, 'books': {'g1': ['grc-A001']}},
+        'NT': {'units': 7900, 'words': 136295, 'books': {'n1': ['grc-A002']}},
+        'noncanonical': {'units': 3767, 'words': 122770, 'books': {'x1': ['grc-A003']}}})
     notes = {row['collection']: row['note'] for row in result['rows']}
     assert 'Codex Sinaiticus' in notes['NT'] and 'earliest surviving complete copy' in notes['NT']
     assert 'Swete' in notes['LXX']
@@ -431,9 +448,9 @@ def test_greek_names_its_witnesses_and_warns_that_the_septuagint_is_two_sources(
 
 def test_hebrew_notes_separate_the_manuscripts_from_the_authors():
     result = _collection_notes('hbo', {
-        'Tanakh': {'units': 23213, 'words': 308575},
-        'DSS': {'units': 5659, 'words': 150391},
-        'inscriptions': {'units': 3, 'words': 273}})
+        'Tanakh': {'units': 23213, 'words': 308575, 'books': {'t1': ['hbo-A001']}},
+        'DSS': {'units': 5659, 'words': 150391, 'books': {'d1': ['hbo-A001']}},
+        'inscriptions': {'units': 3, 'words': 273, 'books': {'i1': []}}})
     notes = {row['collection']: row['note'] for row in result['rows']}
     assert 'Leningrad Codex' in notes['Tanakh']
     assert 'Dead Sea Scrolls' in notes['DSS'] and 'fragmentary' in notes['DSS']
@@ -446,4 +463,83 @@ def test_hebrew_notes_separate_the_manuscripts_from_the_authors():
 def test_undescribed_collections_add_nothing_and_a_language_note_can_stand_alone():
     assert _collection_notes('grc', {'Novels': {'units': 9, 'words': 9000}})['rows'] == []
     assert _collection_notes('hbo', {})['caveats'][0].startswith('Hebrew spans')
-    assert _collection_notes('eng', {'Novels': {'units': 1, 'words': 100}})['caveats'][1].startswith('Novels holds 100 words')
+    thin = _collection_notes('eng', {'Novels': {'units': 1, 'words': 100, 'books': {'b': ['eng-A001']}}})
+    assert thin['caveats'][1].startswith('Novels holds 100 words')
+
+
+def test_each_collection_states_its_expected_authors_beside_the_measured_count():
+    result = _collection_notes('arb', {
+        'Quran': {'units': 6236, 'words': 77881,
+                  'books': {'s1': ['arb-A001'], 's2': ['arb-A001'], 's3': ['arb-A001', 'arb-A002']},
+                  'titles': {'s3': 'Sura 28 Al-Qasas'}},
+        'Hadith Qudsi': {'units': 40, 'words': 3260, 'books': {'q1': ['arb-A001']}}})
+    rows = {row['collection']: row for row in result['rows']}
+    assert 'One speaker throughout' in rows['Quran']['expected']
+    assert rows['Quran']['measured'] == (
+        '2 inferred authors across 3 books, a median of 1 per book'
+        ' and Sura 28 Al-Qasas alone carrying 2.')
+    assert rows['Hadith Qudsi']['measured'] == '1 inferred author in its single book.'
+
+
+def test_measured_counts_report_unassigned_books_rather_than_hiding_them():
+    result = _collection_notes('hbo', {
+        'DSS': {'units': 5659, 'words': 150391,
+                'books': {'a': [], 'b': [], 'c': ['hbo-A001'], 'd': ['hbo-A002']}},
+        'inscriptions': {'units': 3, 'words': 273, 'books': {'i1': [], 'i2': []}}})
+    rows = {row['collection']: row for row in result['rows']}
+    assert rows['DSS']['measured'].startswith('2 inferred authors across 4 books')
+    assert '2 of them carrying none at all' in rows['DSS']['measured']
+    assert rows['inscriptions']['measured'] == (
+        'No text here carries an inferred author under the current filters.')
+
+
+def test_the_control_corpus_reports_how_far_the_method_oversplits_known_authors():
+    # Five novelists are known; anything above five is the method splitting one hand.
+    result = _collection_notes('eng', {'Novels': {
+        'units': 48495, 'words': 2521994,
+        'books': {f'b{index}': [f'eng-A{index:03d}', 'eng-A001'] for index in range(1, 16)},
+        'titles': {'b7': 'A Tale of Two Cities'}}})
+    row = result['rows'][0]
+    assert 'Five authors, named on the title pages' in row['expected']
+    assert row['measured'].startswith('15 inferred authors across 15 books')
+    assert 'a median of 2 per book' in row['measured']
+
+
+def _control_contrast(rows):
+    """Return the sentence the panel derives from the English control corpus."""
+    if shutil.which('node') is None:
+        pytest.skip('Node is optional for browser-code validation')
+    block = re.search(r'const controlContrast=.*?(?=function appendCollectionNotes\()',
+                      _HTML_END, re.DOTALL).group(0)
+    program = (
+        "const str = value => value == null ? '' : String(value);\n"
+        "const count = value => new Intl.NumberFormat('en-US').format(value || 0);\n"
+        "const languageNotes = {};\n"
+        f"const verses = {json.dumps(rows)};\n" + block +
+        "process.stdout.write(JSON.stringify({contrast: controlContrast,"
+        " arabic: collectionCaveats('arb', [], controlContrast),"
+        " english: collectionCaveats('eng', [], controlContrast)}));"
+    )
+    return json.loads(subprocess.run(['node', '-e', program], check=True,
+                                     text=True, capture_output=True).stdout)
+
+
+def test_other_languages_are_told_how_far_the_method_oversplits_known_authors():
+    rows = [dict(language='eng', book=f'b{book}', book_title=f'Book {book}',
+                 reference_author=f'Writer {book % 3}', author_id=f'eng-A{index:03d}')
+            for book in range(3) for index in range(4)]
+    result = _control_contrast(rows)
+    assert '3 of them come back as 4 groups' in result['contrast']
+    assert 'Book 0 alone is split into 4' in result['contrast']
+    # Arabic gets the warning; English does not, since its own cards already show it.
+    assert result['arabic'] == [result['contrast']]
+    assert result['english'] == []
+
+
+def test_no_oversplit_warning_when_the_control_recovers_its_authors():
+    exact = [dict(language='eng', book=f'b{index}', book_title=f'Book {index}',
+                  reference_author=f'Writer {index}', author_id=f'eng-A{index:03d}')
+             for index in range(3)]
+    assert _control_contrast(exact)['contrast'] == ''
+    assert _control_contrast([dict(language='arb', book='b', book_title='B',
+                                   reference_author='X', author_id='arb-A001')])['contrast'] == ''
