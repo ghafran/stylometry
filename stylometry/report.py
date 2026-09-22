@@ -483,7 +483,15 @@ function collectionMeasure(entry){
  const counts=Array.from(entry.books.values(),set=>set.size).sort((a,b)=>a-b);
  const middle=counts[Math.ceil(counts.length/2)-1],empty=counts.filter(size=>!size).length;
  const parts=[named+' across '+count(books)+' books','a median of '+count(middle)+' per book'];
- if(empty)parts.push(count(empty)+' of them carrying none at all');
+ if(empty){
+  const floor=Number((data.config || {}).min_tokens) || 0;
+  const tooShort=Array.from(entry.books.keys())
+   .filter(book=>!entry.books.get(book).size && (entry.bookWords.get(book) || 0)<floor).length;
+  parts.push(count(empty)+' of them carrying none at all'
+   +(floor && tooShort===empty
+     ?', every one shorter than the '+count(floor)+'-word floor for a single passage'
+     :floor && tooShort?', '+count(tooShort)+' of those shorter than the '+count(floor)+'-word floor for a single passage':''));
+ }
  const widest=Array.from(entry.books.entries()).sort((a,b)=>b[1].size-a[1].size || str(a[0]).localeCompare(str(b[0])))[0];
  if(widest && widest[1].size>Math.max(middle,1))
   parts.push(str(entry.titles.get(widest[0]) || widest[0])+' alone carrying '+count(widest[1].size));
@@ -564,11 +572,12 @@ function renderOverview(){
   const language=str(row.language),collection=str(row.collection);
   if(!collections.has(language))collections.set(language,new Map());
   const counts=collections.get(language);
-  if(!counts.has(collection))counts.set(collection,{units:0,words:0,styles:new Set(),books:new Map(),titles:new Map()});
+  if(!counts.has(collection))counts.set(collection,{units:0,words:0,styles:new Set(),books:new Map(),titles:new Map(),bookWords:new Map()});
   const entry=counts.get(collection),book=str(row.book);
   entry.units++;
   entry.words+=typeof row.token_count==='number' && Number.isFinite(row.token_count)?row.token_count:0;
-  if(!entry.books.has(book)){entry.books.set(book,new Set());entry.titles.set(book,row.book_title || row.book);}
+  if(!entry.books.has(book)){entry.books.set(book,new Set());entry.titles.set(book,row.book_title || row.book);entry.bookWords.set(book,0);}
+  entry.bookWords.set(book,entry.bookWords.get(book)+(typeof row.token_count==='number' && Number.isFinite(row.token_count)?row.token_count:0));
   if(row.style_id){entry.styles.add(row.style_id);entry.books.get(book).add(row.style_id);}
  }
  $('overview-summary').textContent=overviewSummary(groups,measure);

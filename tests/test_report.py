@@ -380,13 +380,16 @@ def _collection_notes(language, counts):
     program = (
         "const str = value => value == null ? '' : String(value);\n"
         "const count = value => new Intl.NumberFormat('en-US').format(value || 0);\n"
-        "const verses = [];  // the control contrast is exercised by its own tests\n" + block +
+        "const verses = [];  // the control contrast is exercised by its own tests\n"
+        "const data = {config: {min_tokens: 200}};\n" + block +
         f"const source = {json.dumps(counts)};\n"
         "const counts = new Map(Object.entries(source).map(([collection, entry]) => [collection, {\n"
         "  units: entry.units || 0, words: entry.words || 0,\n"
         "  styles: new Set(Object.values(entry.books || {}).flat()),\n"
         "  books: new Map(Object.entries(entry.books || {}).map(([book, list]) => [book, new Set(list)])),\n"
         "  titles: new Map(Object.entries(entry.titles || {})),\n"
+        "  bookWords: new Map(Object.keys(entry.books || {}).map(book =>\n"
+        "    [book, (entry.bookWords || {})[book] || 0])),\n"
         "}]));\n"
         f"const rows = collectionNotesFor({json.dumps(language)}, counts);\n"
         f"process.stdout.write(JSON.stringify({{rows: rows.map(({{styles, books, titles, ...row}}) => row),"
@@ -489,7 +492,8 @@ def test_measured_counts_report_unassigned_books_rather_than_hiding_them():
         'inscriptions': {'units': 3, 'words': 273, 'books': {'i1': [], 'i2': []}}})
     rows = {row['collection']: row for row in result['rows']}
     assert rows['DSS']['measured'].startswith('2 inferred styles across 4 books')
-    assert '2 of them carrying none at all' in rows['DSS']['measured']
+    # Empty books are usually empty because nothing in them reaches one passage.
+    assert '2 of them carrying none at all, every one shorter than the 200-word floor' in rows['DSS']['measured']
     assert rows['inscriptions']['measured'] == (
         'No text here carries an inferred style under the current filters.')
 
@@ -581,3 +585,12 @@ def test_the_hijra_comparison_ignores_everything_that_is_not_a_tagged_sura():
     assert _hijra([_sura(2, None, 10), _sura(12, None, 10)]) is None
     assert _hijra([dict(collection='Bukhari', book='BUKH02', style_id='arb-S001', token_count=99),
                    _sura(2, 'arb-S003', 10), _sura(12, 'arb-S004', 10)])['total'] == 20
+
+
+def test_an_empty_book_that_is_long_enough_is_not_blamed_on_the_passage_floor():
+    result = _collection_notes('hbo', {'DSS': {
+        'units': 4, 'words': 900,
+        'books': {'short': [], 'long': [], 'tagged': ['hbo-S001'], 'other': ['hbo-S002']},
+        'bookWords': {'short': 40, 'long': 800, 'tagged': 30, 'other': 30}}})
+    measured = result['rows'][0]['measured']
+    assert '2 of them carrying none at all, 1 of those shorter than the 200-word floor' in measured
