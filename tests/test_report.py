@@ -365,3 +365,85 @@ def test_aggregate_chart_is_visible_above_the_tabs_under_every_filter(tmp_path):
     assert html.count('id="contribution-measure"') == 1, 'one measure control governs every view'
     assert 'renderMetrics();renderOverview();' in html, 'the chart redraws with every filter change'
     assert '<option value="assigned">Assigned</option>' in html
+
+
+def _collection_notes(language, counts):
+    """Return what the panel would print beneath a language's chart."""
+    if shutil.which('node') is None:
+        pytest.skip('Node is optional for browser-code validation')
+    block = re.search(r'const collectionNotes=.*?(?=function appendCollectionNotes\()',
+                      _HTML_END, re.DOTALL).group(0)
+    program = (
+        "const str = value => value == null ? '' : String(value);\n"
+        "const count = value => new Intl.NumberFormat('en-US').format(value || 0);\n" + block +
+        f"const rows = collectionNotesFor({json.dumps(language)}, new Map(Object.entries({json.dumps(counts)})));\n"
+        f"process.stdout.write(JSON.stringify({{rows, caveats: collectionCaveats({json.dumps(language)}, rows)}}));"
+    )
+    return json.loads(subprocess.run(['node', '-e', program], check=True,
+                                     text=True, capture_output=True).stdout)
+
+
+def test_arabic_collections_say_whose_speech_each_one_reports():
+    result = _collection_notes('arb', {
+        'Bukhari': {'units': 7589, 'words': 567106},
+        'Quran': {'units': 6236, 'words': 77881},
+        'Hadith Qudsi': {'units': 40, 'words': 3260}})
+    notes = {row['collection']: row['note'] for row in result['rows']}
+    assert [row['collection'] for row in result['rows']] == ['Bukhari', 'Quran', 'Hadith Qudsi']
+    assert 'direct speech of God' in notes['Quran']
+    assert 'outside the Quran' in notes['Hadith Qudsi'] and 'his own wording' in notes['Hadith Qudsi']
+    assert 'own words and actions' in notes['Bukhari'] and 'al-Bukhari' in notes['Bukhari']
+    assert all('peace be upon him' in note for note in notes.values() if 'Quran' not in note[:20])
+    caveats = ' '.join(result['caveats'])
+    assert 'not on its own evidence about a speaker' in caveats
+    assert 'chains of transmission' in caveats
+    assert 'Hadith Qudsi holds 3,260 words here' in caveats
+
+
+def test_english_is_labelled_the_control_corpus_not_a_subject():
+    result = _collection_notes('eng', {
+        'Novels': {'units': 48495, 'words': 2521994},
+        'Cross-genre': {'units': 20508, 'words': 1677606},
+        'Federalist': {'units': 1289, 'words': 189773}})
+    caveats = ' '.join(result['caveats'])
+    assert 'control corpus, not part of the scriptural question' in caveats
+    assert 'known in advance' in caveats
+    # The Federalist is a small share of English but has ample text; it must not be called thin.
+    assert 'Federalist holds' not in caveats
+    notes = {row['collection']: row['note'] for row in result['rows']}
+    assert 'one genre' in notes['Novels'] and 'genre change' in notes['Cross-genre']
+    assert 'disputed' in notes['Federalist']
+
+
+def test_greek_names_its_witnesses_and_warns_that_the_septuagint_is_two_sources():
+    result = _collection_notes('grc', {
+        'LXX': {'units': 29459, 'words': 592804},
+        'NT': {'units': 7900, 'words': 136295},
+        'noncanonical': {'units': 3767, 'words': 122770}})
+    notes = {row['collection']: row['note'] for row in result['rows']}
+    assert 'Codex Sinaiticus' in notes['NT'] and 'earliest surviving complete copy' in notes['NT']
+    assert 'Swete' in notes['LXX']
+    assert 'never canonised' in notes['noncanonical']
+    caveats = ' '.join(result['caveats'])
+    assert 'not one source' in caveats, 'a mixed witness can read as style'
+    assert 'translated Greek' in caveats
+
+
+def test_hebrew_notes_separate_the_manuscripts_from_the_authors():
+    result = _collection_notes('hbo', {
+        'Tanakh': {'units': 23213, 'words': 308575},
+        'DSS': {'units': 5659, 'words': 150391},
+        'inscriptions': {'units': 3, 'words': 273}})
+    notes = {row['collection']: row['note'] for row in result['rows']}
+    assert 'Leningrad Codex' in notes['Tanakh']
+    assert 'Dead Sea Scrolls' in notes['DSS'] and 'fragmentary' in notes['DSS']
+    assert 'Ketef Hinnom' in notes['inscriptions'] and 'Nash Papyrus' in notes['inscriptions']
+    caveats = ' '.join(result['caveats'])
+    assert 'difference between manuscripts before' in caveats
+    assert 'inscriptions holds 273 words here' in caveats
+
+
+def test_undescribed_collections_add_nothing_and_a_language_note_can_stand_alone():
+    assert _collection_notes('grc', {'Novels': {'units': 9, 'words': 9000}})['rows'] == []
+    assert _collection_notes('hbo', {})['caveats'][0].startswith('Hebrew spans')
+    assert _collection_notes('eng', {'Novels': {'units': 1, 'words': 100}})['caveats'][1].startswith('Novels holds 100 words')

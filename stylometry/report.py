@@ -121,7 +121,7 @@ _CSS = r'''
 .works-picker{max-width:360px;margin:18px 0}.works-overview{border:1px solid var(--line);border-radius:11px;background:white;padding:20px;margin-bottom:20px}.works-overview h3{font-size:19px}.works-counts{display:flex;gap:24px;flex-wrap:wrap;margin-top:14px}.works-counts strong{display:block;font-size:23px;font-weight:600}.works-counts span{font-size:12px;color:var(--muted)}.works-branch{border:1px solid var(--line);border-radius:8px;background:white;margin:10px 0;overflow:hidden}.works-branch>summary{cursor:pointer;padding:13px 16px;color:var(--ink);font-weight:600;overflow-wrap:anywhere}.works-branch>summary:hover{background:#f0f6f4}.works-branch>summary .tiny{display:inline;font-weight:400;margin-left:12px}.works-children{padding:0 14px 8px 20px}.works-chapter>.works-children{padding:0}.works-chapter .text-table .ref{min-width:160px}.works-chapter .text-table .tag{min-width:140px}.works-caption{font-size:12px;color:var(--muted);margin:0 0 10px}.works-more{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;flex-wrap:wrap}@media(max-width:740px){.works-children{padding:0 7px 5px 9px}.works-branch>summary{padding:11px}.works-branch>summary .tiny{display:block;margin-left:0}.works-counts{gap:15px}}
 
 .pages{display:flex;gap:8px;flex-wrap:wrap}.pages a{border:1px solid var(--line);background:white;color:var(--ink);border-radius:8px;padding:8px 12px;text-decoration:none;white-space:nowrap}.pages a:hover{background:#f0f6f4;border-color:#abcac2}.header-links{display:flex;flex-direction:column;gap:9px;align-items:flex-end}main.single{padding:28px 42px 48px;max-width:1100px}main.single section{margin-bottom:40px}main.single section:target h2{color:var(--teal)}@media(max-width:740px){.header-links{align-items:stretch;margin-top:17px}main.single{padding:20px 16px}}
-.overview{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:21px 23px;margin-bottom:22px}.overview-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap}.overview-head h2{margin:0 0 5px}.overview-head p{margin:0;font-size:13px;max-width:78ch}.overview-measure{width:200px;flex:none}.overview-card{border-top:1px solid var(--line);margin-top:18px;padding-top:16px}.overview-card:first-child{border-top:0;margin-top:16px;padding-top:0}.overview-card-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:9px}.overview-card-head h3{margin:0;font-size:15px}.overview-bar{display:flex;gap:2px;height:34px;border-radius:6px;background:var(--paper)}.overview-segment{min-width:3px;border-radius:2px}.further{background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.26) 0 5px,transparent 5px 10px)}.overview-bar>.overview-segment:first-child{border-radius:6px 2px 2px 6px}.overview-bar>.overview-segment:last-child{border-radius:2px 6px 6px 2px}.overview-legend{display:flex;flex-wrap:wrap;gap:7px 20px;margin-top:12px;font-size:12px}.overview-entry{display:flex;align-items:center;gap:7px}.overview-entry .swatch{display:inline-block;width:11px;height:11px;border-radius:3px;flex:none}.overview-entry .amount{color:var(--muted)}.overview-tail{margin-top:11px;font-size:12px;color:var(--muted)}.overview-tail summary{cursor:pointer;color:var(--teal)}.overview-tail ul{margin:8px 0 0;padding-left:18px;columns:230px}.overview-empty{margin:0;padding:18px 0;color:var(--muted)}@media(max-width:740px){.overview{padding:16px 14px}.overview-measure{width:100%}.overview-legend{gap:6px 14px}}'''
+.overview{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:21px 23px;margin-bottom:22px}.overview-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap}.overview-head h2{margin:0 0 5px}.overview-head p{margin:0;font-size:13px;max-width:78ch}.overview-measure{width:200px;flex:none}.overview-card{border-top:1px solid var(--line);margin-top:18px;padding-top:16px}.overview-card:first-child{border-top:0;margin-top:16px;padding-top:0}.overview-card-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:9px}.overview-card-head h3{margin:0;font-size:15px}.overview-bar{display:flex;gap:2px;height:34px;border-radius:6px;background:var(--paper)}.overview-segment{min-width:3px;border-radius:2px}.further{background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.26) 0 5px,transparent 5px 10px)}.overview-bar>.overview-segment:first-child{border-radius:6px 2px 2px 6px}.overview-bar>.overview-segment:last-child{border-radius:2px 6px 6px 2px}.overview-legend{display:flex;flex-wrap:wrap;gap:7px 20px;margin-top:12px;font-size:12px}.overview-entry{display:flex;align-items:center;gap:7px}.overview-entry .swatch{display:inline-block;width:11px;height:11px;border-radius:3px;flex:none}.overview-entry .amount{color:var(--muted)}.overview-tail{margin-top:11px;font-size:12px;color:var(--muted)}.overview-tail summary{cursor:pointer;color:var(--teal)}.overview-tail ul{margin:8px 0 0;padding-left:18px;columns:230px}.overview-empty{margin:0;padding:18px 0;color:var(--muted)}.overview-notes{margin-top:15px;padding-top:14px;border-top:1px dashed var(--line);font-size:12px}.overview-notes h4{margin:0 0 9px;font-size:11px;font-weight:750;letter-spacing:.09em;text-transform:uppercase;color:var(--teal)}.overview-notes dl{margin:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:7px 16px}.overview-notes dt{font-weight:650}.overview-notes dt span{font-weight:400;color:var(--muted)}.overview-notes dd{margin:0;color:var(--muted)}.overview-caveat{margin:12px 0 0;color:var(--muted);max-width:92ch}@media(max-width:740px){.overview-notes dl{grid-template-columns:minmax(0,1fr);gap:2px}.overview-notes dd{margin-bottom:9px}}@media(max-width:740px){.overview{padding:16px 14px}.overview-measure{width:100%}.overview-legend{gap:6px 14px}}'''
 
 
 _ANALYSIS_START = r'''<!doctype html>
@@ -408,9 +408,69 @@ function overviewSummary(groups,measure){
  if(incomplete)sentences.push('Some units have no word count; switch the measure to verses / paragraphs for complete shares.');
  return sentences.join(' ');
 }
+const collectionNotes={
+ 'arb\u0000Quran':'In Islamic tradition, the direct speech of God, revealed to the Prophet Muhammad (peace be upon him) and fixed in its recited wording.',
+ 'arb\u0000Hadith Qudsi':'Sayings whose meaning is attributed to God but which stand outside the Quran, related by the Prophet (peace be upon him) in his own wording.',
+ 'arb\u0000Bukhari':'Reports of the Prophet\u2019s (peace be upon him) own words and actions, transmitted by his companions and gathered by al-Bukhari.',
+ 'eng\u0000Novels':'Five nineteenth-century novelists, three novels each, all fiction. Tests whether the method separates authors writing in one genre.',
+ 'eng\u0000Cross-genre':'Five authors across fiction and non-fiction alike. Tests whether the method follows the author when the subject and genre change.',
+ 'eng\u0000Federalist':'The Federalist Papers, the classic attribution benchmark: Hamilton, Madison and Jay signed most of them, and the rest are disputed or jointly written.',
+ 'grc\u0000NT':'The New Testament as it stands in Codex Sinaiticus, the earliest surviving complete copy, written in the fourth century.',
+ 'grc\u0000LXX':'The Septuagint, the Greek Old Testament that the New Testament writers quote. Taken from Sinaiticus where it survives there and from Swete\u2019s edition elsewhere.',
+ 'grc\u0000noncanonical':'Early Christian writings that circulated but were never canonised \u2014 the Didache, the Clement letters, Barnabas, the apocryphal Acts. Sinaiticus itself carries some of them.',
+ 'hbo\u0000Tanakh':'The Hebrew Bible in its Masoretic form, from the Leningrad Codex by way of the Open Scriptures Hebrew Bible.',
+ 'hbo\u0000DSS':'The Dead Sea Scrolls: Hebrew manuscripts roughly a thousand years older than the Masoretic text, many of them fragmentary.',
+ 'hbo\u0000inscriptions':'The Ketef Hinnom silver amulets and the Nash Papyrus, the oldest surviving Hebrew scriptural text of all.',
+};
+const languageNotes={
+ eng:'English is the control corpus, not part of the scriptural question. Every author here is known in advance, so it measures whether the method can recover authorship at all before its answers about scripture are worth anything. The held-out test on these books is on the English validation page.',
+ grc:'The Greek analysis sets what the canon kept beside what it left out, largely within one manuscript. Two cautions. The Septuagint here is not one source: part is transcribed from Sinaiticus and part is Swete\u2019s printed edition, and an editor\u2019s spelling can register as style. And the Septuagint is translated Greek rendered from Hebrew, so its translators stand between any original author and this text.',
+ hbo:'Hebrew spans roughly a thousand years of copying, and the sources differ in kind rather than only in hand: a medieval codex, fragmentary scrolls, and two inscriptions. Age, scribal spelling and damage all move style on their own, so read a difference here as a difference between manuscripts before reading it as a difference between authors.',
+ arb:'Setting these three side by side is the point of the Arabic analysis: the Quran is presented as God speaking, Hadith Qudsi as God\u2019s meaning in the Prophet\u2019s (peace be upon him) wording, and Bukhari as the Prophet\u2019s (peace be upon him) own speech. A measured difference between them is not on its own evidence about a speaker. They also differ in genre, in how they were transmitted and edited, and in what sits in the text: Bukhari still carries its chains of transmission, and the Quran is a fixed recited text rather than a reported one. Any of that can move style on its own.',
+};
+function collectionNotesFor(language,counts){
+ const rows=[];
+ for(const [collection,entry] of counts){
+  const note=collectionNotes[str(language)+'\u0000'+str(collection)];
+  if(note)rows.push({collection,...entry,note});
+ }
+ return rows.sort((a,b)=>b.words-a.words || str(a.collection).localeCompare(str(b.collection)));
+}
+function collectionCaveats(language,rows){
+ const sentences=languageNotes[language]?[languageNotes[language]]:[];
+ // A passage is 1,200 tokens and a group needs three of them, so anything near that cannot be read.
+ const thin=rows.filter(row=>row.words<5000);
+ if(thin.length)sentences.push(thin.map(row=>row.collection+' holds '+count(row.words)+' words here')
+  .join(' and ')+', too little to characterise a style from at this passage size.');
+ return sentences;
+}
+function appendCollectionNotes(card,language,counts){
+ const rows=collectionNotesFor(language,counts);
+ if(!rows.length)return card;
+ const block=el('div',null,'overview-notes'),list=el('dl');
+ block.append(el('h4','What these collections are'));
+ for(const row of rows){
+  const term=el('dt',row.collection);
+  term.append(el('span',' \u00b7 '+count(row.units)+' text units \u00b7 '+count(row.words)+' words'));
+  list.append(term,el('dd',row.note));
+ }
+ block.append(list);
+ const caveats=collectionCaveats(language,rows);
+ if(caveats.length)block.append(el('p',caveats.join(' '),'overview-caveat'));
+ card.append(block);
+ return card;
+}
 function renderOverview(){
  const measure=$('contribution-measure').value,unit=measure==='words'?'words':'verses / paragraphs';
- const groups=contributionSummary(filtered,{},measure),target=$('overview-charts');
+ const groups=contributionSummary(filtered,{},measure),target=$('overview-charts'),collections=new Map();
+ for(const row of filtered){
+  const language=str(row.language),collection=str(row.collection);
+  if(!collections.has(language))collections.set(language,new Map());
+  const counts=collections.get(language);
+  if(!counts.has(collection))counts.set(collection,{units:0,words:0});
+  const entry=counts.get(collection);entry.units++;
+  entry.words+=typeof row.token_count==='number' && Number.isFinite(row.token_count)?row.token_count:0;
+ }
  $('overview-summary').textContent=overviewSummary(groups,measure);
  target.replaceChildren();
  if(!groups.length){target.append(el('p','No text to chart in this selection.','overview-empty'));return;}
@@ -423,11 +483,11 @@ function renderOverview(){
   card.append(head);
   if(measure==='words' && group.missingWords){
    card.append(el('p',count(group.missingWords)+' text units have no word count. Switch the measure to verses / paragraphs for complete shares.','overview-empty'));
-   target.append(card);continue;
+   target.append(appendCollectionNotes(card,group.language,collections.get(group.language) || new Map()));continue;
   }
   if(!group.total){
    card.append(el('p','No '+unit+' to chart here. Switch the measure to include empty text units.','overview-empty'));
-   target.append(card);continue;
+   target.append(appendCollectionNotes(card,group.language,collections.get(group.language) || new Map()));continue;
   }
   const series=overviewSeries(group),bar=el('div',null,'overview-bar');
   bar.setAttribute('role','img');
@@ -456,7 +516,7 @@ function renderOverview(){
     list.append(el('li',entry.author+' · '+count(entry.amount)+' '+unit+' · '+(entry.share*100).toFixed(1)+'%'));
    details.append(list);card.append(details);
   }
-  target.append(card);
+  target.append(appendCollectionNotes(card,group.language,collections.get(group.language) || new Map()));
  }
 }
 function renderContributions(){
