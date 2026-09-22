@@ -28,6 +28,9 @@ class Config:
     max_styles: int = 20
     fit_passages: int = 2000
     seed: int = 42
+    # Collections whose books are chapters of one continuous work. Only there may a run of
+    # books too short to hold a passage share one, and only until the run reaches the floor.
+    joinable_collections: tuple[str, ...] = ('Quran',)
 
     def __post_init__(self):
         if self.min_tokens < 20 or self.passage_tokens < self.min_tokens:
@@ -50,11 +53,17 @@ def corpus_fingerprint(verses: list[dict]) -> str:
 
 
 def make_passages(verses: list[dict], config: Config) -> tuple[list[dict], dict[str, int]]:
-    """Non-overlapping context, never crossing books, languages or marked gaps.
+    """Non-overlapping context, never crossing languages or marked gaps.
 
     Input order is source order. Complete verse/paragraph units are kept intact.
     A small final block joins its preceding block only in the same uninterrupted
     book segment. Chapters may share context; passage membership is exported.
+
+    A passage stays inside one book, with one exception: in a collection named by
+    ``joinable_collections`` the books are chapters of a single continuous work, so a
+    run of consecutive books too short to reach ``min_tokens`` may share one passage.
+    Merging stops as soon as the floor is reached, and every passage reports how many
+    books its evidence covers so a shared tag is never mistaken for an independent one.
     """
     books = defaultdict(list)
     counts = {}
@@ -81,17 +90,18 @@ def make_passages(verses: list[dict], config: Config) -> tuple[list[dict], dict[
             ids = [v['id'] for v, _ in block]
             n = sum(len(t) for _, t in block)
             first = block[0][0]
+            covered = {v['book'] for v, _ in block}
             passages.append({
                 'id': 'P-' + hashlib.sha256('\0'.join(ids).encode()).hexdigest()[:16],
                 'language': first['language'], 'collection': first['collection'],
-                'book': first['book'], 'verse_ids': ids, 'tokens': n,
+                'book': first['book'], 'book_count': len(covered), 'verse_ids': ids, 'tokens': n,
                 'text': ' '.join(v['text'] for v, _ in block),
                 'eligible': n >= config.min_tokens,
             })
 
-    for book in books.values():
+    def emit_book(content):
         segment = []
-        for verse, words in book:
+        for verse, words in content:
             if verse.get('has_gap') or not words:
                 if segment:
                     emit_segment(segment)
@@ -102,6 +112,44 @@ def make_passages(verses: list[dict], config: Config) -> tuple[list[dict], dict[
                 segment.append((verse, words))
         if segment:
             emit_segment(segment)
+
+    def emit_run(run):
+        """Cut a run of short books into the smallest groups that reach the floor."""
+        groups, current = [], []
+        for content in run:
+            current.append(content)
+            if sum(len(words) for part in current for _, words in part) >= config.min_tokens:
+                groups.append(current)
+                current = []
+        if current:
+            # A short tail joins its neighbour rather than stranding its book.
+            if groups:
+                groups[-1].extend(current)
+            else:
+                groups.append(current)
+        for group in groups:
+            emit_book([unit for part in group for unit in part])
+
+    # Books are visited in source order so that grouping a collection never reorders any
+    # other one; only a joinable collection holds a run back, and only while it is short.
+    run, pending = [], None
+    for key in books:
+        language, collection, _ = key
+        if pending and (pending != (language, collection) or collection not in config.joinable_collections):
+            emit_run(run)
+            run, pending = [], None
+        if collection not in config.joinable_collections:
+            emit_book(books[key])
+            continue
+        pending = (language, collection)
+        content = books[key]
+        if sum(len(words) for _, words in content) >= config.min_tokens:
+            emit_run(run)
+            run = []
+            emit_book(content)
+        else:
+            run.append(content)
+    emit_run(run)
     return passages, counts
 
 
@@ -318,6 +366,7 @@ def analyze(verses: list[dict], config: Config | None = None, progress=None) -> 
             for ident in passage['verse_ids']:
                 v = by_id[ident]
                 v.update(style_id=style_id, passage_id=passage['id'], evidence_tokens=passage['tokens'],
+                         passage_books=passage['book_count'],
                          distance_margin=float(margin) if np.isfinite(margin) else None,
                          status='low_evidence' if counts[ident] < 40 or v.get('has_gap') or
                          selection.get('stable') is not True or (np.isfinite(margin) and margin < .1)

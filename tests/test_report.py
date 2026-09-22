@@ -371,7 +371,9 @@ def _collection_notes(language, counts):
     """Return what the panel would print beneath a language's chart.
 
     ``counts`` maps a collection to ``{"words": n, "books": {book: [style, ...]}}``,
-    which is what the browser accumulates while walking the filtered corpus.
+    optionally with ``bookWords`` and a ``shared`` list of books whose only evidence
+    came from a passage shared with a neighbour. This is what the browser accumulates
+    while walking the filtered corpus.
     """
     if shutil.which('node') is None:
         pytest.skip('Node is optional for browser-code validation')
@@ -390,6 +392,8 @@ def _collection_notes(language, counts):
         "  titles: new Map(Object.entries(entry.titles || {})),\n"
         "  bookWords: new Map(Object.keys(entry.books || {}).map(book =>\n"
         "    [book, (entry.bookWords || {})[book] || 0])),\n"
+        "  alone: new Set(Object.keys(entry.books || {}).filter(book =>\n"
+        "    !(entry.shared || []).includes(book))),\n"
         "}]));\n"
         f"const rows = collectionNotesFor({json.dumps(language)}, counts);\n"
         f"process.stdout.write(JSON.stringify({{rows: rows.map(({{styles, books, titles, ...row}}) => row),"
@@ -594,3 +598,17 @@ def test_an_empty_book_that_is_long_enough_is_not_blamed_on_the_passage_floor():
         'bookWords': {'short': 40, 'long': 800, 'tagged': 30, 'other': 30}}})
     measured = result['rows'][0]['measured']
     assert '2 of them carrying none at all, 1 of those shorter than the 200-word floor' in measured
+
+
+def test_a_book_tagged_only_from_a_shared_passage_is_declared_as_such():
+    result = _collection_notes('arb', {'Quran': {
+        'units': 6236, 'words': 77881,
+        'books': {'Q002': ['arb-S003'], 'Q112': ['arb-S004'], 'Q113': ['arb-S004']},
+        'bookWords': {'Q002': 6140, 'Q112': 20, 'Q113': 25},
+        'shared': ['Q112', 'Q113']}})
+    measured = result['rows'][0]['measured']
+    assert '2 tagged only from a passage shared with neighbouring books' in measured
+    # A book standing on its own evidence is never counted among them.
+    alone = _collection_notes('arb', {'Quran': {
+        'units': 10, 'words': 500, 'books': {'Q002': ['arb-S003']}, 'bookWords': {'Q002': 500}}})
+    assert 'shared with neighbouring books' not in alone['rows'][0]['measured']

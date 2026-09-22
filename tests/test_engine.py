@@ -131,3 +131,47 @@ def test_rollups_track_each_style_reach_separately_at_every_level():
         assert all(row['style_count'] == 2 for row in rows)
         for style in ('eng-S001', 'eng-S002'):
             assert sum(style in row['style_ids'] for row in rows) == expected
+
+
+def _work(collection, sizes, chapter='1'):
+    """One book per entry, sized in tokens, in source order."""
+    return [{**verse(f'{collection}-{index}', 'word ' * size), 'collection': collection,
+             'book': f'B{index:02d}', 'chapter': chapter} for index, size in enumerate(sizes)]
+
+
+def test_short_books_share_a_passage_only_in_a_continuous_collection():
+    config = Config(passage_tokens=600, min_tokens=100, joinable_collections=('Joined',))
+    sizes = [40, 40, 40, 300, 30, 30]
+    joined, _ = make_passages(_work('Joined', sizes), config)
+    apart, _ = make_passages(_work('Apart', sizes), config)
+    assert [p['book_count'] for p in joined] == [3, 1, 2]
+    assert [p['eligible'] for p in joined] == [True, True, False]
+    # The same books in an ordinary collection stay separate and mostly unusable.
+    assert [p['book_count'] for p in apart] == [1] * 6
+    assert [p['eligible'] for p in apart] == [False, False, False, True, False, False]
+
+
+def test_merging_stops_at_the_floor_rather_than_swallowing_a_whole_run():
+    config = Config(passage_tokens=600, min_tokens=100, joinable_collections=('Joined',))
+    passages, _ = make_passages(_work('Joined', [60] * 8), config)
+    # Eight short books become four pairs, not one block of eight.
+    assert [p['book_count'] for p in passages] == [2, 2, 2, 2]
+    assert all(p['eligible'] for p in passages)
+
+
+def test_a_short_tail_joins_its_neighbour_and_an_isolated_book_stays_alone():
+    config = Config(passage_tokens=600, min_tokens=100, joinable_collections=('Joined',))
+    passages, _ = make_passages(_work('Joined', [60, 60, 20, 500, 30, 500]), config)
+    assert [p['book_count'] for p in passages] == [3, 1, 1, 1]
+    # The isolated short book between two long ones has no neighbour to join.
+    assert [p['eligible'] for p in passages] == [True, True, False, True]
+
+
+def test_a_shared_passage_marks_every_verse_it_tagged():
+    config = Config(passage_tokens=600, min_tokens=100, joinable_collections=('Joined',))
+    records = _work('Joined', [60, 60, 300])
+    result = analyze(records, config)
+    shared = [v for v in result['verses'] if v['style_id'] and v['passage_books'] > 1]
+    alone = [v for v in result['verses'] if v['style_id'] and v['passage_books'] == 1]
+    assert len(shared) == 2 and len(alone) == 1
+    assert {v['book'] for v in shared} == {'B00', 'B01'}

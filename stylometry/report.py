@@ -8,7 +8,7 @@ from typing import Any
 
 _VERSE_FIELDS = (
     "id", "language", "collection", "book", "book_title", "chapter", "verse",
-    "text", "style_id", "status", "evidence_tokens", "passage_id",
+    "text", "style_id", "status", "evidence_tokens", "passage_id", "passage_books",
     "distance_margin", "reference_author", "token_count", "has_gap",
 )
 _ROLLUP_FIELDS = (
@@ -492,6 +492,8 @@ function collectionMeasure(entry){
      ?', every one shorter than the '+count(floor)+'-word floor for a single passage'
      :floor && tooShort?', '+count(tooShort)+' of those shorter than the '+count(floor)+'-word floor for a single passage':''));
  }
+ const shared=Array.from(entry.books.keys()).filter(book=>entry.books.get(book).size && !entry.alone.has(book)).length;
+ if(shared)parts.push(count(shared)+' tagged only from a passage shared with neighbouring books');
  const widest=Array.from(entry.books.entries()).sort((a,b)=>b[1].size-a[1].size || str(a[0]).localeCompare(str(b[0])))[0];
  if(widest && widest[1].size>Math.max(middle,1))
   parts.push(str(entry.titles.get(widest[0]) || widest[0])+' alone carrying '+count(widest[1].size));
@@ -572,13 +574,16 @@ function renderOverview(){
   const language=str(row.language),collection=str(row.collection);
   if(!collections.has(language))collections.set(language,new Map());
   const counts=collections.get(language);
-  if(!counts.has(collection))counts.set(collection,{units:0,words:0,styles:new Set(),books:new Map(),titles:new Map(),bookWords:new Map()});
+  if(!counts.has(collection))counts.set(collection,{units:0,words:0,styles:new Set(),books:new Map(),titles:new Map(),bookWords:new Map(),alone:new Set()});
   const entry=counts.get(collection),book=str(row.book);
   entry.units++;
   entry.words+=typeof row.token_count==='number' && Number.isFinite(row.token_count)?row.token_count:0;
   if(!entry.books.has(book)){entry.books.set(book,new Set());entry.titles.set(book,row.book_title || row.book);entry.bookWords.set(book,0);}
   entry.bookWords.set(book,entry.bookWords.get(book)+(typeof row.token_count==='number' && Number.isFinite(row.token_count)?row.token_count:0));
-  if(row.style_id){entry.styles.add(row.style_id);entry.books.get(book).add(row.style_id);}
+  if(row.style_id){
+   entry.styles.add(row.style_id);entry.books.get(book).add(row.style_id);
+   if(!(Number(row.passage_books)>1))entry.alone.add(book);
+  }
  }
  $('overview-summary').textContent=overviewSummary(groups,measure);
  target.replaceChildren();
@@ -673,7 +678,7 @@ function renderContributions(){
 }
 function renderMetrics(){ const groups=new Set(filtered.filter(row=>row.style_id).map(row=>str(row.language)+'\u0000'+row.style_id));const tagged=filtered.filter(row=>row.style_id).length; const insufficient=filtered.filter(row=>row.status==='insufficient_text').length; const langCount=new Set(filtered.map(row=>row.language)).size;$('metrics').replaceChildren(metric(count(filtered.length),'Verses / paragraphs','In the current text selection'),metric(count(groups.size),'Estimated styles',langCount>1?'Language-specific groups, summed':'Groups represented in this selection'),metric(count(tagged),'Tagged text units',filtered.length ? (100*tagged/filtered.length).toFixed(1)+'% of selected text' : 'No text in this selection'),metric(count(insufficient),'Insufficient text','Text without enough supporting evidence')); }
 function reference(row){const english=/^(en|eng|english)$/i.test(str(row.language));return (row.book_title || row.book || row.collection || row.language || 'Text')+' · '+(row.chapter == null ? '' : str(row.chapter)+':')+(english?'¶ ':'')+str(row.verse);}
-function verseRow(row){const tr=el('tr');const ref=el('td',null,'ref');ref.append(el('div',reference(row),'ref-title'),el('div',str(row.language)+' / '+str(row.collection),'ref-meta'),el('div',row.id,'ref-meta'));const tag=el('td',null,'tag');tag.append(styleButton(row.style_id,row.language));const status=row.status || (row.style_id?'assigned':'insufficient_text');tag.append(el('div',null,'tiny'));tag.lastChild.append(el('span',status==='low_evidence'?'Low evidence':status==='insufficient_text'?'Insufficient text':'Assigned','badge '+(status==='low_evidence'?'low':status==='insufficient_text'?'none':'')));tag.append(el('div',count(row.evidence_tokens)+' passage tokens','tiny'));if(row.distance_margin!=null)tag.append(el('div','Distance margin: '+Number(row.distance_margin).toFixed(3),'tiny'));const content=el('td',null,'content');const preview=el('div',row.text || '','verse-text excerpt');preview.dir='auto';content.append(preview);const details=el('details',null,'verse-detail');details.append(el('summary','Full text & evidence'));const full=el('div',row.text || '','verse-text full');full.dir='auto';details.append(full,el('div','Passage: '+(row.passage_id || 'No passage assigned'),'tiny'));if(row.reference_author)details.append(el('div','Reference author (validation only): '+row.reference_author,'truth'));content.append(details);tr.append(ref,tag,content);return tr;}
+function verseRow(row){const tr=el('tr');const ref=el('td',null,'ref');ref.append(el('div',reference(row),'ref-title'),el('div',str(row.language)+' / '+str(row.collection),'ref-meta'),el('div',row.id,'ref-meta'));const tag=el('td',null,'tag');tag.append(styleButton(row.style_id,row.language));const status=row.status || (row.style_id?'assigned':'insufficient_text');tag.append(el('div',null,'tiny'));tag.lastChild.append(el('span',status==='low_evidence'?'Low evidence':status==='insufficient_text'?'Insufficient text':'Assigned','badge '+(status==='low_evidence'?'low':status==='insufficient_text'?'none':'')));tag.append(el('div',count(row.evidence_tokens)+' passage tokens','tiny'));if(row.distance_margin!=null)tag.append(el('div','Distance margin: '+Number(row.distance_margin).toFixed(3),'tiny'));const content=el('td',null,'content');const preview=el('div',row.text || '','verse-text excerpt');preview.dir='auto';content.append(preview);const details=el('details',null,'verse-detail');details.append(el('summary','Full text & evidence'));const full=el('div',row.text || '','verse-text full');full.dir='auto';details.append(full,el('div','Passage: '+(row.passage_id || 'No passage assigned')+(Number(row.passage_books)>1?' \u00b7 evidence shared with '+count(row.passage_books-1)+' other books':''),'tiny'));if(row.reference_author)details.append(el('div','Reference author (validation only): '+row.reference_author,'truth'));content.append(details);tr.append(ref,tag,content);return tr;}
 function pageInfo(total,page,size){return total ? count(page*size+1)+'–'+count(Math.min((page+1)*size,total))+' of '+count(total) : '0 results';}
 function renderVerses(){ const start=state.page*state.size;const fragment=document.createDocumentFragment();filtered.slice(start,start+state.size).forEach(row=>fragment.append(verseRow(row)));$('verse-rows').replaceChildren(fragment);$('verse-empty').hidden=filtered.length>0;$('verse-count').textContent=pageInfo(filtered.length,state.page,state.size);$('previous').disabled=state.page===0;$('next').disabled=(state.page+1)*state.size>=filtered.length;}
 function resetPages(){state.page=0;state.rollupPage=0;state.stylePage=0;}
