@@ -267,7 +267,7 @@
       "test_passages": 100,
       "correct_passages": 82,
       "accuracy": 0.82,
-      "balanced_accuracy": 0.8200000000000001,
+      "balanced_accuracy": 0.82,
       "train_books": 15,
       "test_books": 5,
       "reference_authors": 5

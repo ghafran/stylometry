@@ -111,7 +111,8 @@ def test_rollups_and_style_groups_share_style_and_evidence_filters():
     assert actual["rollups"][0]["verse_count"] == 1
     assert actual["rollups"][0]["style_counts"] == {"A": 1}
     assert actual["styles"] == [{"language": "eng", "style_id": "A", "verse_count": 1,
-                                  "book_count": 1, "collection_count": 1, "token_count": 10}]
+                                 "chapter_count": 1, "book_count": 1, "collection_count": 1,
+                                 "token_count": 10}]
 
 
 def test_rollup_grouping_preserves_language_and_collection_namespaces():
@@ -125,8 +126,10 @@ def test_style_counts_use_selected_words_and_distinct_books():
     actual = _run(f"styleSummary({json.dumps(_rows())})", "styleSummary")
     groups = {(row["language"], row["style_id"]): row for row in actual}
     assert set(groups) == {("eng", "A"), ("eng", "B"), ("grc", "A")}
+    # One style, three chapters, two books, two collections: the reach is the point.
     assert groups["eng", "A"] == dict(language="eng", style_id="A", verse_count=3,
-                                       book_count=2, collection_count=2, token_count=90)
+                                      chapter_count=3, book_count=2, collection_count=2,
+                                      token_count=90)
     assert groups["eng", "B"]["token_count"] == 60
     assert groups["eng", "B"]["book_count"] == 2
     assert groups["grc", "A"]["token_count"] == 90

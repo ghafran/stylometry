@@ -92,3 +92,42 @@ def test_invalid_configuration_and_duplicate_ids_rejected():
         Config(min_tokens=1200, passage_tokens=200)
     with pytest.raises(ValueError, match='unique'):
         analyze([verse('a', 'word'), verse('a', 'word')])
+
+
+def _spread(text, marker):
+    """One body of text placed across two chapters, three books and two collections."""
+    places = [('One', 'B1', '1'), ('One', 'B1', '2'), ('One', 'B2', '1'),
+              ('Two', 'B3', '1'), ('Two', 'B3', '2'), ('Two', 'B4', '1')]
+    return [{**verse(f'{marker}{index}', text), 'collection': collection, 'book': book,
+             'chapter': chapter} for index, (collection, book, chapter) in enumerate(places)]
+
+
+def test_one_style_reaches_across_chapters_books_and_collections():
+    result = analyze(_spread('the and to it was he of in that for with as but not they ' * 12, 'a'),
+                     Config(passage_tokens=60, min_tokens=20))
+    assert {v['style_id'] for v in result['verses']} == {'eng-S001'}
+    row = result['styles'][0]
+    assert (row['chapter_count'], row['book_count'], row['collection_count']) == (6, 4, 2)
+    # Every level reports the same single style rather than one private to its own branch.
+    for level in ('language', 'collection', 'book', 'chapter'):
+        rows = [r for r in result['rollups'] if r['level'] == level]
+        assert rows and all(r['style_ids'] == ['eng-S001'] for r in rows)
+
+
+def test_rollups_track_each_style_reach_separately_at_every_level():
+    """Two styles occupying the same places must each keep their own full reach."""
+    tagged = []
+    for marker, style in (('a', 'eng-S001'), ('b', 'eng-S002')):
+        for row in _spread('shared text', marker):
+            tagged.append({**row, 'style_id': style, 'status': 'assigned', 'token_count': 10})
+    rollups = make_rollups(tagged)
+    language = next(row for row in rollups if row['level'] == 'language')
+    assert language['style_ids'] == ['eng-S001', 'eng-S002']
+    assert language['style_counts'] == {'eng-S001': 6, 'eng-S002': 6}
+    for level, expected in (('collection', 2), ('book', 4), ('chapter', 6)):
+        rows = [row for row in rollups if row['level'] == level]
+        assert len(rows) == expected
+        # Neither style is dropped where they share a chapter, and neither is merged away.
+        assert all(row['style_count'] == 2 for row in rows)
+        for style in ('eng-S001', 'eng-S002'):
+            assert sum(style in row['style_ids'] for row in rows) == expected

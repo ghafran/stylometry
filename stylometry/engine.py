@@ -338,6 +338,7 @@ def analyze(verses: list[dict], config: Config | None = None, progress=None) -> 
             styles[v['style_id']].append(v)
     style_rows = [{
         'style_id': style, 'language': units[0]['language'], 'verse_count': len(units),
+        'chapter_count': len({(v['collection'], v['book'], v['chapter']) for v in units}),
         'book_count': len({(v['collection'], v['book']) for v in units}),
         'collection_count': len({v['collection'] for v in units}),
         'token_count': sum(v['token_count'] for v in units), 'examples': [v['id'] for v in units[:5]],
