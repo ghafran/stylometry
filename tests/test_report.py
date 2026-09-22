@@ -67,7 +67,7 @@ def test_portable_report_and_exports_preserve_attributions(tmp_path):
     assert path.name == "index.html"
     assert path.parent.is_dir()
     assert {p.name for p in path.parent.iterdir()} == {
-        "index.html", "analysis.html", "report.json", "verses.csv", "rollups.csv"
+        "index.html", "analysis.html", "expected.html", "report.json", "verses.csv", "rollups.csv"
     }
     assert json.loads((path.parent / "report.json").read_text()) == source
     html = path.read_text()

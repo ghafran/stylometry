@@ -158,6 +158,7 @@ hard-coded as passing results.
 | `output/rollups.csv` | Language, collection, book, chapter and verse summaries |
 | `output/passages.json` | Exact supporting passage membership |
 | `output/benchmark.json` | English benchmark and post-hoc discovery comparison |
+| `output/expected.html` | Expected writer against measured style, by language and collection |
 
 Custom JSONL input uses `id`, `language`, `collection`, `book`, `book_title`,
 `chapter`, `verse`, `text`, and optional `reference_author`, `source`, `witness`,

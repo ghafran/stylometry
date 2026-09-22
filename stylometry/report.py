@@ -6,6 +6,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+from .expectation import compare
+
 _VERSE_FIELDS = (
     "id", "language", "collection", "book", "book_title", "chapter", "verse",
     "text", "style_id", "status", "evidence_tokens", "passage_id", "passage_books",
@@ -107,6 +109,8 @@ def write_html_report(result: dict, out_dir: Path) -> Path:
     out_dir.mkdir(parents=True, exist_ok=True)
     _write_page(out_dir / "analysis.html", _ANALYSIS_START,
                 {key: result[key] for key in _ANALYSIS_FIELDS if key in result}, _ANALYSIS_END)
+    _write_page(out_dir / "expected.html", _EXPECTED_START,
+                compare(result.get("verses", [])), _EXPECTED_END)
     return _write_page(out_dir / "index.html", _HTML_START, _html_payload(result), _HTML_END)
 
 
@@ -121,7 +125,7 @@ _CSS = r'''
 .works-picker{max-width:360px;margin:18px 0}.works-overview{border:1px solid var(--line);border-radius:11px;background:white;padding:20px;margin-bottom:20px}.works-overview h3{font-size:19px}.works-counts{display:flex;gap:24px;flex-wrap:wrap;margin-top:14px}.works-counts strong{display:block;font-size:23px;font-weight:600}.works-counts span{font-size:12px;color:var(--muted)}.works-branch{border:1px solid var(--line);border-radius:8px;background:white;margin:10px 0;overflow:hidden}.works-branch>summary{cursor:pointer;padding:13px 16px;color:var(--ink);font-weight:600;overflow-wrap:anywhere}.works-branch>summary:hover{background:#f0f6f4}.works-branch>summary .tiny{display:inline;font-weight:400;margin-left:12px}.works-children{padding:0 14px 8px 20px}.works-chapter>.works-children{padding:0}.works-chapter .text-table .ref{min-width:160px}.works-chapter .text-table .tag{min-width:140px}.works-caption{font-size:12px;color:var(--muted);margin:0 0 10px}.works-more{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;flex-wrap:wrap}@media(max-width:740px){.works-children{padding:0 7px 5px 9px}.works-branch>summary{padding:11px}.works-branch>summary .tiny{display:block;margin-left:0}.works-counts{gap:15px}}
 
 .pages{display:flex;gap:8px;flex-wrap:wrap}.pages a{border:1px solid var(--line);background:white;color:var(--ink);border-radius:8px;padding:8px 12px;text-decoration:none;white-space:nowrap}.pages a:hover{background:#f0f6f4;border-color:#abcac2}.header-links{display:flex;flex-direction:column;gap:9px;align-items:flex-end}main.single{padding:28px 42px 48px;max-width:1100px}main.single section{margin-bottom:40px}main.single section:target h2{color:var(--teal)}@media(max-width:740px){.header-links{align-items:stretch;margin-top:17px}main.single{padding:20px 16px}}
-.overview{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:21px 23px;margin-bottom:22px}.overview-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap}.overview-head h2{margin:0 0 5px}.overview-head p{margin:0;font-size:13px;max-width:78ch}.overview-measure{width:200px;flex:none}.overview-card{border-top:1px solid var(--line);margin-top:18px;padding-top:16px}.overview-card:first-child{border-top:0;margin-top:16px;padding-top:0}.overview-card-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:9px}.overview-card-head h3{margin:0;font-size:15px}.overview-bar{display:flex;gap:2px;height:34px;border-radius:6px;background:var(--paper)}.overview-segment{min-width:3px;border-radius:2px}.further{background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.26) 0 5px,transparent 5px 10px)}.overview-bar>.overview-segment:first-child{border-radius:6px 2px 2px 6px}.overview-bar>.overview-segment:last-child{border-radius:2px 6px 6px 2px}.overview-legend{display:flex;flex-wrap:wrap;gap:7px 20px;margin-top:12px;font-size:12px}.overview-entry{display:flex;align-items:center;gap:7px}.overview-entry .swatch{display:inline-block;width:11px;height:11px;border-radius:3px;flex:none}.overview-entry .amount{color:var(--muted)}.overview-tail{margin-top:11px;font-size:12px;color:var(--muted)}.overview-tail summary{cursor:pointer;color:var(--teal)}.overview-tail ul{margin:8px 0 0;padding-left:18px;columns:230px}.overview-empty{margin:0;padding:18px 0;color:var(--muted)}.overview-notes{margin-top:15px;padding-top:14px;border-top:1px dashed var(--line);font-size:12px}.overview-notes h4{margin:0 0 9px;font-size:11px;font-weight:750;letter-spacing:.09em;text-transform:uppercase;color:var(--teal)}.overview-notes dl{margin:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:7px 16px}.overview-notes dt{font-weight:650}.overview-notes dt span{font-weight:400;color:var(--muted)}.overview-notes dd{margin:0;color:var(--muted)}.overview-notes dd p{margin:0 0 4px}.overview-notes dd p:last-child{margin-bottom:0}.overview-claim strong{color:var(--ink);font-weight:650}.overview-caveat{margin:12px 0 0;color:var(--muted);max-width:92ch}@media(max-width:740px){.overview-notes dl{grid-template-columns:minmax(0,1fr);gap:2px}.overview-notes dd{margin-bottom:9px}}@media(max-width:740px){.overview{padding:16px 14px}.overview-measure{width:100%}.overview-legend{gap:6px 14px}}'''
+.overview{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:21px 23px;margin-bottom:22px}.overview-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap}.overview-head h2{margin:0 0 5px}.overview-head p{margin:0;font-size:13px;max-width:78ch}.overview-measure{width:200px;flex:none}.overview-card{border-top:1px solid var(--line);margin-top:18px;padding-top:16px}.overview-card:first-child{border-top:0;margin-top:16px;padding-top:0}.overview-card-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:9px}.overview-card-head h3{margin:0;font-size:15px}.overview-bar{display:flex;gap:2px;height:34px;border-radius:6px;background:var(--paper)}.overview-segment{min-width:3px;border-radius:2px}.further{background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.26) 0 5px,transparent 5px 10px)}.overview-bar>.overview-segment:first-child{border-radius:6px 2px 2px 6px}.overview-bar>.overview-segment:last-child{border-radius:2px 6px 6px 2px}.overview-legend{display:flex;flex-wrap:wrap;gap:7px 20px;margin-top:12px;font-size:12px}.overview-entry{display:flex;align-items:center;gap:7px}.overview-entry .swatch{display:inline-block;width:11px;height:11px;border-radius:3px;flex:none}.overview-entry .amount{color:var(--muted)}.overview-tail{margin-top:11px;font-size:12px;color:var(--muted)}.overview-tail summary{cursor:pointer;color:var(--teal)}.overview-tail ul{margin:8px 0 0;padding-left:18px;columns:230px}.overview-empty{margin:0;padding:18px 0;color:var(--muted)}.overview-notes{margin-top:15px;padding-top:14px;border-top:1px dashed var(--line);font-size:12px}.overview-notes h4{margin:0 0 9px;font-size:11px;font-weight:750;letter-spacing:.09em;text-transform:uppercase;color:var(--teal)}.overview-notes dl{margin:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:7px 16px}.overview-notes dt{font-weight:650}.overview-notes dt span{font-weight:400;color:var(--muted)}.overview-notes dd{margin:0;color:var(--muted)}.overview-notes dd p{margin:0 0 4px}.overview-notes dd p:last-child{margin-bottom:0}.overview-claim strong{color:var(--ink);font-weight:650}.overview-caveat{margin:12px 0 0;color:var(--muted);max-width:92ch}@media(max-width:740px){.overview-notes dl{grid-template-columns:minmax(0,1fr);gap:2px}.overview-notes dd{margin-bottom:9px}}@media(max-width:740px){.overview{padding:16px 14px}.overview-measure{width:100%}.overview-legend{gap:6px 14px}}.verdict{display:inline-flex;border-radius:5px;padding:3px 7px;font-size:11px;white-space:nowrap}.verdict.recovered{background:#dcefe4;color:#1d5c3c}.verdict.split{background:#faf1d9;color:#7b5d19}.verdict.merged{background:#f3e5e2;color:#7d3a2e}.verdict.unscored{background:#edf0f1;color:#647078}.scope-table td,.scope-table th{vertical-align:top}.scope-table .spread{font-size:12px;color:var(--muted);line-height:1.8;min-width:260px}.scope-table .spread b{color:var(--ink);font-weight:600}.scope-head{display:flex;justify-content:space-between;align-items:baseline;gap:14px;flex-wrap:wrap;margin:26px 0 10px}.scope-head h3{margin:0}.scope-head .muted{font-size:12px}.reach{font-size:11px;color:var(--muted)}.language-block{margin-bottom:46px}'''
 
 
 _ANALYSIS_START = r'''<!doctype html>
@@ -214,7 +218,7 @@ _HTML_START = r'''<!doctype html>
 <style>''' + _CSS + r'''</style>
 </head>
 <body>
-<header><div class="titles"><div class="eyebrow">Stylometry workspace</div><h1>Authorship Atlas</h1><p class="muted">Explore the voices behind the text.</p></div><div class="header-links"><nav class="pages" aria-label="Analysis pages"><a href="analysis.html#validation">English validation</a><a href="analysis.html#method">About the analysis</a></nav><nav class="downloads" aria-label="Download analysis"><a href="verses.csv" download>Verse tags ↓</a><a href="rollups.csv" download>Rollups ↓</a><a href="report.json" download>Full analysis ↓</a></nav></div></header>
+<header><div class="titles"><div class="eyebrow">Stylometry workspace</div><h1>Authorship Atlas</h1><p class="muted">Explore the voices behind the text.</p></div><div class="header-links"><nav class="pages" aria-label="Analysis pages"><a href="expected.html">Expected vs measured</a><a href="analysis.html#validation">English validation</a><a href="analysis.html#method">About the analysis</a></nav><nav class="downloads" aria-label="Download analysis"><a href="verses.csv" download>Verse tags ↓</a><a href="rollups.csv" download>Rollups ↓</a><a href="report.json" download>Full analysis ↓</a></nav></div></header>
 <div class="layout">
 <aside aria-label="Filter the corpus"><h2>Explore your corpus</h2>
 <div class="field"><label for="language">Language</label><select id="language"></select></div>
@@ -926,6 +930,123 @@ $('page-size').addEventListener('change',()=>{state.size=Number($('page-size').v
 const incoming=new URLSearchParams(location.search);
 for(const key of ['language','style'])if(incoming.get(key))state[key]=incoming.get(key);
 refreshOptions();renderScopeLine();refresh();activate('text');
+</script>
+</body>
+</html>
+'''
+
+
+_EXPECTED_START = r'''<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Expected writers vs measured styles</title>
+<style>''' + _CSS + r'''</style>
+</head>
+<body>
+<header><div class="titles"><div class="eyebrow">Stylometry workspace</div><h1>Expected vs measured</h1><p class="muted">Who each work is supposed to be by, and which style the text actually fell into.</p></div><div class="header-links"><nav class="pages" aria-label="Analysis pages"><a href="index.html">&#8592; Back to the explorer</a><a href="analysis.html#validation">English validation</a></nav></div></header>
+<main class="single"><noscript>This page needs JavaScript. Download report.json for the same results.</noscript>
+<section id="how"><h2>How to read this</h2>
+<p class="muted">An <strong>expected writer</strong> is received opinion, never a measurement: a traditional or scholarly attribution, a known title page, or an explicit statement that the hand is unknown. None of it reaches the estimator &mdash; it is looked up when this page is written, long after the clustering has finished.</p>
+<p class="muted">A writer is <span class="verdict recovered">recovered</span> only when one style holds almost all of their text <em>and</em> almost all of that style is theirs. <span class="verdict split">Split</span> means their text landed in several styles. <span class="verdict merged">Merged</span> means their style also covers other writers. <span class="verdict unscored">Unscored</span> means nobody knows who wrote it, so there is nothing to compare.</p>
+<div id="headline"></div>
+</section>
+<div id="languages"></div>
+<p class="footer-note">Shares are by word. Writers are counted inside their own collection; a style is counted across its whole language, because scoring a style inside one collection would hide every writer it joined outside.</p>
+</main>
+<script type="application/json" id="report-data">'''
+
+_EXPECTED_END = r'''</script>
+<script>
+'use strict';
+const data = JSON.parse(document.getElementById('report-data').textContent);
+document.getElementById('report-data').remove();
+const $ = id => document.getElementById(id);
+const count = value => new Intl.NumberFormat().format(value || 0);
+const percent = value => (value * 100).toFixed(0) + '%';
+const languageNames = {eng:'English', grc:'Greek', hbo:'Hebrew', arb:'Arabic'};
+function el(tag, text, cls) { const node = document.createElement(tag); if(text != null) node.textContent = String(text); if(cls) node.className = cls; return node; }
+function verdict(kind) { const node = el('span', kind, 'verdict ' + kind.replace(/ /g, '-')); return node; }
+function table(headings, rows) {
+ const wrap = el('div', null, 'table-wrap'), node = el('table', null, 'scope-table');
+ const head = el('thead'), tr = el('tr');
+ for(const label of headings) tr.append(el('th', label));
+ head.append(tr);
+ const body = el('tbody');
+ for(const cells of rows) {
+  const row = el('tr');
+  for(const cell of cells) row.append(cell instanceof Node ? cell : el('td', cell));
+  body.append(row);
+ }
+ node.append(head, body); wrap.append(node);
+ const box = el('div', null, 'panelbox'); box.append(wrap); return box;
+}
+function spread(items, bold) {
+ const cell = el('td', null, 'spread');
+ items.forEach((item, index) => {
+  if(index) cell.append(el('span', ' · '));
+  const name = el(item.remainder ? 'span' : 'b', item.name);
+  cell.append(name, el('span', ' ' + percent(item.share)));
+ });
+ return cell;
+}
+function renderHeadline() {
+ const grid = el('div', null, 'benchmark-grid');
+ let expected = 0, recovered = 0, split = 0, merged = 0;
+ for(const language of data.languages) for(const scope of language.collections) {
+  expected += scope.expected_count; recovered += scope.recovered;
+  split += scope.split; merged += scope.merged;
+ }
+ const cards = [['Expected writers', expected, 'Named by tradition, scholarship or a title page'],
+                ['Recovered', recovered, 'One style, almost all of it theirs'],
+                ['Split', split, 'Their text landed in several styles'],
+                ['Merged', merged, 'Their style also covers other writers']];
+ for(const [label, value, hint] of cards) {
+  const card = el('div', null, 'method-card');
+  card.append(el('div', label, 'label'), el('div', count(value), 'benchmark-value'), el('p', hint));
+  grid.append(card);
+ }
+ $('headline').append(grid);
+}
+function renderLanguage(language) {
+ const block = el('section', null, 'language-block');
+ block.append(el('h2', languageNames[language.language] || language.language));
+ block.append(table(['Collection', 'Expected writers', 'Styles', 'Best-case agreement', 'Recovered', 'Split', 'Merged'],
+  language.collections.map(scope => [
+   el('td', scope.collection), 
+   el('td', count(scope.expected_count) + (scope.unscored_count ? ' (+' + count(scope.unscored_count) + ' unscored)' : '')),
+   count(scope.style_count), percent(scope.agreement),
+   count(scope.recovered), count(scope.split), count(scope.merged)])));
+ for(const scope of language.collections) {
+  const head = el('div', null, 'scope-head');
+  head.append(el('h3', scope.collection + ' — what each expected writer became'),
+              el('span', count(scope.words) + ' words', 'muted'));
+  block.append(head);
+  block.append(table(['Expected writer', 'Books', 'Words', 'Styles its text fell into', 'Verdict'],
+   scope.writers.map(row => {
+    const tag = el('td'); tag.append(verdict(row.verdict));
+    return [el('td', row.writer), count(row.books), count(row.words), spread(row.styles), tag];
+   })));
+  if(scope.hidden) block.append(el('p', count(scope.hidden) + ' smaller writers are not listed; report.json holds them all.', 'footer-note'));
+ }
+ const head = el('div', null, 'scope-head');
+ head.append(el('h3', 'What each style drew together'),
+             el('span', 'Counted across the whole language', 'muted'));
+ block.append(head);
+ block.append(table(['Style', 'Books', 'Words', 'Expected writers it covers', 'Verdict'],
+  language.styles.map(row => {
+   const books = el('td');
+   books.append(el('div', count(row.books)));
+   books.append(el('div', row.collections.map(item => item.collection + ' ' + count(item.books)).join(' · '), 'reach'));
+   const tag = el('td'); tag.append(verdict(row.verdict));
+   return [el('td', row.style_id), books, count(row.words), spread(row.writers), tag];
+  })));
+ return block;
+}
+renderHeadline();
+const target = $('languages');
+for(const language of data.languages) target.append(renderLanguage(language));
 </script>
 </body>
 </html>
