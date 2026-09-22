@@ -25,15 +25,15 @@ from threadpoolctl import threadpool_limits
 class Config:
     passage_tokens: int = 1200
     min_tokens: int = 200
-    max_authors: int = 20
+    max_styles: int = 20
     fit_passages: int = 2000
     seed: int = 42
 
     def __post_init__(self):
         if self.min_tokens < 20 or self.passage_tokens < self.min_tokens:
             raise ValueError("Require passage_tokens >= min_tokens >= 20")
-        if not 1 <= self.max_authors <= 100 or self.fit_passages < 20:
-            raise ValueError("Require 1 <= max_authors <= 100 and fit_passages >= 20")
+        if not 1 <= self.max_styles <= 100 or self.fit_passages < 20:
+            raise ValueError("Require 1 <= max_styles <= 100 and fit_passages >= 20")
 
 
 def tokens(text: str) -> list[str]:
@@ -167,7 +167,7 @@ def _discover(passages: list[dict], config: Config) -> tuple[np.ndarray, np.ndar
                 'reason': 'All passage feature vectors are identical.',
                 'candidate_scores': [], 'stable': None, 'fit_passages': len(fit),
             }
-        upper = min(config.max_authors, max(1, len(fit) // 8))
+        upper = min(config.max_styles, max(1, len(fit) // 8))
         candidates, models = [], {}
         for k in range(1, upper + 1):
             model = GaussianMixture(n_components=k, covariance_type='diag',
@@ -216,7 +216,7 @@ def _discover(passages: list[dict], config: Config) -> tuple[np.ndarray, np.ndar
         'stability_ari': agreement, 'stable': min(agreement) >= .8 if agreement else None,
         'at_search_limit': best == upper and upper > 1,
         'limitations': 'Style groups can reflect genre, topic, editor or transmitter. '
-                      'Stability holds features and group count fixed; it is not author accuracy.',
+                      'Stability holds features and group count fixed; it is not accuracy against a known author.',
     }
     return labels, margins, selection
 
@@ -249,42 +249,42 @@ def make_rollups(verses: list[dict]) -> list[dict]:
                     'id': v['id'] if depth == 5 else None,
                     'verse_count': 0, 'assigned_verse_count': 0,
                     'insufficient_verse_count': 0, 'low_evidence_verse_count': 0,
-                    'author_counts': Counter(),
+                    'style_counts': Counter(),
                 }
             row = grouped[level, key]
             row['verse_count'] += 1
-            if v['author_id']:
+            if v['style_id']:
                 row['assigned_verse_count'] += 1
-                row['author_counts'][v['author_id']] += 1
+                row['style_counts'][v['style_id']] += 1
             else:
                 row['insufficient_verse_count'] += 1
             row['low_evidence_verse_count'] += v['status'] == 'low_evidence'
     for row in grouped.values():
-        counts = row['author_counts']
-        row['author_ids'] = sorted(counts)
-        row['author_count'] = len(counts)
-        row['dominant_author'] = counts.most_common(1)[0][0] if counts else None
-        row['author_counts'] = dict(sorted(counts.items()))
+        counts = row['style_counts']
+        row['style_ids'] = sorted(counts)
+        row['style_count'] = len(counts)
+        row['dominant_style'] = counts.most_common(1)[0][0] if counts else None
+        row['style_counts'] = dict(sorted(counts.items()))
     return list(grouped.values())
 
 
 def discovery_validation(verses: list[dict]) -> dict:
     """Evaluate completed blind English clustering; never influences discovery."""
     known = [v for v in verses if v['language'] == 'eng' and v.get('reference_author')]
-    eligible = [v for v in known if v.get('author_id')]
+    eligible = [v for v in known if v.get('style_id')]
     truth = sorted({v['reference_author'] for v in known})
-    discovered = {v['author_id'] for v in eligible}
+    discovered = {v['style_id'] for v in eligible}
     contingency = defaultdict(Counter)
     for v in eligible:
-        contingency[v['author_id']][v['reference_author']] += 1
+        contingency[v['style_id']][v['reference_author']] += 1
     return {
         'known_author_count': len(truth), 'discovered_groups_on_labelled_text': len(discovered),
         'count_error': len(discovered) - len(truth), 'evaluated_verses': len(eligible),
         'coverage': len(eligible) / len(known) if known else 0,
         'adjusted_rand_index': float(adjusted_rand_score(
-            [v['reference_author'] for v in eligible], [v['author_id'] for v in eligible])) if eligible else None,
+            [v['reference_author'] for v in eligible], [v['style_id'] for v in eligible])) if eligible else None,
         'normalized_mutual_information': float(normalized_mutual_info_score(
-            [v['reference_author'] for v in eligible], [v['author_id'] for v in eligible])) if eligible else None,
+            [v['reference_author'] for v in eligible], [v['style_id'] for v in eligible])) if eligible else None,
         'group_reference_counts': {k: dict(v) for k, v in sorted(contingency.items())},
         'interpretation': 'Post-hoc verse-weighted cluster agreement, not held-out accuracy. '
                           'Nearby verses share passage predictions. Matching the count alone is insufficient.',
@@ -293,7 +293,7 @@ def discovery_validation(verses: list[dict]) -> dict:
 
 def analyze(verses: list[dict], config: Config | None = None, progress=None) -> dict:
     config = config or Config()
-    tagged = [{**v, 'author_id': None, 'status': 'insufficient_text',
+    tagged = [{**v, 'style_id': None, 'status': 'insufficient_text',
                'evidence_tokens': 0, 'passage_id': None, 'distance_margin': None} for v in verses]
     by_id = {v['id']: v for v in tagged}
     if len(by_id) != len(tagged):
@@ -310,14 +310,14 @@ def analyze(verses: list[dict], config: Config | None = None, progress=None) -> 
         sizes = Counter()
         for passage, label in zip(eligible, labels):
             sizes[int(label)] += passage['tokens']
-        names = {label: f'{language}-A{rank:03}' for rank, (label, _) in enumerate(
+        names = {label: f'{language}-S{rank:03}' for rank, (label, _) in enumerate(
             sorted(sizes.items(), key=lambda p: (-p[1], p[0])), 1)}
         for passage, label, margin in zip(eligible, labels, margins):
-            author_id = names[int(label)]
-            passage['author_id'] = author_id
+            style_id = names[int(label)]
+            passage['style_id'] = style_id
             for ident in passage['verse_ids']:
                 v = by_id[ident]
-                v.update(author_id=author_id, passage_id=passage['id'], evidence_tokens=passage['tokens'],
+                v.update(style_id=style_id, passage_id=passage['id'], evidence_tokens=passage['tokens'],
                          distance_margin=float(margin) if np.isfinite(margin) else None,
                          status='low_evidence' if counts[ident] < 40 or v.get('has_gap') or
                          selection.get('stable') is not True or (np.isfinite(margin) and margin < .1)
@@ -331,18 +331,18 @@ def analyze(verses: list[dict], config: Config | None = None, progress=None) -> 
             evidence.append({k: v for k, v in passage.items() if k != 'text'})
         language_results.append({'language': language, 'verse_count': len(subset),
                                  'passage_count': len(passages), 'eligible_passage_count': len(eligible),
-                                 'estimated_authors': len(names), 'selection': selection})
-    authors = defaultdict(list)
+                                 'estimated_styles': len(names), 'selection': selection})
+    styles = defaultdict(list)
     for v in tagged:
-        if v['author_id']:
-            authors[v['author_id']].append(v)
-    author_rows = [{
-        'author_id': author, 'language': units[0]['language'], 'verse_count': len(units),
+        if v['style_id']:
+            styles[v['style_id']].append(v)
+    style_rows = [{
+        'style_id': style, 'language': units[0]['language'], 'verse_count': len(units),
         'book_count': len({(v['collection'], v['book']) for v in units}),
         'collection_count': len({v['collection'] for v in units}),
         'token_count': sum(v['token_count'] for v in units), 'examples': [v['id'] for v in units[:5]],
-    } for author, units in sorted(authors.items())]
+    } for style, units in sorted(styles.items())]
     return {'schema_version': 1, 'config': asdict(config), 'corpus_sha256': corpus_fingerprint(verses),
-            'languages': language_results, 'verses': tagged, 'authors': author_rows,
+            'languages': language_results, 'verses': tagged, 'styles': style_rows,
             'passages': evidence, 'rollups': make_rollups(tagged), 'benchmark': None,
             'discovery_validation': discovery_validation(tagged)}

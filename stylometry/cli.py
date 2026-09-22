@@ -1,4 +1,4 @@
-"""One-command corpus build, authorship discovery, evaluation and explorer."""
+"""One-command corpus build, style discovery, evaluation and explorer."""
 from __future__ import annotations
 
 import argparse
@@ -33,7 +33,7 @@ def parser():
         p.add_argument('--out', type=Path, default=Path('output'))
         p.add_argument('--passage-tokens', type=int, default=1200)
         p.add_argument('--min-tokens', type=int, default=200)
-        p.add_argument('--max-authors', type=int, default=20, help='Search ceiling, not a supplied author count')
+        p.add_argument('--max-styles', type=int, default=20, help='Search ceiling, not a supplied style count')
         p.add_argument('--fit-passages', type=int, default=2000)
         p.add_argument('--seed', type=int, default=42)
         p.add_argument('--skip-benchmark', action='store_true')
@@ -111,7 +111,7 @@ def _run(args):
     if not verses:
         raise ValueError('The input corpus is empty')
     config = Config(passage_tokens=args.passage_tokens, min_tokens=args.min_tokens,
-                    max_authors=args.max_authors, fit_passages=args.fit_passages, seed=args.seed)
+                    max_styles=args.max_styles, fit_passages=args.fit_passages, seed=args.seed)
     result = analyze(verses, config, progress=lambda message: print(message, flush=True))
     if build_report is not None:
         result['source_coverage'] = {key: build_report.get(key) for key in (
@@ -134,7 +134,7 @@ def _run(args):
         # A reused output directory must not advertise a prior run's accuracy.
         (args.out / 'benchmark.json').unlink(missing_ok=True)
     for row in result['languages']:
-        print(f"{row['language']}: {row['estimated_authors']} inferred author groups, {row['verse_count']:,} text units")
+        print(f"{row['language']}: {row['estimated_styles']} inferred styles, {row['verse_count']:,} text units")
     print(f'Explorer: {report.resolve()}')
     return 0
 

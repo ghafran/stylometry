@@ -1,6 +1,6 @@
 # Stylometry
 
-Discover possible shared authors within each language, tag every verse, and explore
+Discover shared writing styles within each language, tag every verse, and explore
 the results from language down to collection, book, chapter and verse. The English
 reference corpus provides 13 known authors against which to measure the results.
 
@@ -48,12 +48,14 @@ also shows this scope. A custom JSONL corpus analyzes every supplied row directl
 
 ## What the output means
 
-- **Inferred author** is an anonymous language-wide group, such as `eng-A001`.
+- **Inferred style** is an anonymous language-wide group, such as `eng-S001`. It is a
+  writing style, not a person: the English control returns more styles than it
+  has authors.
   The same ID means the same estimated group in every collection and book of
   that run. Different languages are never matched. IDs may change after reruns
   with different texts or settings; they are not permanent person identifiers.
-- **Estimated authors** counts distinct inferred groups. Parent totals use a
-  union of author IDs, so an author appearing in three books is counted once.
+- **Estimated styles** counts distinct inferred groups. Parent totals use a
+  union of style IDs, so a style appearing in three books is counted once.
 - **Reference author** is an independently supplied English catalogue label. It
   is displayed separately and is never a discovery feature or supplied count.
 - **Low evidence** marks an assigned verse whose own text is short, whose margin
@@ -65,30 +67,30 @@ also shows this scope. A custom JSONL corpus analyzes every supplied row directl
   with the nearest other center. It is not a probability of correct authorship.
 
 In the explorer, choose a language and drill into collections, books and chapters.
-Search verse text or filter by an inferred author to find related passages across
-books in that language. Text explorer, Authorship map, Author groups, and By author share the
+Search verse text or filter by an inferred style to find related passages across
+books in that language. Text explorer, Style map, Style groups, and By style share the
 corpus filters and search. Their counts are recomputed from matching text, even
 when viewing a parent rollup with a chapter or evidence filter selected. Opening
-an author keeps existing filters. The map has its own drill path; breadcrumbs
+a style keeps existing filters. The map has its own drill path; breadcrumbs
 return to earlier graph levels inside the same corpus filters. Use the sidebar or Reset
 filters to broaden the corpus. English prose uses paragraphs as verse-like text units;
 the input adapter preserves chapter headings where available.
 
-The **By author** tab shows one inferred author's collections, books, chapters,
-and assigned verses or paragraphs in a nested outline. Choose an author there,
-or use **Browse works** in Author groups. Expand a chapter to read the text and
+The **By style** tab shows one inferred style's collections, books, chapters,
+and assigned verses or paragraphs in a nested outline. Choose a style there,
+or use **Browse works** in Style groups. Expand a chapter to read the text and
 its evidence; longer chapters offer **Show more** until every matching unit is
 visible. Counts and the outline respect all active corpus filters and search.
 
-The **Authorship map** combines hierarchy navigation and contribution graphs.
+The **Style map** combines hierarchy navigation and contribution graphs.
 Each language, collection, book, chapter, or verse has a bar split by inferred
-author. Select a bar to drill down; expand its author breakdown for exact counts
+style. Select a bar to drill down; expand its style breakdown for exact counts
 and shares. Switch between words and verse/paragraph counts. Unassigned text
 remains in the denominator, and words count each verse's own tokens once.
-**Author totals for this selection** shows an overall bar chart whose author
+**Style totals for this selection** shows an overall bar chart whose style
 buttons highlight the corresponding segments without changing the totals.
 All corpus filters and search apply to both charts. **Open matching text** carries
-the current graph location and optional highlighted author into Text explorer.
+the current graph location and optional highlighted style into Text explorer.
 
 ## Analysis
 
@@ -115,13 +117,13 @@ You can change the passage size, minimum evidence, search ceiling and fit sample
 
 ```sh
 uv run stylometry analyze --passage-tokens 1200 --min-tokens 200 \
-  --max-authors 30 --fit-passages 3000 --seed 42
+  --max-styles 30 --fit-passages 3000 --seed 42
 ```
 
 Authorship is an inference: genre, topic, translation, transmission and editorial
 practice can also produce style differences. The displayed count is an
 exploratory estimate, especially when subsample agreement is low or the selected
-count reaches the search ceiling. One group is not proof of one author.
+count reaches the search ceiling. One group is not proof of one author, and many groups are not proof of many.
 English performance does not establish accuracy in the other languages.
 
 ## English validation
@@ -130,7 +132,7 @@ The report keeps two different tests separate:
 
 1. **Blind discovery:** after clustering without author labels, compare the
    discovered groups with the known authors using count error, adjusted Rand
-   index and normalized mutual information. The group/author table shows splits
+   index and normalized mutual information. The style/author table shows splits
    and merges. Agreement is weighted by verses and is not a held-out score.
 2. **Held-out book attribution:** a separate classifier learns labelled training
    books and predicts entire unseen test books from the same known candidates.
@@ -151,8 +153,8 @@ hard-coded as passing results.
 | `data/processed/verses.jsonl` | Canonical input records |
 | `data/processed/build_report.json` | Input coverage and source accounting |
 | `output/index.html` | Self-contained interactive explorer |
-| `output/report.json` | Full result with tags, author groups, rollups and diagnostics |
-| `output/verses.csv` | One row per verse, including reference and inferred authors |
+| `output/report.json` | Full result with tags, style groups, rollups and diagnostics |
+| `output/verses.csv` | One row per verse, with its reference author and inferred style |
 | `output/rollups.csv` | Language, collection, book, chapter and verse summaries |
 | `output/passages.json` | Exact supporting passage membership |
 | `output/benchmark.json` | English benchmark and post-hoc discovery comparison |
@@ -160,7 +162,8 @@ hard-coded as passing results.
 Custom JSONL input uses `id`, `language`, `collection`, `book`, `book_title`,
 `chapter`, `verse`, `text`, and optional `reference_author`, `source`, `witness`,
 `has_gap`. IDs must be unique; chapter and verse references are strings. Supply
-records in reading order. Generated artifacts are ignored by Git and can be
-rebuilt. Original source licences still apply to the texts and derived exports;
+records in reading order. The seven files above are committed so the result can
+be read without rebuilding; every other generated artifact is ignored by Git.
+Original source licences still apply to the texts and derived exports;
 licence/readme files remain alongside their sources in `data/raw/` and the old
 source catalogue is retained in `_backup/README.md`.

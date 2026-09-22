@@ -16,24 +16,24 @@ def _result():
         "schema_version": 1,
         "config": {"passage_tokens": 500},
         "languages": [{"language": "english", "verse_count": 2, "passage_count": 1,
-                       "estimated_authors": 1, "selection": {"reason": "Fixture"}}],
+                       "estimated_styles": 1, "selection": {"reason": "Fixture"}}],
         "verses": [
             {"id": "english/test/book/1/1", "language": "english", "collection": "test",
              "book": "book", "book_title": "A book", "chapter": 1, "verse": 1,
-             "text": 'A sentence, with "quotes".\nAnother line.', "author_id": "english-A01",
+             "text": 'A sentence, with "quotes".\nAnother line.', "style_id": "english-S01",
              "status": "assigned", "evidence_tokens": 501, "passage_id": "p1",
              "distance_margin": 0.0, "reference_author": "Known writer"},
             {"id": "english/test/book/1/2", "language": "english", "collection": "test",
              "book": "book", "book_title": "A book", "chapter": 1, "verse": 2,
-             "text": "…", "author_id": None, "status": "insufficient_text",
+             "text": "…", "style_id": None, "status": "insufficient_text",
              "evidence_tokens": 0, "passage_id": None, "distance_margin": None},
         ],
         "rollups": [{"level": "book", "language": "english", "collection": "test",
                      "book": "book", "chapter": None, "verse": None, "verse_count": 2,
                      "assigned_verse_count": 1, "insufficient_verse_count": 1,
-                     "author_count": 1, "author_ids": ["english-A01"],
-                     "dominant_author": "english-A01", "author_counts": {"english-A01": 1}}],
-        "authors": [{"author_id": "english-A01", "language": "english", "verse_count": 1,
+                     "style_count": 1, "style_ids": ["english-S01"],
+                     "dominant_style": "english-S01", "style_counts": {"english-S01": 1}}],
+        "styles": [{"style_id": "english-S01", "language": "english", "verse_count": 1,
                      "book_count": 1, "collection_count": 1, "token_count": 501,
                      "examples": ["english/test/book/1/1"]}],
         "benchmark": None,
@@ -54,7 +54,7 @@ def _assert_display_projection(html, source):
     for original, row in zip(source["verses"], rows):
         for field in payload["verse_fields"]:
             assert row[field] == original.get(field)
-    for field in ("languages", "config", "authors", "benchmark", "discovery_validation", "source_coverage"):
+    for field in ("languages", "config", "styles", "benchmark", "discovery_validation", "source_coverage"):
         if field in source:
             assert payload[field] == source[field]
     assert payload["rollups"] == [r for r in source["rollups"] if r["level"] != "verse"]
@@ -80,10 +80,10 @@ def test_portable_report_and_exports_preserve_attributions(tmp_path):
         rows = list(csv.DictReader(stream))
     assert len(rows) == len(source["verses"])
     assert rows[0]["text"] == source["verses"][0]["text"]
-    assert rows[0]["author_id"] == "english-A01"
+    assert rows[0]["style_id"] == "english-S01"
     assert rows[0]["distance_margin"] == "0.0"
     assert rows[0]["reference_author"] == "Known writer"
-    assert rows[1]["author_id"] == ""
+    assert rows[1]["style_id"] == ""
     assert rows[1]["evidence_tokens"] == "0"
     assert rows[1]["distance_margin"] == ""
     assert rows[1]["passage_id"] == ""
@@ -91,8 +91,8 @@ def test_portable_report_and_exports_preserve_attributions(tmp_path):
         rollup = next(csv.DictReader(stream))
     assert rollup["chapter"] == ""
     assert rollup["verse_count"] == "2"
-    assert json.loads(rollup["author_ids"]) == ["english-A01"]
-    assert json.loads(rollup["author_counts"]) == {"english-A01": 1}
+    assert json.loads(rollup["style_ids"]) == ["english-S01"]
+    assert json.loads(rollup["style_counts"]) == {"english-S01": 1}
 
 
 def test_untrusted_text_cannot_close_the_data_script(tmp_path):
@@ -122,12 +122,12 @@ def test_untrusted_text_cannot_close_the_data_script(tmp_path):
 
 def test_empty_report_is_complete_and_readable(tmp_path):
     source = {"schema_version": 1, "config": {}, "languages": [], "verses": [],
-              "rollups": [], "authors": [], "benchmark": None}
+              "rollups": [], "styles": [], "benchmark": None}
     path = write_report(source, tmp_path)
     html = path.read_text()
     _assert_display_projection(html, source)
     assert "No matching text" in html
-    assert "No inferred author groups" in html
+    assert "No inferred style groups" in html
     # Validation and method are their own page now, reached from the explorer's top navigation.
     assert 'href="analysis.html#validation"' in html and 'href="analysis.html#method"' in html
     assert "No English validation results" not in html
@@ -136,7 +136,7 @@ def test_empty_report_is_complete_and_readable(tmp_path):
     assert "verse_rows" not in analysis, "the corpus table never reaches the summary page"
     with (tmp_path / "verses.csv").open(encoding="utf-8-sig", newline="") as stream:
         reader = csv.DictReader(stream)
-        assert "author_id" in reader.fieldnames
+        assert "style_id" in reader.fieldnames
         assert list(reader) == []
 
 
@@ -153,7 +153,7 @@ def test_html_omits_duplicate_evidence_and_keeps_full_exports(tmp_path):
     source = _result()
     source["passages"] = [{"id": "p1", "verse_ids": [v["id"] for v in source["verses"]]}]
     source["verses"][0]["source_dir"] = "internal/source/location"
-    source["verses"][0]["source_reference"] = "Author: book, chapter 1, paragraph 1"
+    source["verses"][0]["source_reference"] = "Style: book, chapter 1, paragraph 1"
     source["rollups"].append({"level": "verse", "id": source["verses"][0]["id"], "verse_count": 1})
     source["discovery_validation"] = {"known_author_count": 13, "count_error": 6}
     source["source_coverage"] = {"source_policy": "One primary witness per book.", "parsed_units": 3,
@@ -193,11 +193,11 @@ def test_on_demand_verse_rollups_preserve_counts_and_references():
         assert row["verse_count"] == 1
         for field in ("id", "language", "collection", "book", "book_title", "chapter", "verse"):
             assert row[field] == original[field]
-        assert row["assigned_verse_count"] == int(bool(original["author_id"]))
-        assert row["insufficient_verse_count"] == int(not original["author_id"])
+        assert row["assigned_verse_count"] == int(bool(original["style_id"]))
+        assert row["insufficient_verse_count"] == int(not original["style_id"])
         assert row["low_evidence_verse_count"] == int(original["status"] == "low_evidence")
-        assert row["author_ids"] == ([original["author_id"]] if original["author_id"] else [])
-        assert row["author_counts"] == ({original["author_id"]: 1} if original["author_id"] else {})
+        assert row["style_ids"] == ([original["style_id"]] if original["style_id"] else [])
+        assert row["style_counts"] == ({original["style_id"]: 1} if original["style_id"] else {})
 
 
 def _contributions(rows, selection=None, measure='words'):
@@ -212,18 +212,18 @@ def _contributions(rows, selection=None, measure='words'):
 
 def test_contribution_shares_count_verse_words_once_and_include_unassigned():
     base = dict(language='eng', collection='C', book='B', chapter='1', evidence_tokens=1200)
-    rows = [dict(base, author_id='A', token_count=100, status='low_evidence'),
-            dict(base, author_id='B', token_count=50, status='assigned'),
-            dict(base, author_id=None, token_count=50, status='insufficient_text')]
-    # Author/text/evidence selection highlights a contribution; it must not
+    rows = [dict(base, style_id='A', token_count=100, status='low_evidence'),
+            dict(base, style_id='B', token_count=50, status='assigned'),
+            dict(base, style_id=None, token_count=50, status='insufficient_text')]
+    # Style/text/evidence selection highlights a contribution; it must not
     # change the full-scope denominator or drop unassigned/uncertain text.
-    result = _contributions(rows, {'author': 'A', 'query': 'no match', 'status': 'assigned'})[0]
+    result = _contributions(rows, {'style': 'A', 'query': 'no match', 'status': 'assigned'})[0]
     assert result['total'] == 200  # Not three copies of the 1200-token context.
-    assert {x['author']: x['share'] for x in result['authors']} == {'A': .5, 'B': .25, None: .25}
-    assert result['authors'][0]['lowEvidenceUnits'] == 1
+    assert {x['style']: x['share'] for x in result['styles']} == {'A': .5, 'B': .25, None: .25}
+    assert result['styles'][0]['lowEvidenceUnits'] == 1
     by_verse = _contributions(rows, measure='verses')[0]
     assert by_verse['total'] == 3
-    assert all(x['share'] == pytest.approx(1/3) for x in by_verse['authors'])
+    assert all(x['share'] == pytest.approx(1/3) for x in by_verse['styles'])
 
 
 @pytest.mark.parametrize(('selection', 'expected'), [
@@ -233,27 +233,27 @@ def test_contribution_shares_count_verse_words_once_and_include_unassigned():
     ({'language': 'eng', 'collection': 'C1', 'book': 'B1', 'chapter': '1'}, 30),
 ])
 def test_contributions_follow_each_hierarchy_level(selection, expected):
-    rows = [dict(language='eng', collection='C1', book='B1', chapter='1', author_id='A', token_count=10),
-            dict(language='eng', collection='C1', book='B1', chapter='1', author_id='B', token_count=20),
-            dict(language='eng', collection='C1', book='B1', chapter='2', author_id='A', token_count=30),
-            dict(language='eng', collection='C1', book='B2', chapter='1', author_id='A', token_count=40),
-            dict(language='eng', collection='C2', book='B3', chapter='1', author_id='A', token_count=50),
-            dict(language='grc', collection='C1', book='B1', chapter='1', author_id='A', token_count=999)]
+    rows = [dict(language='eng', collection='C1', book='B1', chapter='1', style_id='A', token_count=10),
+            dict(language='eng', collection='C1', book='B1', chapter='1', style_id='B', token_count=20),
+            dict(language='eng', collection='C1', book='B1', chapter='2', style_id='A', token_count=30),
+            dict(language='eng', collection='C1', book='B2', chapter='1', style_id='A', token_count=40),
+            dict(language='eng', collection='C2', book='B3', chapter='1', style_id='A', token_count=50),
+            dict(language='grc', collection='C1', book='B1', chapter='1', style_id='A', token_count=999)]
     result = _contributions(rows, selection)
     assert len(result) == 1 and result[0]['language'] == 'eng'
     assert result[0]['total'] == expected
-    assert sum(x['share'] for x in result[0]['authors']) == pytest.approx(1)
+    assert sum(x['share'] for x in result[0]['styles']) == pytest.approx(1)
     all_languages = _contributions(rows)
     assert [(x['language'], x['total']) for x in all_languages] == [('eng', 150), ('grc', 999)]
 
 
 def test_contributions_handle_missing_counts_zero_words_and_empty_scope():
-    rows = [dict(language='eng', author_id=None, token_count=0),
-            dict(language='eng', author_id='A', evidence_tokens=1200)]
+    rows = [dict(language='eng', style_id=None, token_count=0),
+            dict(language='eng', style_id='A', evidence_tokens=1200)]
     result = _contributions(rows)[0]
     assert result['total'] == 0
     assert result['missingWords'] == 1
-    assert all(x['share'] == 0 for x in result['authors'])
+    assert all(x['share'] == 0 for x in result['styles'])
     assert _contributions(rows, {'language': 'grc'}) == []
     assert _contributions(rows, measure='verses')[0]['total'] == 2
 
@@ -267,7 +267,7 @@ def _overview(rows, measure='words', shown=None):
     if shutil.which('node') is None:
         pytest.skip('Node is optional for browser-code validation')
     summary = re.search(r'function contributionSummary\(.*?\n}\n', _HTML_END, re.DOTALL).group(0)
-    block = re.search(r'const authorPalette=.*?(?=function renderOverview\()', _HTML_END, re.DOTALL).group(0)
+    block = re.search(r'const stylePalette=.*?(?=function renderOverview\()', _HTML_END, re.DOTALL).group(0)
     program = (
         "const str = value => value == null ? '' : String(value);\n"
         "const count = value => new Intl.NumberFormat('en-US').format(value || 0);\n"
@@ -282,74 +282,74 @@ def _overview(rows, measure='words', shown=None):
                                      text=True, capture_output=True).stdout)
 
 
-def _corpus(author_count, words=None):
+def _corpus(style_count, words=None):
     rows = []
-    for index in range(author_count):
+    for index in range(style_count):
         rows.append(dict(language='eng', collection='C', book='B', chapter='1', status='assigned',
-                         author_id=f'eng-A{index + 1:03d}',
-                         token_count=(words[index] if words else author_count - index) * 10))
+                         style_id=f'eng-S{index + 1:03d}',
+                         token_count=(words[index] if words else style_count - index) * 10))
     return rows
 
 
-def test_aggregate_chart_gives_the_largest_authors_a_fixed_palette_and_folds_the_rest():
+def test_aggregate_chart_gives_the_largest_styles_a_fixed_palette_and_folds_the_rest():
     result = _overview(_corpus(9))
     series = result['languages'][0]['series']
-    assert [item['label'] for item in series[:6]] == [f'eng-A{i:03d}' for i in range(1, 7)]
+    assert [item['label'] for item in series[:6]] == [f'eng-S{i:03d}' for i in range(1, 7)]
     assert len({item['color'] for item in series[:6]}) == 6
-    assert series[6]['label'] == '3 further authors'
-    assert [entry['author'] for entry in series[6]['members']] == ['eng-A007', 'eng-A008', 'eng-A009']
+    assert series[6]['label'] == '3 further styles'
+    assert [entry['style'] for entry in series[6]['members']] == ['eng-S007', 'eng-S008', 'eng-S009']
     assert series[6]['amount'] == sum(entry['amount'] for entry in series[6]['members'])
     assert sum(item['share'] for item in series) == pytest.approx(1)
 
 
-def test_filtering_to_fewer_authors_never_repaints_the_ones_that_remain():
+def test_filtering_to_fewer_styles_never_repaints_the_ones_that_remain():
     rows = _corpus(9)
     full = {item['label']: item['color'] for item in _overview(rows)['languages'][0]['series']}
     # The chart reads an already-filtered corpus, so a filter arrives here as missing rows.
-    narrowed = _overview(rows, shown=[row for row in rows if row['author_id'] in {'eng-A002', 'eng-A005'}])
+    narrowed = _overview(rows, shown=[row for row in rows if row['style_id'] in {'eng-S002', 'eng-S005'}])
     series = narrowed['languages'][0]['series']
-    assert [item['label'] for item in series] == ['eng-A002', 'eng-A005']
-    assert [item['color'] for item in series] == [full['eng-A002'], full['eng-A005']]
+    assert [item['label'] for item in series] == ['eng-S002', 'eng-S005']
+    assert [item['color'] for item in series] == [full['eng-S002'], full['eng-S005']]
 
 
 def test_aggregate_chart_ranks_by_the_whole_corpus_not_by_the_current_filter():
-    # eng-A009 is the largest author overall, so it keeps a palette colour when others are filtered out.
+    # eng-S009 is the largest style overall, so it keeps a palette colour when others are filtered out.
     rows = _corpus(9, words=[1, 1, 1, 1, 1, 1, 1, 1, 90])
     series = _overview(rows)['languages'][0]['series']
-    assert series[0]['label'] == 'eng-A009'
+    assert series[0]['label'] == 'eng-S009'
     assert series[0]['share'] == pytest.approx(900 / 980)
-    assert series[-1]['label'] == '3 further authors'
+    assert series[-1]['label'] == '3 further styles'
 
 
 def test_aggregate_summary_reports_scope_concentration_unassigned_and_evidence():
-    rows = [dict(language='eng', collection='C', book='B', chapter='1', author_id='eng-A001',
+    rows = [dict(language='eng', collection='C', book='B', chapter='1', style_id='eng-S001',
                  token_count=60, status='low_evidence'),
-            dict(language='eng', collection='C', book='B', chapter='1', author_id='eng-A002',
+            dict(language='eng', collection='C', book='B', chapter='1', style_id='eng-S002',
                  token_count=20, status='assigned'),
-            dict(language='eng', collection='C', book='B', chapter='1', author_id=None,
+            dict(language='eng', collection='C', book='B', chapter='1', style_id=None,
                  token_count=20, status='insufficient_text'),
-            dict(language='grc', collection='C', book='G', chapter='1', author_id='grc-A001',
+            dict(language='grc', collection='C', book='G', chapter='1', style_id='grc-S001',
                  token_count=100, status='assigned')]
     summary = _overview(rows)['summary']
-    assert '3 inferred authors across 2 languages' in summary
+    assert '3 inferred styles across 2 languages' in summary
     assert '4 text units' in summary
     assert '200 words' in summary
-    assert 'grc-A001 with 100.0% of Greek' in summary
-    assert '1 text units (25.0%) carry no inferred author' in summary
+    assert 'grc-S001 with 100.0% of Greek' in summary
+    assert '1 text units (25.0%) carry no inferred style' in summary
     assert '1 of 3 assigned units are flagged low evidence' in summary
     assert 'No text matches' in _overview([])['summary']
 
 
 def test_aggregate_summary_flags_a_selection_that_is_entirely_low_evidence():
-    rows = [dict(language='eng', collection='C', book='B', chapter='1', author_id='eng-A001',
+    rows = [dict(language='eng', collection='C', book='B', chapter='1', style_id='eng-S001',
                  token_count=10, status='low_evidence')]
     assert 'Every assigned unit here is flagged low evidence' in _overview(rows)['summary']
 
 
 def test_aggregate_summary_switches_units_and_reports_missing_word_counts():
-    rows = [dict(language='eng', collection='C', book='B', chapter='1', author_id='eng-A001',
+    rows = [dict(language='eng', collection='C', book='B', chapter='1', style_id='eng-S001',
                  status='assigned'),
-            dict(language='eng', collection='C', book='B', chapter='1', author_id='eng-A002',
+            dict(language='eng', collection='C', book='B', chapter='1', style_id='eng-S002',
                  token_count=10, status='assigned')]
     assert 'switch the measure' in _overview(rows)['summary']
     by_verse = _overview(rows, measure='verses')
@@ -370,7 +370,7 @@ def test_aggregate_chart_is_visible_above_the_tabs_under_every_filter(tmp_path):
 def _collection_notes(language, counts):
     """Return what the panel would print beneath a language's chart.
 
-    ``counts`` maps a collection to ``{"words": n, "books": {book: [author, ...]}}``,
+    ``counts`` maps a collection to ``{"words": n, "books": {book: [style, ...]}}``,
     which is what the browser accumulates while walking the filtered corpus.
     """
     if shutil.which('node') is None:
@@ -384,12 +384,12 @@ def _collection_notes(language, counts):
         f"const source = {json.dumps(counts)};\n"
         "const counts = new Map(Object.entries(source).map(([collection, entry]) => [collection, {\n"
         "  units: entry.units || 0, words: entry.words || 0,\n"
-        "  authors: new Set(Object.values(entry.books || {}).flat()),\n"
+        "  styles: new Set(Object.values(entry.books || {}).flat()),\n"
         "  books: new Map(Object.entries(entry.books || {}).map(([book, list]) => [book, new Set(list)])),\n"
         "  titles: new Map(Object.entries(entry.titles || {})),\n"
         "}]));\n"
         f"const rows = collectionNotesFor({json.dumps(language)}, counts);\n"
-        f"process.stdout.write(JSON.stringify({{rows: rows.map(({{authors, books, titles, ...row}}) => row),"
+        f"process.stdout.write(JSON.stringify({{rows: rows.map(({{styles, books, titles, ...row}}) => row),"
         f" caveats: collectionCaveats({json.dumps(language)}, rows, '')}}));"
     )
     return json.loads(subprocess.run(['node', '-e', program], check=True,
@@ -399,12 +399,12 @@ def _collection_notes(language, counts):
 def test_arabic_collections_say_whose_speech_each_one_reports():
     result = _collection_notes('arb', {
         'Bukhari': {'units': 7589, 'words': 567106,
-                    'books': {'b1': ['arb-A001'], 'b2': ['arb-A001', 'arb-A004']},
+                    'books': {'b1': ['arb-S001'], 'b2': ['arb-S001', 'arb-S004']},
                     'titles': {'b2': 'Bukhari 65'}},
         'Quran': {'units': 6236, 'words': 77881,
-                  'books': {'s1': ['arb-A001'], 's2': ['arb-A001'], 's3': ['arb-A001', 'arb-A002']},
+                  'books': {'s1': ['arb-S001'], 's2': ['arb-S001'], 's3': ['arb-S001', 'arb-S002']},
                   'titles': {'s3': 'Sura 28 Al-Qasas'}},
-        'Hadith Qudsi': {'units': 40, 'words': 3260, 'books': {'q1': ['arb-A001']}}})
+        'Hadith Qudsi': {'units': 40, 'words': 3260, 'books': {'q1': ['arb-S001']}}})
     notes = {row['collection']: row['note'] for row in result['rows']}
     assert [row['collection'] for row in result['rows']] == ['Bukhari', 'Quran', 'Hadith Qudsi']
     assert 'direct speech of God' in notes['Quran']
@@ -419,9 +419,9 @@ def test_arabic_collections_say_whose_speech_each_one_reports():
 
 def test_english_is_labelled_the_control_corpus_not_a_subject():
     result = _collection_notes('eng', {
-        'Novels': {'units': 48495, 'words': 2521994, 'books': {'n1': ['eng-A001']}},
-        'Cross-genre': {'units': 20508, 'words': 1677606, 'books': {'c1': ['eng-A002']}},
-        'Federalist': {'units': 1289, 'words': 189773, 'books': {'f1': ['eng-A003']}}})
+        'Novels': {'units': 48495, 'words': 2521994, 'books': {'n1': ['eng-S001']}},
+        'Cross-genre': {'units': 20508, 'words': 1677606, 'books': {'c1': ['eng-S002']}},
+        'Federalist': {'units': 1289, 'words': 189773, 'books': {'f1': ['eng-S003']}}})
     caveats = ' '.join(result['caveats'])
     assert 'control corpus, not part of the scriptural question' in caveats
     assert 'known in advance' in caveats
@@ -434,9 +434,9 @@ def test_english_is_labelled_the_control_corpus_not_a_subject():
 
 def test_greek_names_its_witnesses_and_warns_that_the_septuagint_is_two_sources():
     result = _collection_notes('grc', {
-        'LXX': {'units': 29459, 'words': 592804, 'books': {'g1': ['grc-A001']}},
-        'NT': {'units': 7900, 'words': 136295, 'books': {'n1': ['grc-A002']}},
-        'noncanonical': {'units': 3767, 'words': 122770, 'books': {'x1': ['grc-A003']}}})
+        'LXX': {'units': 29459, 'words': 592804, 'books': {'g1': ['grc-S001']}},
+        'NT': {'units': 7900, 'words': 136295, 'books': {'n1': ['grc-S002']}},
+        'noncanonical': {'units': 3767, 'words': 122770, 'books': {'x1': ['grc-S003']}}})
     notes = {row['collection']: row['note'] for row in result['rows']}
     assert 'Codex Sinaiticus' in notes['NT'] and 'earliest surviving complete copy' in notes['NT']
     assert 'Swete' in notes['LXX']
@@ -448,8 +448,8 @@ def test_greek_names_its_witnesses_and_warns_that_the_septuagint_is_two_sources(
 
 def test_hebrew_notes_separate_the_manuscripts_from_the_authors():
     result = _collection_notes('hbo', {
-        'Tanakh': {'units': 23213, 'words': 308575, 'books': {'t1': ['hbo-A001']}},
-        'DSS': {'units': 5659, 'words': 150391, 'books': {'d1': ['hbo-A001']}},
+        'Tanakh': {'units': 23213, 'words': 308575, 'books': {'t1': ['hbo-S001']}},
+        'DSS': {'units': 5659, 'words': 150391, 'books': {'d1': ['hbo-S001']}},
         'inscriptions': {'units': 3, 'words': 273, 'books': {'i1': []}}})
     notes = {row['collection']: row['note'] for row in result['rows']}
     assert 'Leningrad Codex' in notes['Tanakh']
@@ -463,45 +463,45 @@ def test_hebrew_notes_separate_the_manuscripts_from_the_authors():
 def test_undescribed_collections_add_nothing_and_a_language_note_can_stand_alone():
     assert _collection_notes('grc', {'Novels': {'units': 9, 'words': 9000}})['rows'] == []
     assert _collection_notes('hbo', {})['caveats'][0].startswith('Hebrew spans')
-    thin = _collection_notes('eng', {'Novels': {'units': 1, 'words': 100, 'books': {'b': ['eng-A001']}}})
+    thin = _collection_notes('eng', {'Novels': {'units': 1, 'words': 100, 'books': {'b': ['eng-S001']}}})
     assert thin['caveats'][1].startswith('Novels holds 100 words')
 
 
 def test_each_collection_states_its_expected_authors_beside_the_measured_count():
     result = _collection_notes('arb', {
         'Quran': {'units': 6236, 'words': 77881,
-                  'books': {'s1': ['arb-A001'], 's2': ['arb-A001'], 's3': ['arb-A001', 'arb-A002']},
+                  'books': {'s1': ['arb-S001'], 's2': ['arb-S001'], 's3': ['arb-S001', 'arb-S002']},
                   'titles': {'s3': 'Sura 28 Al-Qasas'}},
-        'Hadith Qudsi': {'units': 40, 'words': 3260, 'books': {'q1': ['arb-A001']}}})
+        'Hadith Qudsi': {'units': 40, 'words': 3260, 'books': {'q1': ['arb-S001']}}})
     rows = {row['collection']: row for row in result['rows']}
     assert 'One speaker throughout' in rows['Quran']['expected']
     assert rows['Quran']['measured'] == (
-        '2 inferred authors across 3 books, a median of 1 per book'
+        '2 inferred styles across 3 books, a median of 1 per book'
         ' and Sura 28 Al-Qasas alone carrying 2.')
-    assert rows['Hadith Qudsi']['measured'] == '1 inferred author in its single book.'
+    assert rows['Hadith Qudsi']['measured'] == '1 inferred style in its single book.'
 
 
 def test_measured_counts_report_unassigned_books_rather_than_hiding_them():
     result = _collection_notes('hbo', {
         'DSS': {'units': 5659, 'words': 150391,
-                'books': {'a': [], 'b': [], 'c': ['hbo-A001'], 'd': ['hbo-A002']}},
+                'books': {'a': [], 'b': [], 'c': ['hbo-S001'], 'd': ['hbo-S002']}},
         'inscriptions': {'units': 3, 'words': 273, 'books': {'i1': [], 'i2': []}}})
     rows = {row['collection']: row for row in result['rows']}
-    assert rows['DSS']['measured'].startswith('2 inferred authors across 4 books')
+    assert rows['DSS']['measured'].startswith('2 inferred styles across 4 books')
     assert '2 of them carrying none at all' in rows['DSS']['measured']
     assert rows['inscriptions']['measured'] == (
-        'No text here carries an inferred author under the current filters.')
+        'No text here carries an inferred style under the current filters.')
 
 
 def test_the_control_corpus_reports_how_far_the_method_oversplits_known_authors():
     # Five novelists are known; anything above five is the method splitting one hand.
     result = _collection_notes('eng', {'Novels': {
         'units': 48495, 'words': 2521994,
-        'books': {f'b{index}': [f'eng-A{index:03d}', 'eng-A001'] for index in range(1, 16)},
+        'books': {f'b{index}': [f'eng-S{index:03d}', 'eng-S001'] for index in range(1, 16)},
         'titles': {'b7': 'A Tale of Two Cities'}}})
     row = result['rows'][0]
     assert 'Five authors, named on the title pages' in row['expected']
-    assert row['measured'].startswith('15 inferred authors across 15 books')
+    assert row['measured'].startswith('15 inferred styles across 15 books')
     assert 'a median of 2 per book' in row['measured']
 
 
@@ -526,7 +526,7 @@ def _control_contrast(rows):
 
 def test_other_languages_are_told_how_far_the_method_oversplits_known_authors():
     rows = [dict(language='eng', book=f'b{book}', book_title=f'Book {book}',
-                 reference_author=f'Writer {book % 3}', author_id=f'eng-A{index:03d}')
+                 reference_author=f'Writer {book % 3}', style_id=f'eng-S{index:03d}')
             for book in range(3) for index in range(4)]
     result = _control_contrast(rows)
     assert '3 of them come back as 4 groups' in result['contrast']
@@ -538,8 +538,8 @@ def test_other_languages_are_told_how_far_the_method_oversplits_known_authors():
 
 def test_no_oversplit_warning_when_the_control_recovers_its_authors():
     exact = [dict(language='eng', book=f'b{index}', book_title=f'Book {index}',
-                  reference_author=f'Writer {index}', author_id=f'eng-A{index:03d}')
+                  reference_author=f'Writer {index}', style_id=f'eng-S{index:03d}')
              for index in range(3)]
     assert _control_contrast(exact)['contrast'] == ''
     assert _control_contrast([dict(language='arb', book='b', book_title='B',
-                                   reference_author='X', author_id='arb-A001')])['contrast'] == ''
+                                   reference_author='X', style_id='arb-S001')])['contrast'] == ''

@@ -49,14 +49,14 @@ def _run(expression, *helpers):
 def _rows():
     base = {"language": "eng", "collection": "C1", "book": "B1",
             "book_title": "First book", "chapter": 1, "verse": 1,
-            "text": "A quiet morning", "author_id": "A", "status": "low_evidence",
+            "text": "A quiet morning", "style_id": "A", "status": "low_evidence",
             "token_count": 10, "evidence_tokens": 1200, "passage_id": "shared-passage"}
     return [
         {**base, "id": "v1"},
-        {**base, "id": "v2", "verse": 2, "author_id": "B", "token_count": 20, "status": "assigned"},
-        {**base, "id": "v3", "verse": 3, "author_id": None, "token_count": 5, "status": "insufficient_text"},
+        {**base, "id": "v2", "verse": 2, "style_id": "B", "token_count": 20, "status": "assigned"},
+        {**base, "id": "v3", "verse": 3, "style_id": None, "token_count": 5, "status": "insufficient_text"},
         {**base, "id": "v4", "chapter": 2, "token_count": 30},
-        {**base, "id": "v5", "book": "B2", "book_title": "Second book", "author_id": "B", "token_count": 40},
+        {**base, "id": "v5", "book": "B2", "book_title": "Second book", "style_id": "B", "token_count": 40},
         {**base, "id": "v6", "collection": "C2", "token_count": 50},
         {**base, "id": "v7", "language": "grc", "token_count": 90},
     ]
@@ -75,24 +75,24 @@ def test_every_map_level_preserves_all_units_and_their_own_word_counts(level, gr
     for row in actual:
         assert row["level"] == level
         assert row["missingWords"] == 0
-        assert sum(author["amount"] for author in row["authors"]) == row["total"]
-        assert sum(author["units"] for author in row["authors"]) == row["verse_count"]
-        assert sum(author["share"] for author in row["authors"]) == pytest.approx(1)
+        assert sum(style["amount"] for style in row["styles"]) == row["total"]
+        assert sum(style["units"] for style in row["styles"]) == row["verse_count"]
+        assert sum(style["share"] for style in row["styles"]) == pytest.approx(1)
         for dimension in dimensions[dimensions.index(level) + 1:4]:
             assert row[dimension] is None
 
 
-def test_map_authors_include_low_evidence_and_unassigned_in_word_and_unit_shares():
+def test_map_styles_include_low_evidence_and_unassigned_in_word_and_unit_shares():
     expression = "({words:mapBreakdown(" + json.dumps(_rows()) + ",'language'),units:mapBreakdown(" + json.dumps(_rows()) + ",'language','verses')})"
     actual = _run(expression, "mapBreakdown")
     words = next(row for row in actual["words"] if row["language"] == "eng")
     units = next(row for row in actual["units"] if row["language"] == "eng")
     assert (words["verse_count"], words["total"]) == (6, 155)
     assert (units["verse_count"], units["token_count"], units["total"]) == (6, 155, 6)
-    assert {entry["author"]: entry["amount"] for entry in words["authors"]} == {"A": 90, "B": 60, None: 5}
-    assert {entry["author"]: entry["amount"] for entry in units["authors"]} == {"A": 3, "B": 2, None: 1}
+    assert {entry["style"]: entry["amount"] for entry in words["styles"]} == {"A": 90, "B": 60, None: 5}
+    assert {entry["style"]: entry["amount"] for entry in units["styles"]} == {"A": 3, "B": 2, None: 1}
     for group in (words, units):
-        for entry in group["authors"]:
+        for entry in group["styles"]:
             assert entry["share"] == pytest.approx(entry["amount"] / group["total"])
 
 
@@ -115,16 +115,16 @@ def test_map_namespaces_keep_duplicate_book_chapter_and_verse_ids_separate():
 def test_missing_and_invalid_word_counts_never_create_false_graph_shares():
     base = _rows()[0]
     rows = [{**base, "token_count": 0},
-            {**base, "id": "missing", "token_count": None, "author_id": None},
-            {**base, "id": "negative", "token_count": -5, "author_id": "B"},
-            {**base, "id": "string", "token_count": "8", "author_id": "C"}]
+            {**base, "id": "missing", "token_count": None, "style_id": None},
+            {**base, "id": "negative", "token_count": -5, "style_id": "B"},
+            {**base, "id": "string", "token_count": "8", "style_id": "C"}]
     expression = "({words:mapBreakdown(" + json.dumps(rows) + ",'chapter'),units:mapBreakdown(" + json.dumps(rows) + ",'chapter','verses'),empty:mapBreakdown([],'chapter')})"
     actual = _run(expression, "mapBreakdown")
     words, units = actual["words"][0], actual["units"][0]
     assert (words["total"], words["token_count"], words["missingWords"], words["verse_count"]) == (0, 0, 3, 4)
-    assert all(entry["share"] == 0 and entry["amount"] == 0 for entry in words["authors"])
+    assert all(entry["share"] == 0 and entry["amount"] == 0 for entry in words["styles"])
     assert units["total"] == 4
-    assert all(entry["share"] == 0.25 and entry["amount"] == 1 for entry in units["authors"])
+    assert all(entry["share"] == 0.25 and entry["amount"] == 1 for entry in units["styles"])
     assert actual["empty"] == []
 
 
@@ -134,7 +134,7 @@ def test_missing_and_invalid_word_counts_never_create_false_graph_shares():
     ({"language": "eng", "collection": "C1"}, "book"),
     ({"language": "eng", "collection": "C1", "book": "B1"}, "chapter"),
     ({"language": "eng", "collection": "C1", "book": "B1", "chapter": "1"}, "verse"),
-    ({"chapter": "1", "author": "A", "status": "assigned", "query": "quiet"}, "language"),
+    ({"chapter": "1", "style": "A", "status": "assigned", "query": "quiet"}, "language"),
 ])
 def test_map_starts_at_the_first_unselected_hierarchy_level(selection, expected):
     assert _run(f"mapStartLevel({json.dumps(selection)})", "mapStartLevel") == expected
@@ -163,8 +163,8 @@ def test_map_drill_and_back_never_widen_the_shared_corpus_boundary():
     assert actual["original"] == _rows()
 
 
-def test_map_path_cannot_reintroduce_author_evidence_or_search_exclusions():
-    selection = {"language": "eng", "collection": "C1", "author": "B",
+def test_map_path_cannot_reintroduce_style_evidence_or_search_exclusions():
+    selection = {"language": "eng", "collection": "C1", "style": "B",
                  "status": "assigned", "query": "quiet", "focusId": "v2"}
     descriptor = {"level": "book", "language": "eng", "collection": "C1", "book": "B1", "chapter": None}
     expression = """(() => {
@@ -182,16 +182,16 @@ def test_map_path_cannot_reintroduce_author_evidence_or_search_exclusions():
 ])
 def test_open_matching_text_preserves_an_existing_single_verse_boundary(path):
     selection = {"language": "eng", "collection": "C1", "book": "B1", "chapter": "1",
-                 "author": "", "status": "assigned", "query": "quiet", "focusId": "v2"}
+                 "style": "", "status": "assigned", "query": "quiet", "focusId": "v2"}
     expression = """(() => {
  globalThis.state=SELECTION;globalThis.mapPath=PATH;
- globalThis.mapHighlight={language:'eng',author:'B'};
+ globalThis.mapHighlight={language:'eng',style:'B'};
  for(const name of ['refreshOptions','resetPages','refresh','activate'])globalThis[name]=()=>{};
  openMapText();return state;
 })()""".replace("SELECTION", json.dumps(selection)).replace("PATH", json.dumps(path))
-    actual = _run(expression, "authorSelection", "drillSelection", "openMapText")
+    actual = _run(expression, "styleSelection", "drillSelection", "openMapText")
     assert actual["focusId"] == "v2"
-    assert actual["author"] == "B"
+    assert actual["style"] == "B"
     for key in ("language", "collection", "book", "chapter", "status", "query"):
         assert actual[key] == selection[key]
 

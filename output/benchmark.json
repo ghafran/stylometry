@@ -4027,7 +4027,7 @@
     "adjusted_rand_index": 0.2601837925680145,
     "normalized_mutual_information": 0.43677505772306174,
     "group_reference_counts": {
-      "eng-A001": {
+      "eng-S001": {
         "Jane Austen": 8,
         "Charles Dickens": 1157,
         "Charlotte Bronte": 526,
@@ -4039,7 +4039,7 @@
         "H. G. Wells": 306,
         "Arthur Conan Doyle": 87
       },
-      "eng-A002": {
+      "eng-S002": {
         "Jane Austen": 40,
         "Charles Dickens": 177,
         "Charlotte Bronte": 6527,
@@ -4049,7 +4049,7 @@
         "Robert Louis Stevenson": 120,
         "Arthur Conan Doyle": 52
       },
-      "eng-A003": {
+      "eng-S003": {
         "Jane Austen": 167,
         "Charles Dickens": 509,
         "Charlotte Bronte": 255,
@@ -4060,7 +4060,7 @@
         "Robert Louis Stevenson": 45,
         "Arthur Conan Doyle": 27
       },
-      "eng-A004": {
+      "eng-S004": {
         "Jane Austen": 31,
         "Charles Dickens": 691,
         "Charlotte Bronte": 546,
@@ -4071,7 +4071,7 @@
         "H. G. Wells": 17,
         "Arthur Conan Doyle": 30
       },
-      "eng-A005": {
+      "eng-S005": {
         "Jane Austen": 14,
         "Charles Dickens": 815,
         "Charlotte Bronte": 153,
@@ -4082,7 +4082,7 @@
         "Robert Louis Stevenson": 382,
         "Arthur Conan Doyle": 134
       },
-      "eng-A006": {
+      "eng-S006": {
         "Jane Austen": 37,
         "Charles Dickens": 4296,
         "Charlotte Bronte": 261,
@@ -4094,12 +4094,12 @@
         "H. G. Wells": 16,
         "Arthur Conan Doyle": 721
       },
-      "eng-A007": {
+      "eng-S007": {
         "Thomas Hardy": 26,
         "Mark Twain": 14,
         "Arthur Conan Doyle": 1090
       },
-      "eng-A008": {
+      "eng-S008": {
         "Jane Austen": 417,
         "Charles Dickens": 725,
         "Charlotte Bronte": 3744,
@@ -4109,7 +4109,7 @@
         "Robert Louis Stevenson": 26,
         "Arthur Conan Doyle": 235
       },
-      "eng-A009": {
+      "eng-S009": {
         "Charles Dickens": 66,
         "Charlotte Bronte": 92,
         "Mark Twain": 1645,
@@ -4117,20 +4117,20 @@
         "H. G. Wells": 25,
         "Arthur Conan Doyle": 21
       },
-      "eng-A010": {
+      "eng-S010": {
         "Jane Austen": 2419,
         "Charlotte Bronte": 32,
         "George Eliot": 52,
         "Thomas Hardy": 44
       },
-      "eng-A011": {
+      "eng-S011": {
         "Alexander Hamilton": 724,
         "John Jay": 76,
         "James Madison": 262,
         "Mark Twain": 41,
         "H. G. Wells": 6
       },
-      "eng-A012": {
+      "eng-S012": {
         "Charles Dickens": 1729,
         "Charlotte Bronte": 137,
         "Mark Twain": 836,
@@ -4138,19 +4138,19 @@
         "Robert Louis Stevenson": 160,
         "Arthur Conan Doyle": 225
       },
-      "eng-A013": {
+      "eng-S013": {
         "Alexander Hamilton": 3,
         "Mark Twain": 24,
         "G. K. Chesterton": 5,
         "H. G. Wells": 689
       },
-      "eng-A014": {
+      "eng-S014": {
         "Jane Austen": 3028,
         "Charles Dickens": 31,
         "George Eliot": 103,
         "Arthur Conan Doyle": 17
       },
-      "eng-A015": {
+      "eng-S015": {
         "Jane Austen": 20,
         "Charles Dickens": 681,
         "Mark Twain": 152,
@@ -4159,17 +4159,17 @@
         "H. G. Wells": 175,
         "Arthur Conan Doyle": 2438
       },
-      "eng-A016": {
+      "eng-S016": {
         "G. K. Chesterton": 467,
         "Robert Louis Stevenson": 13,
         "H. G. Wells": 16
       },
-      "eng-A017": {
+      "eng-S017": {
         "Charles Dickens": 22,
         "Mark Twain": 2672,
         "H. G. Wells": 28
       },
-      "eng-A018": {
+      "eng-S018": {
         "Charles Dickens": 27,
         "Charlotte Bronte": 329,
         "Mark Twain": 39,
@@ -4177,7 +4177,7 @@
         "H. G. Wells": 620,
         "Arthur Conan Doyle": 20
       },
-      "eng-A019": {
+      "eng-S019": {
         "Charlotte Bronte": 12,
         "George Eliot": 34,
         "Mark Twain": 43,

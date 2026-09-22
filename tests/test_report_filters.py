@@ -50,7 +50,7 @@ def _run(expression, *helpers):
 def _row(ident, **overrides):
     return {"id": ident, "language": "eng", "collection": "C1", "book": "B1",
             "book_title": "First book", "chapter": 1, "verse": 1, "text": "A quiet morning",
-            "author_id": "A", "status": "low_evidence", "token_count": 10,
+            "style_id": "A", "status": "low_evidence", "token_count": 10,
             "evidence_tokens": 1200, "passage_id": "shared-passage", **overrides}
 
 
@@ -58,10 +58,10 @@ def _rows():
     base = _row("v1")
     return [
         base,
-        {**base, "id": "v2", "verse": 2, "author_id": "B", "status": "assigned", "token_count": 20},
-        {**base, "id": "v3", "verse": 3, "author_id": None, "status": "insufficient_text", "token_count": 5},
+        {**base, "id": "v2", "verse": 2, "style_id": "B", "status": "assigned", "token_count": 20},
+        {**base, "id": "v3", "verse": 3, "style_id": None, "status": "insufficient_text", "token_count": 5},
         {**base, "id": "v4", "chapter": 2, "status": "assigned", "token_count": 30},
-        {**base, "id": "v5", "book": "B2", "book_title": "Second book", "author_id": "B", "token_count": 40},
+        {**base, "id": "v5", "book": "B2", "book_title": "Second book", "style_id": "B", "token_count": 40},
         {**base, "id": "v6", "collection": "C2", "token_count": 50},
         {**base, "id": "v7", "language": "grc", "token_count": 90},
     ]
@@ -72,7 +72,7 @@ def _rows():
     ({"language": "eng", "collection": "C1"}, ["v1", "v2", "v3", "v4", "v5"]),
     ({"language": "eng", "collection": "C1", "book": "B1"}, ["v1", "v2", "v3", "v4"]),
     ({"language": "eng", "collection": "C1", "book": "B1", "chapter": "1"}, ["v1", "v2", "v3"]),
-    ({"language": "eng", "collection": "C1", "book": "B1", "chapter": "1", "author": "A"}, ["v1"]),
+    ({"language": "eng", "collection": "C1", "book": "B1", "chapter": "1", "style": "A"}, ["v1"]),
     ({"language": "eng", "status": "assigned"}, ["v2", "v4"]),
     ({"language": "eng", "status": "low_evidence"}, ["v1", "v5", "v6"]),
     ({"language": "eng", "status": "insufficient_text"}, ["v3"]),
@@ -99,18 +99,18 @@ def test_parent_rollups_count_only_the_filtered_chapter(level):
     assert row["assigned_verse_count"] == 2
     assert row["insufficient_verse_count"] == 1
     assert row["low_evidence_verse_count"] == 1
-    assert row["author_count"] == 2
-    assert set(row["author_ids"]) == {"A", "B"}
-    assert row["author_counts"] == {"A": 1, "B": 1}
+    assert row["style_count"] == 2
+    assert set(row["style_ids"]) == {"A", "B"}
+    assert row["style_counts"] == {"A": 1, "B": 1}
 
 
-def test_rollups_and_author_groups_share_author_and_evidence_filters():
-    selection = dict(language="eng", collection="C1", author="A", status="low_evidence")
-    expression = "(() => {const rows = selectCorpus(" + json.dumps(_rows()) + "," + json.dumps(selection) + ");return {rollups:rollupSummary(rows,'language'),authors:authorSummary(rows)};})()"
-    actual = _run(expression, "selectCorpus", "verseRollup", "rollupSummary", "authorSummary")
+def test_rollups_and_style_groups_share_style_and_evidence_filters():
+    selection = dict(language="eng", collection="C1", style="A", status="low_evidence")
+    expression = "(() => {const rows = selectCorpus(" + json.dumps(_rows()) + "," + json.dumps(selection) + ");return {rollups:rollupSummary(rows,'language'),styles:styleSummary(rows)};})()"
+    actual = _run(expression, "selectCorpus", "verseRollup", "rollupSummary", "styleSummary")
     assert actual["rollups"][0]["verse_count"] == 1
-    assert actual["rollups"][0]["author_counts"] == {"A": 1}
-    assert actual["authors"] == [{"language": "eng", "author_id": "A", "verse_count": 1,
+    assert actual["rollups"][0]["style_counts"] == {"A": 1}
+    assert actual["styles"] == [{"language": "eng", "style_id": "A", "verse_count": 1,
                                   "book_count": 1, "collection_count": 1, "token_count": 10}]
 
 
@@ -121,11 +121,11 @@ def test_rollup_grouping_preserves_language_and_collection_namespaces():
                       ("eng", "C2", "B1"): 1, ("grc", "C1", "B1"): 1}
 
 
-def test_author_counts_use_selected_words_and_distinct_books():
-    actual = _run(f"authorSummary({json.dumps(_rows())})", "authorSummary")
-    groups = {(row["language"], row["author_id"]): row for row in actual}
+def test_style_counts_use_selected_words_and_distinct_books():
+    actual = _run(f"styleSummary({json.dumps(_rows())})", "styleSummary")
+    groups = {(row["language"], row["style_id"]): row for row in actual}
     assert set(groups) == {("eng", "A"), ("eng", "B"), ("grc", "A")}
-    assert groups["eng", "A"] == dict(language="eng", author_id="A", verse_count=3,
+    assert groups["eng", "A"] == dict(language="eng", style_id="A", verse_count=3,
                                        book_count=2, collection_count=2, token_count=90)
     assert groups["eng", "B"]["token_count"] == 60
     assert groups["eng", "B"]["book_count"] == 2
@@ -133,37 +133,37 @@ def test_author_counts_use_selected_words_and_distinct_books():
 
 
 def test_empty_and_unassigned_selections_remain_visible_in_rollups():
-    unassigned = [{**_row("empty"), "author_id": None, "status": "insufficient_text"}]
-    expression = "({emptyRollups:rollupSummary([], 'book'),emptyAuthors:authorSummary([]),unassignedRollups:rollupSummary(" + json.dumps(unassigned) + ", 'book'),unassignedAuthors:authorSummary(" + json.dumps(unassigned) + ")})"
-    actual = _run(expression, "verseRollup", "rollupSummary", "authorSummary")
+    unassigned = [{**_row("empty"), "style_id": None, "status": "insufficient_text"}]
+    expression = "({emptyRollups:rollupSummary([], 'book'),emptyAuthors:styleSummary([]),unassignedRollups:rollupSummary(" + json.dumps(unassigned) + ", 'book'),unassignedAuthors:styleSummary(" + json.dumps(unassigned) + ")})"
+    actual = _run(expression, "verseRollup", "rollupSummary", "styleSummary")
     assert actual["emptyRollups"] == actual["emptyAuthors"] == actual["unassignedAuthors"] == []
     row = actual["unassignedRollups"][0]
     assert row["verse_count"] == row["insufficient_verse_count"] == 1
-    assert row["assigned_verse_count"] == row["author_count"] == 0
-    assert row["dominant_author"] is None
+    assert row["assigned_verse_count"] == row["style_count"] == 0
+    assert row["dominant_style"] is None
 
 
 def _selection():
-    return dict(language="eng", collection="C1", book="B1", chapter="1", author="A",
+    return dict(language="eng", collection="C1", book="B1", chapter="1", style="A",
                 status="low_evidence", query="quiet", focusId="v1", level="book", tab="hierarchy")
 
 
-def test_author_navigation_preserves_the_selected_corpus_and_search():
+def test_style_navigation_preserves_the_selected_corpus_and_search():
     selection = _selection()
-    expression = "(() => {const original=" + json.dumps(selection) + ";return {next:authorSelection(original,'B','grc'),original};})()"
-    actual = _run(expression, "authorSelection")
+    expression = "(() => {const original=" + json.dumps(selection) + ";return {next:styleSelection(original,'B','grc'),original};})()"
+    actual = _run(expression, "styleSelection")
     assert actual["original"] == selection
-    assert actual["next"] == {**selection, "author": "B", "focusId": ""}
+    assert actual["next"] == {**selection, "style": "B", "focusId": ""}
     no_language = {**selection, "language": ""}
-    actual = _run(f"authorSelection({json.dumps(no_language)},'B','eng')", "authorSelection")
-    assert actual == {**no_language, "language": "eng", "author": "B", "focusId": ""}
+    actual = _run(f"styleSelection({json.dumps(no_language)},'B','eng')", "styleSelection")
+    assert actual == {**no_language, "language": "eng", "style": "B", "focusId": ""}
 
 
 @pytest.mark.parametrize(("level", "next_level"), [
     ("language", "collection"), ("collection", "book"),
     ("book", "chapter"), ("chapter", "verse"), ("verse", "verse"),
 ])
-def test_drill_preserves_deeper_corpus_filters_author_evidence_and_search(level, next_level):
+def test_drill_preserves_deeper_corpus_filters_style_evidence_and_search(level, next_level):
     selection = _selection()
     row = dict(level=level, language="eng", collection=None, book=None, chapter=None,
                id="v1" if level == "verse" else None)
@@ -175,7 +175,7 @@ def test_drill_preserves_deeper_corpus_filters_author_evidence_and_search(level,
 
 
 def test_drill_only_fills_unselected_hierarchy_fields():
-    selection = dict(language="", collection="C1", book="", chapter="1", author="A", status="low_evidence")
+    selection = dict(language="", collection="C1", book="", chapter="1", style="A", status="low_evidence")
     row = dict(level="book", language="eng", collection="C2", book="B1", chapter=2)
     actual = _run(f"drillSelection({json.dumps(selection)}, {json.dumps(row)})", "drillSelection")
     assert actual == {**selection, "language": "eng", "book": "B1", "level": "chapter", "focusId": ""}
