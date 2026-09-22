@@ -15,6 +15,13 @@ __pycache__/
 data/processed/
 output*/
 
+# Keep the research article available alongside the tracked explorer pages.
+!output/
+output/*
+!output/pdf/
+output/pdf/*
+!output/pdf/stylometry_research_article.pdf
+
 # ---------------------------------------------------------------------------------------------
 # The scripture sources under data/raw/ ARE checked in, so the corpus can be rebuilt from this
 # repository alone. See data/raw/SOURCES.md for the licence and attribution each one carries.

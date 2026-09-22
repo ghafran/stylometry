@@ -89,6 +89,11 @@ def _escape(chunk: str) -> str:
 
 
 def _write_page(path: Path, start: str, payload: dict, end: str) -> Path:
+    article = Path("pdf/stylometry_research_article.pdf")
+    if (path.parent / article).is_file():
+        navigation = '<nav class="downloads" aria-label="Download analysis">'
+        start = start.replace(navigation, navigation +
+                              f'<a href="{article.as_posix()}">Research article (PDF)</a>', 1)
     encoder = json.JSONEncoder(ensure_ascii=False, separators=(",", ":"), allow_nan=False)
     with path.open("w", encoding="utf-8") as stream:
         stream.write(start)
