@@ -474,7 +474,8 @@ def test_each_collection_states_its_expected_authors_beside_the_measured_count()
                   'titles': {'s3': 'Sura 28 Al-Qasas'}},
         'Hadith Qudsi': {'units': 40, 'words': 3260, 'books': {'q1': ['arb-S001']}}})
     rows = {row['collection']: row for row in result['rows']}
-    assert 'One speaker throughout' in rows['Quran']['expected']
+    assert 'Meccan suras came before the hijra' in rows['Quran']['expected']
+    assert 'not of its speaker' in rows['Quran']['expected']
     assert rows['Quran']['measured'] == (
         '2 inferred styles across 3 books, a median of 1 per book'
         ' and Sura 28 Al-Qasas alone carrying 2.')
@@ -543,3 +544,40 @@ def test_no_oversplit_warning_when_the_control_recovers_its_authors():
     assert _control_contrast(exact)['contrast'] == ''
     assert _control_contrast([dict(language='arb', book='b', book_title='B',
                                    reference_author='X', style_id='arb-S001')])['contrast'] == ''
+
+
+def _hijra(rows):
+    """Run the browser's Meccan/Medinan comparison over Quran verses."""
+    if shutil.which('node') is None:
+        pytest.skip('Node is optional for browser-code validation')
+    block = re.search(r'const medinanSuras=.*?(?=function collectionMeasure\()',
+                      _HTML_END, re.DOTALL).group(0)
+    program = ("const str = value => value == null ? '' : String(value);\n" + block +
+               f"process.stdout.write(JSON.stringify(hijraAgreement({json.dumps(rows)})));")
+    return json.loads(subprocess.run(['node', '-e', program], check=True,
+                                     text=True, capture_output=True).stdout)
+
+
+def _sura(number, style, words):
+    return dict(collection='Quran', book=f'Q{number:03d}', style_id=style, token_count=words)
+
+
+def test_the_quran_split_is_measured_against_the_meccan_medinan_division():
+    # Sura 2 is Medinan, sura 12 Meccan; a perfect split should agree completely.
+    perfect = _hijra([_sura(2, 'arb-S003', 100), _sura(12, 'arb-S004', 100)])
+    assert perfect['agreement'] == 1 and perfect['baseline'] == 0.5
+    # A split that ignores the division scores no better than giving everything one side.
+    blind = _hijra([_sura(2, 'arb-S003', 50), _sura(2, 'arb-S004', 50),
+                    _sura(12, 'arb-S003', 50), _sura(12, 'arb-S004', 50)])
+    assert blind['agreement'] == 0.5 == blind['baseline']
+    partial = _hijra([_sura(2, 'arb-S003', 100), _sura(12, 'arb-S004', 60),
+                      _sura(12, 'arb-S003', 40)])
+    assert partial['agreement'] == pytest.approx(0.8)  # 100 Medinan + 60 of the 100 Meccan
+    assert partial['baseline'] == pytest.approx(0.5)
+
+
+def test_the_hijra_comparison_ignores_everything_that_is_not_a_tagged_sura():
+    assert _hijra([_sura(2, 'arb-S003', 10)]) is None, 'one side alone cannot be scored'
+    assert _hijra([_sura(2, None, 10), _sura(12, None, 10)]) is None
+    assert _hijra([dict(collection='Bukhari', book='BUKH02', style_id='arb-S001', token_count=99),
+                   _sura(2, 'arb-S003', 10), _sura(12, 'arb-S004', 10)])['total'] == 20

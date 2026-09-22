@@ -411,7 +411,7 @@ function overviewSummary(groups,measure){
 const collectionNotes={
  'arb\u0000Quran':{
   note:'In Islamic tradition, the direct speech of God, revealed to the Prophet Muhammad (peace be upon him) and fixed in its recited wording.',
-  expected:'One speaker throughout, across roughly twenty-three years of revelation. A single voice is the expectation.'},
+  expected:'Two, by tradition. The Meccan suras came before the hijra and the Medinan after, and they differ in length, cadence and subject, so a split into two is expected here \u2014 as a division of the text, not of its speaker.'},
  'arb\u0000Hadith Qudsi':{
   note:'Sayings whose meaning is attributed to God but which stand outside the Quran, related by the Prophet (peace be upon him) in his own wording.',
   expected:'God\u2019s meaning in the Prophet\u2019s (peace be upon him) wording, so the wording is expected to read as his rather than as the Quran\u2019s.'},
@@ -446,6 +446,34 @@ const collectionNotes={
   note:'The Ketef Hinnom silver amulets and the Nash Papyrus, the oldest surviving Hebrew scriptural text of all.',
   expected:'Three artefacts, each cut or written by its own hand.'},
 };
+const medinanSuras=new Set([2,3,4,5,8,9,13,22,24,33,47,48,49,55,57,58,59,60,61,62,63,64,65,66,76,98,99,110]);
+function revelationPlace(row){
+ if(str(row.collection)!=='Quran')return null;
+ const sura=Number(String(row.book).replace(/\D/g,''));
+ return sura?(medinanSuras.has(sura)?'Medinan':'Meccan'):null;
+}
+function hijraAgreement(rows){
+ const counts=new Map(),places=new Map();
+ for(const row of rows){
+  const place=revelationPlace(row);
+  if(!place || !row.style_id)continue;
+  const words=typeof row.token_count==='number' && Number.isFinite(row.token_count)?row.token_count:0;
+  const key=str(row.style_id)+'\u0000'+place;
+  counts.set(key,(counts.get(key) || 0)+words);
+  places.set(place,(places.get(place) || 0)+words);
+ }
+ const total=Array.from(places.values()).reduce((sum,value)=>sum+value,0);
+ if(!total || places.size<2)return null;
+ const styles=Array.from(new Set(Array.from(counts.keys(),key=>key.split('\u0000')[0])));
+ // Each style is credited to whichever side it mostly covers; that is the best case for the split.
+ let agreed=0;
+ for(const style of styles){
+  const meccan=counts.get(style+'\u0000Meccan') || 0,medinan=counts.get(style+'\u0000Medinan') || 0;
+  agreed+=Math.max(meccan,medinan);
+ }
+ const baseline=Math.max(...places.values());
+ return {styles:styles.length,total,agreement:agreed/total,baseline:baseline/total};
+}
 function collectionMeasure(entry){
  const styles=entry.styles.size,books=entry.books.size;
  if(!styles)return 'No text here carries an inferred style under the current filters.';
@@ -501,16 +529,22 @@ function collectionCaveats(language,rows,contrast){
   .join(' and ')+', too little to characterise a style from at this passage size.');
  return sentences;
 }
-function appendCollectionNotes(card,language,counts){
+function appendCollectionNotes(card,language,counts,scope){
  const rows=collectionNotesFor(language,counts);
  if(!rows.length)return card;
+ const hijra=hijraAgreement(scope);
  const block=el('div',null,'overview-notes'),list=el('dl');
  block.append(el('h4','What these collections are'));
  for(const row of rows){
   const term=el('dt',row.collection),detail=el('dd');
   term.append(el('span',' \u00b7 '+count(row.units)+' text units \u00b7 '+count(row.words)+' words'));
   detail.append(el('p',row.note));
-  for(const [label,text] of [['Expected',row.expected],['Measured here',row.measured]]){
+  const lines=[['Expected',row.expected],['Measured here',row.measured]];
+  if(row.collection==='Quran' && hijra)lines.push(['Against the hijra',
+   (100*hijra.agreement).toFixed(0)+'% of Quranic words sit in the style that covers their own side of the hijra, '
+   +'against '+(100*hijra.baseline).toFixed(0)+'% if every word were given the larger side. '
+   +'The split is partly the Meccan/Medinan division and partly something else.']);
+  for(const [label,text] of lines){
    const line=el('p',null,'overview-claim');
    line.append(el('strong',label),' '+text);
    detail.append(line);
@@ -549,11 +583,11 @@ function renderOverview(){
   card.append(head);
   if(measure==='words' && group.missingWords){
    card.append(el('p',count(group.missingWords)+' text units have no word count. Switch the measure to verses / paragraphs for complete shares.','overview-empty'));
-   target.append(appendCollectionNotes(card,group.language,collections.get(group.language) || new Map()));continue;
+   target.append(appendCollectionNotes(card,group.language,collections.get(group.language) || new Map(),filtered));continue;
   }
   if(!group.total){
    card.append(el('p','No '+unit+' to chart here. Switch the measure to include empty text units.','overview-empty'));
-   target.append(appendCollectionNotes(card,group.language,collections.get(group.language) || new Map()));continue;
+   target.append(appendCollectionNotes(card,group.language,collections.get(group.language) || new Map(),filtered));continue;
   }
   const series=overviewSeries(group),bar=el('div',null,'overview-bar');
   bar.setAttribute('role','img');
@@ -582,7 +616,7 @@ function renderOverview(){
     list.append(el('li',entry.style+' · '+count(entry.amount)+' '+unit+' · '+(entry.share*100).toFixed(1)+'%'));
    details.append(list);card.append(details);
   }
-  target.append(appendCollectionNotes(card,group.language,collections.get(group.language) || new Map()));
+  target.append(appendCollectionNotes(card,group.language,collections.get(group.language) || new Map(),filtered));
  }
 }
 function renderContributions(){
